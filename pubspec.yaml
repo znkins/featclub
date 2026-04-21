@@ -1,0 +1,49 @@
+name: featclub_app
+description: "Featclub — application de coaching sportif."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Supabase
+  supabase_flutter: ^2.8.0
+
+  # Navigation
+  go_router: ^14.6.1
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Media
+  image_picker: ^1.1.2
+  image_cropper: ^8.0.2
+
+  # Utils
+  url_launcher: ^6.3.1
+  fl_chart: ^0.69.2
+
+  # UI
+  google_fonts: ^6.2.1
+  lucide_icons: ^0.257.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Riverpod codegen (optionnel pour la phase 0, présent pour préparer le futur)
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.6.3
+
+flutter:
+  uses-material-design: true
