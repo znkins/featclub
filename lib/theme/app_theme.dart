@@ -215,9 +215,37 @@ class AppTheme {
         ),
       ),
 
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.brandSecondary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        disabledElevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
+        extendedIconLabelSpacing: AppSpacing.sm,
+      ),
+
+      tabBarTheme: TabBarThemeData(
+        labelColor: AppColors.brandPrimary,
+        unselectedLabelColor: textSecondary,
+        indicatorColor: AppColors.brandPrimary,
+        dividerColor: Colors.transparent,
+        indicatorSize: TabBarIndicatorSize.label,
+        labelPadding: EdgeInsets.zero,
+        tabAlignment: TabAlignment.fill,
+        labelStyle: textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: textTheme.bodyLarge,
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+      ),
+
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: surface,
-        selectedItemColor: AppColors.brandSecondary,
+        selectedItemColor: AppColors.brandPrimary,
         unselectedItemColor: textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
@@ -227,19 +255,19 @@ class AppTheme {
 
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        indicatorColor: AppColors.brandSecondary.withValues(alpha: 0.12),
+        indicatorColor: AppColors.brandPrimary.withValues(alpha: 0.12),
         elevation: 0,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return textTheme.labelMedium?.copyWith(
-            color: selected ? AppColors.brandSecondary : textSecondary,
+            color: selected ? AppColors.brandPrimary : textSecondary,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
-            color: selected ? AppColors.brandSecondary : textSecondary,
+            color: selected ? AppColors.brandPrimary : textSecondary,
             size: AppSizes.iconDefault,
           );
         }),

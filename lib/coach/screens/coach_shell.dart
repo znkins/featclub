@@ -52,7 +52,7 @@ class _CoachShellState extends State<CoachShell> {
             label: 'Featers',
           ),
           NavigationDestination(
-            icon: Icon(LucideIcons.layers),
+            icon: Icon(LucideIcons.layoutGrid),
             label: 'Contenu',
           ),
           NavigationDestination(
