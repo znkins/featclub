@@ -153,7 +153,7 @@ class _SessionTileSubtitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (description != null) ...[
+        if (description != null)
           Text(
             description!,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -162,8 +162,6 @@ class _SessionTileSubtitle extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: AppSpacing.xs),
-        ],
         SessionMetaRow(
           blockCount: blockCount,
           durationMinutes: durationMinutes,

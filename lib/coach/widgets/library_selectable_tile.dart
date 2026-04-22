@@ -59,10 +59,7 @@ class LibrarySelectableTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (subtitleWidget != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      subtitleWidget!,
-                    ],
+                    if (subtitleWidget != null) subtitleWidget!,
                   ],
                 ),
               ),

@@ -61,7 +61,6 @@ class LibraryListTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (hasSubtitle) ...[
-                      const SizedBox(height: AppSpacing.xs),
                       subtitleWidget ??
                           Text(
                             subtitle!,

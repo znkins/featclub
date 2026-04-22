@@ -21,6 +21,21 @@ class ProfileService {
     return Profile.fromJson(row);
   }
 
+  /// Liste des élèves actifs (rôle `eleve` + statut `active`).
+  ///
+  /// Utilisé par le coach pour parcourir ses Featers. Le tri (profil complété
+  /// en premier, puis par nom) est réalisé côté client.
+  Future<List<Profile>> listActiveStudents() async {
+    final rows = await _client
+        .from('profiles')
+        .select(_selectColumns)
+        .eq('role', 'eleve')
+        .eq('status', 'active');
+    return (rows as List)
+        .map((r) => Profile.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Met à jour les champs éditables par l'utilisateur lui-même.
   ///
   /// On ne touche pas à `role`, `status` (réservés à l'admin) ni à

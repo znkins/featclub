@@ -11,6 +11,7 @@ import 'core/utils/user_role.dart';
 import 'core/widgets/loading_indicator.dart';
 import 'shared/providers/auth_provider.dart';
 import 'shared/providers/current_profile_provider.dart';
+import 'shared/providers/route_observer_provider.dart';
 import 'shared/providers/supabase_providers.dart';
 import 'student/screens/student_shell.dart';
 
@@ -32,6 +33,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login',
     refreshListenable: refreshNotifier,
+    observers: [ref.read(appRouteObserverProvider)],
     redirect: (context, state) => _handleRedirect(ref, state),
     routes: [
       GoRoute(

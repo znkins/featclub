@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/models/profile.dart';
 import '../../core/utils/avatar_picker.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/user_role.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/confirmation_dialog.dart';
@@ -348,7 +349,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _ReadField(
             label: 'Date de naissance',
             value: profile.birthDate != null
-                ? _formatDate(profile.birthDate!)
+                ? formatDate(profile.birthDate!)
                 : null,
           ),
           _ReadField(
@@ -404,12 +405,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final i1 = f.isNotEmpty ? f[0] : '';
     final i2 = l.isNotEmpty ? l[0] : '';
     return (i1 + i2).toUpperCase();
-  }
-
-  String _formatDate(DateTime d) {
-    final dd = d.day.toString().padLeft(2, '0');
-    final mm = d.month.toString().padLeft(2, '0');
-    return '$dd/$mm/${d.year}';
   }
 }
 

@@ -153,15 +153,13 @@ class _ProgramTileSubtitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (description != null) ...[
+        if (description != null)
           Text(
             description!,
             style: muted,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: AppSpacing.xs),
-        ],
         Text(
           '$sessionCount séance${sessionCount > 1 ? 's' : ''}',
           style: muted,

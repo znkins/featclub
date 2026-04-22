@@ -140,7 +140,7 @@ class _ProgramSessionPickerScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (hasDescription) ...[
+                          if (hasDescription)
                             Text(
                               s.description!,
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -149,8 +149,6 @@ class _ProgramSessionPickerScreenState
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: AppSpacing.xs),
-                          ],
                           SessionMetaRow(
                             blockCount: it.blockCount,
                             durationMinutes: s.durationMinutes,
