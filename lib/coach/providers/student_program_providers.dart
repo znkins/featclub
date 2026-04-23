@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/student_program_service.dart';
-import '../../shared/providers/supabase_providers.dart';
+import '../../shared/providers/data_providers.dart';
 
-final studentProgramServiceProvider = Provider<StudentProgramService>((ref) {
-  return StudentProgramService(ref.watch(supabaseClientProvider));
-});
+// `studentProgramServiceProvider` est déclaré dans `shared/providers` et
+// re-exporté ici pour préserver les imports existants côté coach.
+export '../../shared/providers/data_providers.dart'
+    show studentProgramServiceProvider;
 
 /// Liste des programmes d'un élève (plus récents en premier).
 final studentProgramsProvider =

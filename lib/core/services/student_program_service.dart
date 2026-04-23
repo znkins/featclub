@@ -72,6 +72,52 @@ class StudentBlockEditorDetail {
   final List<StudentSessionExercise> exercises;
 }
 
+/// Programme actif d'un élève et ses séances (liste plate, triée pour l'app
+/// élève). Utilisé par l'accueil et l'onglet programme.
+class StudentActiveProgramDetail {
+  const StudentActiveProgramDetail({
+    required this.program,
+    required this.sessions,
+  });
+
+  /// `null` si l'élève n'a aucun programme actif.
+  final StudentProgram? program;
+
+  /// Séances du programme actif, triées pour la vue élève : séances avec
+  /// `assigned_date` en premier (plus proche en tête), puis séances sans date
+  /// triées par date de création.
+  final List<StudentSession> sessions;
+}
+
+/// Bloc élève + ses exercices ordonnés (version "lecture" pour l'élève).
+class StudentSessionBlockContent {
+  const StudentSessionBlockContent({
+    required this.block,
+    required this.exercises,
+  });
+
+  final StudentSessionBlock block;
+  final List<StudentSessionExercise> exercises;
+}
+
+/// Contenu complet d'une séance élève : séance + blocs + exercices.
+///
+/// Utilisé par le détail séance et le mode d'exécution, où l'on doit
+/// disposer de tout l'arbre d'un coup pour naviguer bloc par bloc sans
+/// aller-retour réseau supplémentaire.
+class StudentSessionContent {
+  const StudentSessionContent({
+    required this.session,
+    required this.blocks,
+  });
+
+  final StudentSession session;
+  final List<StudentSessionBlockContent> blocks;
+
+  int get exerciseCount =>
+      blocks.fold<int>(0, (acc, b) => acc + b.exercises.length);
+}
+
 /// Contenu personnalisé d'un élève : `student_programs`, `student_sessions`,
 /// `student_session_blocks`, `student_session_exercises`.
 ///
@@ -197,6 +243,83 @@ class StudentProgramService {
           .from('student_programs')
           .update({'is_active': false}).eq('id', programId);
     }
+  }
+
+  /// Programme actif d'un élève (`is_active = true`).
+  ///
+  /// Renvoie `null` si aucun programme n'est actif. La contrainte unique côté
+  /// DB garantit au plus un résultat.
+  Future<StudentProgram?> fetchActiveProgram(String studentId) async {
+    final rows = await _client
+        .from('student_programs')
+        .select(_programColumns)
+        .eq('student_id', studentId)
+        .eq('is_active', true)
+        .limit(1);
+    final list = rows as List;
+    if (list.isEmpty) return null;
+    return StudentProgram.fromJson(list.first as Map<String, dynamic>);
+  }
+
+  /// Programme actif + séances triées pour la vue élève.
+  ///
+  /// Tri : séances avec `assigned_date` en premier (plus proche d'abord),
+  /// puis séances sans date, triées par date de création (la plus ancienne
+  /// en tête — ordre d'apparition stable).
+  Future<StudentActiveProgramDetail> fetchActiveProgramWithSessions(
+    String studentId,
+  ) async {
+    final program = await fetchActiveProgram(studentId);
+    if (program == null) {
+      return const StudentActiveProgramDetail(program: null, sessions: []);
+    }
+    final rows = await _client
+        .from('student_sessions')
+        .select(_sessionColumns)
+        .eq('student_program_id', program.id);
+    final sessions = (rows as List)
+        .map((r) => StudentSession.fromJson(r as Map<String, dynamic>))
+        .toList()
+      ..sort(_compareStudentSessionsForStudent);
+    return StudentActiveProgramDetail(program: program, sessions: sessions);
+  }
+
+  /// Contenu complet d'une séance : entête + blocs + exercices.
+  ///
+  /// Une seule requête via select imbriqué ; tri client-side sur `position`
+  /// (PostgREST ne garantit pas l'ordre des relations imbriquées).
+  Future<StudentSessionContent> fetchStudentSessionContent(
+    String sessionId,
+  ) async {
+    final row = await _client
+        .from('student_sessions')
+        .select(
+          '$_sessionColumns, '
+          'student_session_blocks('
+          '$_blockColumns, '
+          'student_session_exercises($_exerciseColumns)'
+          ')',
+        )
+        .eq('id', sessionId)
+        .single();
+    final session = StudentSession.fromJson(row);
+    final rawBlocks =
+        (row['student_session_blocks'] as List? ?? []).cast<Map<String, dynamic>>();
+    final sortedBlocks = [...rawBlocks]
+      ..sort((a, b) => (a['position'] as int).compareTo(b['position'] as int));
+    final blocks = sortedBlocks.map((b) {
+      final rawEx = (b['student_session_exercises'] as List? ?? [])
+          .cast<Map<String, dynamic>>();
+      final exercises = rawEx
+          .map(StudentSessionExercise.fromJson)
+          .toList()
+        ..sort((a, c) => a.position.compareTo(c.position));
+      return StudentSessionBlockContent(
+        block: StudentSessionBlock.fromJson(b),
+        exercises: exercises,
+      );
+    }).toList();
+    return StudentSessionContent(session: session, blocks: blocks);
   }
 
   /// Charge un programme + ses séances (avec compteurs de blocs) en ordre.
@@ -638,6 +761,21 @@ class StudentProgramService {
         ? 0
         : ((last.first as Map)['position'] as int) + 1;
   }
+}
+
+/// Tri "vue élève" : séances avec `assignedDate` en premier (plus proche
+/// d'abord), puis séances sans date triées par date de création.
+int _compareStudentSessionsForStudent(StudentSession a, StudentSession b) {
+  final ad = a.assignedDate;
+  final bd = b.assignedDate;
+  if (ad != null && bd != null) {
+    final byDate = ad.compareTo(bd);
+    if (byDate != 0) return byDate;
+    return a.createdAt.compareTo(b.createdAt);
+  }
+  if (ad != null) return -1;
+  if (bd != null) return 1;
+  return a.createdAt.compareTo(b.createdAt);
 }
 
 String? _nullIfBlank(String? value) {

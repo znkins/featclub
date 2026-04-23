@@ -19,18 +19,18 @@ class _StudentShellState extends State<StudentShell> {
   int _index = 0;
 
   static const _titles = ['Accueil', 'Mon programme', 'Progression', 'Profil'];
-
-  static const _tabs = <Widget>[
-    StudentHomeScreen(),
-    StudentProgramScreen(),
-    StudentProgressScreen(),
-    ProfileScreen(),
-  ];
-
   static const _profileTabIndex = 3;
+
+  void _navigateToTab(int i) => setState(() => _index = i);
 
   @override
   Widget build(BuildContext context) {
+    final tabs = <Widget>[
+      StudentHomeScreen(onNavigate: _navigateToTab),
+      const StudentProgramScreen(),
+      const StudentProgressScreen(),
+      const ProfileScreen(),
+    ];
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[_index]),
@@ -38,10 +38,10 @@ class _StudentShellState extends State<StudentShell> {
           if (_index == _profileTabIndex) const ThemeModeToggle(),
         ],
       ),
-      body: IndexedStack(index: _index, children: _tabs),
+      body: IndexedStack(index: _index, children: tabs),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        onDestinationSelected: _navigateToTab,
         destinations: const [
           NavigationDestination(
             icon: Icon(LucideIcons.home),
