@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/models/session.dart' as models;
+import '../../../../core/models/student_session.dart';
+import '../../../../core/utils/day_of_week.dart';
 import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../shared/providers/auth_provider.dart';
 import '../../../../theme/app_spacing.dart';
-import '../../../providers/session_providers.dart';
+import '../../../providers/student_program_providers.dart';
 
-class SessionFormScreen extends ConsumerStatefulWidget {
-  const SessionFormScreen({super.key, this.existing});
+/// Création ou édition d'une séance élève (métadonnées + jour de semaine).
+///
+/// Mode création : nécessite `programId`, `existing` est null.
+/// Mode édition : nécessite `existing`.
+///
+/// Le jour de semaine choisi déclenche le calcul automatique de
+/// `assigned_date` côté service (prochaine occurrence, aujourd'hui si
+/// même jour).
+class StudentSessionFormScreen extends ConsumerStatefulWidget {
+  const StudentSessionFormScreen({
+    super.key,
+    this.programId,
+    this.existing,
+  }) : assert(programId != null || existing != null,
+            'programId requis en création');
 
-  final models.Session? existing;
+  final String? programId;
+  final StudentSession? existing;
 
   @override
-  ConsumerState<SessionFormScreen> createState() => _SessionFormScreenState();
+  ConsumerState<StudentSessionFormScreen> createState() =>
+      _StudentSessionFormScreenState();
 }
 
-class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
+class _StudentSessionFormScreenState
+    extends ConsumerState<StudentSessionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _durationController = TextEditingController();
+  DayOfWeek? _dayOfWeek;
   bool _saving = false;
 
   bool get _isEdit => widget.existing != null;
@@ -33,6 +50,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
       _titleController.text = s.title;
       _descriptionController.text = s.description ?? '';
       _durationController.text = s.durationMinutes?.toString() ?? '';
+      _dayOfWeek = DayOfWeek.fromStorage(s.dayOfWeek);
     }
   }
 
@@ -60,28 +78,33 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
 
     setState(() => _saving = true);
     try {
-      final service = ref.read(sessionServiceProvider);
+      final service = ref.read(studentProgramServiceProvider);
+      String programIdToInvalidate;
       if (_isEdit) {
-        await service.update(
+        final updated = await service.updateSessionMetadata(
           id: widget.existing!.id,
           title: _titleController.text.trim(),
           description: _descriptionController.text,
           durationMinutes: duration,
+          dayOfWeek: _dayOfWeek,
         );
-        ref.invalidate(sessionDetailProvider(widget.existing!.id));
+        programIdToInvalidate = updated.studentProgramId;
+        ref.invalidate(
+          studentSessionEditorDetailProvider(widget.existing!.id),
+        );
       } else {
-        final coachId = ref.read(currentSessionProvider)?.user.id;
-        if (coachId == null) {
-          throw StateError('Session coach introuvable');
-        }
-        await service.create(
-          coachId: coachId,
+        await service.createEmptySession(
+          programId: widget.programId!,
           title: _titleController.text.trim(),
           description: _descriptionController.text,
           durationMinutes: duration,
+          dayOfWeek: _dayOfWeek,
         );
+        programIdToInvalidate = widget.programId!;
       }
-      ref.invalidate(coachSessionsProvider);
+      ref.invalidate(
+        studentProgramEditorDetailProvider(programIdToInvalidate),
+      );
       if (!mounted) return;
       AppSnackbar.showSuccess(
         context,
@@ -131,6 +154,25 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
               controller: _durationController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(hintText: '60'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Jour de la semaine', style: theme.textTheme.labelLarge),
+            const SizedBox(height: AppSpacing.sm),
+            DropdownButtonFormField<DayOfWeek?>(
+              initialValue: _dayOfWeek,
+              decoration: const InputDecoration(hintText: 'Aucun'),
+              items: [
+                const DropdownMenuItem<DayOfWeek?>(
+                  value: null,
+                  child: Text('Aucun'),
+                ),
+                for (final d in DayOfWeek.values)
+                  DropdownMenuItem<DayOfWeek?>(
+                    value: d,
+                    child: Text(d.frenchLabel),
+                  ),
+              ],
+              onChanged: (v) => setState(() => _dayOfWeek = v),
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(

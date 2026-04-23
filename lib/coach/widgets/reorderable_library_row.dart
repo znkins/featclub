@@ -19,6 +19,7 @@ class ReorderableLibraryRow extends StatelessWidget {
     this.onTap,
     this.onDuplicate,
     this.onRemove,
+    this.removeLabel = 'Retirer',
   });
 
   final int index;
@@ -28,6 +29,13 @@ class ReorderableLibraryRow extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDuplicate;
   final VoidCallback? onRemove;
+
+  /// Libellé de l'action « retirer » (défaut: « Retirer »).
+  ///
+  /// Utilisé pour distinguer retrait d'un lien biblio (ne supprime pas le
+  /// contenu sous-jacent) de la suppression d'une entité propre à l'élève
+  /// (cascade réelle) : dans ce dernier cas passer `'Supprimer'`.
+  final String removeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +89,7 @@ class ReorderableLibraryRow extends StatelessWidget {
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
-                            maxLines: 2,
+                            maxLines: 5,
                             overflow: TextOverflow.ellipsis,
                           ),
                     ],
@@ -131,7 +139,7 @@ class ReorderableLibraryRow extends StatelessWidget {
                               color: theme.colorScheme.secondary,
                             ),
                             const SizedBox(width: AppSpacing.sm),
-                            const Text('Retirer'),
+                            Text(removeLabel),
                           ],
                         ),
                       ),

@@ -105,7 +105,9 @@ class _ProgramFormScreenState extends ConsumerState<ProgramFormScreen> {
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
               controller: _descriptionController,
-              maxLines: 3,
+              minLines: 3,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(

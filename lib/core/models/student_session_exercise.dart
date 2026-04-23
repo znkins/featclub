@@ -3,11 +3,17 @@
 /// Snapshot indépendant d'un exercice template : tous les paramètres sont
 /// stockés en clair (`reps`, `load`, `intensity`, `rest`, `note`) et restent
 /// modifiables sans impact sur la bibliothèque coach.
+///
+/// Les champs `description` et `note` ont des rôles distincts :
+///   - `description` : instructions générales de l'exercice (snapshot du
+///     template, ou édité par le coach)
+///   - `note` : remarque personnalisée du coach pour cet élève spécifique
 class StudentSessionExercise {
   StudentSessionExercise({
     required this.id,
     required this.studentBlockId,
     required this.title,
+    this.description,
     this.videoUrl,
     this.reps,
     this.load,
@@ -20,6 +26,7 @@ class StudentSessionExercise {
   final String id;
   final String studentBlockId;
   final String title;
+  final String? description;
   final String? videoUrl;
   final String? reps;
   final String? load;
@@ -33,6 +40,7 @@ class StudentSessionExercise {
       id: json['id'] as String,
       studentBlockId: json['student_block_id'] as String,
       title: json['title'] as String,
+      description: json['description'] as String?,
       videoUrl: json['video_url'] as String?,
       reps: json['reps'] as String?,
       load: json['load'] as String?,
@@ -47,6 +55,7 @@ class StudentSessionExercise {
         'id': id,
         'student_block_id': studentBlockId,
         'title': title,
+        'description': description,
         'video_url': videoUrl,
         'reps': reps,
         'load': load,

@@ -374,7 +374,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _EditField(
           label: 'Bio',
           controller: _bioController,
-          maxLines: 3,
+          keyboardType: TextInputType.multiline,
+          minLines: 3,
+          maxLines: null,
         ),
         if (isStudent) ...[
           const SizedBox(height: AppSpacing.lg),
@@ -516,12 +518,14 @@ class _EditField extends StatelessWidget {
     required this.controller,
     this.keyboardType,
     this.maxLines = 1,
+    this.minLines,
   });
 
   final String label;
   final TextEditingController controller;
   final TextInputType? keyboardType;
-  final int maxLines;
+  final int? maxLines;
+  final int? minLines;
 
   @override
   Widget build(BuildContext context) {
@@ -534,6 +538,7 @@ class _EditField extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
+          minLines: minLines,
           maxLines: maxLines,
         ),
       ],

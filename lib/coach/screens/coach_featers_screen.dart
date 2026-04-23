@@ -8,6 +8,7 @@ import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_providers.dart';
+import '../widgets/editor_breadcrumb.dart';
 import '../widgets/library_search_field.dart';
 import '../widgets/student_list_tile.dart';
 import 'students/student_detail_screen.dart';
@@ -37,6 +38,7 @@ class _CoachFeatersScreenState extends ConsumerState<CoachFeatersScreen> {
   void _openDetail(Profile student) {
     Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: EditorRoutes.studentDetail),
         builder: (_) => StudentDetailScreen(studentId: student.id),
       ),
     );

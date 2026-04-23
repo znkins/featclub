@@ -1,26 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/models/session.dart' as models;
+import '../../../../core/models/student_session_block.dart';
 import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../shared/providers/auth_provider.dart';
 import '../../../../theme/app_spacing.dart';
-import '../../../providers/session_providers.dart';
+import '../../../providers/student_program_providers.dart';
 
-class SessionFormScreen extends ConsumerStatefulWidget {
-  const SessionFormScreen({super.key, this.existing});
+/// Création ou édition d'un bloc élève (titre + description).
+///
+/// Mode création : `sessionId` requis.
+/// Mode édition : `existing` requis.
+class StudentBlockFormScreen extends ConsumerStatefulWidget {
+  const StudentBlockFormScreen({
+    super.key,
+    this.sessionId,
+    this.existing,
+  }) : assert(sessionId != null || existing != null,
+            'sessionId requis en création');
 
-  final models.Session? existing;
+  final String? sessionId;
+  final StudentSessionBlock? existing;
 
   @override
-  ConsumerState<SessionFormScreen> createState() => _SessionFormScreenState();
+  ConsumerState<StudentBlockFormScreen> createState() =>
+      _StudentBlockFormScreenState();
 }
 
-class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
+class _StudentBlockFormScreenState
+    extends ConsumerState<StudentBlockFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _durationController = TextEditingController();
   bool _saving = false;
 
   bool get _isEdit => widget.existing != null;
@@ -28,11 +38,10 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   @override
   void initState() {
     super.initState();
-    final s = widget.existing;
-    if (s != null) {
-      _titleController.text = s.title;
-      _descriptionController.text = s.description ?? '';
-      _durationController.text = s.durationMinutes?.toString() ?? '';
+    final b = widget.existing;
+    if (b != null) {
+      _titleController.text = b.title;
+      _descriptionController.text = b.description ?? '';
     }
   }
 
@@ -40,7 +49,6 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _durationController.dispose();
     super.dispose();
   }
 
@@ -48,44 +56,35 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
     if (_saving) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final durationText = _durationController.text.trim();
-    int? duration;
-    if (durationText.isNotEmpty) {
-      duration = int.tryParse(durationText);
-      if (duration == null || duration <= 0) {
-        AppSnackbar.showError(context, 'Durée invalide');
-        return;
-      }
-    }
-
     setState(() => _saving = true);
     try {
-      final service = ref.read(sessionServiceProvider);
+      final service = ref.read(studentProgramServiceProvider);
+      String sessionIdToInvalidate;
       if (_isEdit) {
-        await service.update(
+        final updated = await service.updateBlockMetadata(
           id: widget.existing!.id,
           title: _titleController.text.trim(),
           description: _descriptionController.text,
-          durationMinutes: duration,
         );
-        ref.invalidate(sessionDetailProvider(widget.existing!.id));
+        sessionIdToInvalidate = updated.studentSessionId;
+        ref.invalidate(
+          studentBlockEditorDetailProvider(widget.existing!.id),
+        );
       } else {
-        final coachId = ref.read(currentSessionProvider)?.user.id;
-        if (coachId == null) {
-          throw StateError('Session coach introuvable');
-        }
-        await service.create(
-          coachId: coachId,
+        await service.createEmptyBlock(
+          sessionId: widget.sessionId!,
           title: _titleController.text.trim(),
           description: _descriptionController.text,
-          durationMinutes: duration,
         );
+        sessionIdToInvalidate = widget.sessionId!;
       }
-      ref.invalidate(coachSessionsProvider);
+      ref.invalidate(
+        studentSessionEditorDetailProvider(sessionIdToInvalidate),
+      );
       if (!mounted) return;
       AppSnackbar.showSuccess(
         context,
-        _isEdit ? 'Séance mise à jour' : 'Séance créée',
+        _isEdit ? 'Bloc mis à jour' : 'Bloc créé',
       );
       Navigator.of(context).pop();
     } catch (e) {
@@ -100,7 +99,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEdit ? 'Modifier la séance' : 'Nouvelle séance'),
+        title: Text(_isEdit ? 'Modifier le bloc' : 'Nouveau bloc'),
       ),
       body: Form(
         key: _formKey,
@@ -123,14 +122,6 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
               minLines: 3,
               maxLines: null,
               keyboardType: TextInputType.multiline,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Durée estimée (min)', style: theme.textTheme.labelLarge),
-            const SizedBox(height: AppSpacing.sm),
-            TextFormField(
-              controller: _durationController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(hintText: '60'),
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(

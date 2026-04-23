@@ -22,7 +22,9 @@ import '../../providers/completed_session_providers.dart';
 import '../../providers/student_program_providers.dart';
 import '../../providers/student_providers.dart';
 import '../../providers/weight_measure_providers.dart';
+import '../../widgets/add_choice_sheet.dart';
 import '../../widgets/student_program_tile.dart';
+import 'editor/student_program_editor_screen.dart';
 import 'student_history_list_screen.dart';
 import 'student_program_form_screen.dart';
 import 'student_program_template_picker_screen.dart';
@@ -30,8 +32,6 @@ import 'weight_measure_form_dialog.dart';
 import 'weight_measures_sheet.dart';
 
 /// Fiche élève côté coach : identité + programmes + mesures + historique.
-///
-/// Édition profonde des séances/blocs/exercices en 3.c.
 class StudentDetailScreen extends ConsumerStatefulWidget {
   const StudentDetailScreen({super.key, required this.studentId});
 
@@ -563,21 +563,24 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
   final Set<String> _togglingIds = {};
 
   Future<void> _openAddSheet() async {
-    final choice = await showModalBottomSheet<_AddChoice>(
-      context: context,
-      showDragHandle: true,
-      builder: (_) => const _AddProgramSheet(),
+    final choice = await showAddChoiceSheet(
+      context,
+      title: 'Ajouter un programme',
+      emptyTitle: 'Nouveau programme',
+      emptySubtitle: 'Créer un programme vide à construire.',
+      templateTitle: 'Copier un template',
+      templateSubtitle: 'Copier un programme de la bibliothèque.',
     );
     if (choice == null || !mounted) return;
     switch (choice) {
-      case _AddChoice.empty:
+      case AddChoice.empty:
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) =>
                 StudentProgramFormScreen(studentId: widget.studentId),
           ),
         );
-      case _AddChoice.template:
+      case AddChoice.template:
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => StudentProgramTemplatePickerScreen(
@@ -690,133 +693,18 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
             program: items[i].program,
             sessionCount: items[i].sessionCount,
             busy: _togglingIds.contains(items[i].program.id),
+            onTap: () => Navigator.of(context).push(
+              StudentProgramEditorScreen.route(
+                studentId: widget.studentId,
+                programId: items[i].program.id,
+              ),
+            ),
             onToggleActive: (v) => _toggleActive(items[i].program, v),
             onEdit: () => _edit(items[i].program),
             onDelete: () => _delete(items[i].program),
           ),
         ],
       ],
-    );
-  }
-}
-
-enum _AddChoice { empty, template }
-
-class _AddProgramSheet extends StatelessWidget {
-  const _AddProgramSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: Text(
-                'Ajouter un programme',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-            _SheetOption(
-              icon: LucideIcons.filePlus,
-              title: 'Nouveau programme',
-              subtitle: 'Créer un programme vide à construire.',
-              onTap: () => Navigator.of(context).pop(_AddChoice.empty),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _SheetOption(
-              icon: LucideIcons.copyPlus,
-              title: 'Copier un template',
-              subtitle: 'Copier un programme de la bibliothèque.',
-              onTap: () => Navigator.of(context).pop(_AddChoice.template),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SheetOption extends StatelessWidget {
-  const _SheetOption({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface,
-      borderRadius: AppRadius.lgAll,
-      child: InkWell(
-        borderRadius: AppRadius.lgAll,
-        onTap: onTap,
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: AppRadius.lgAll,
-            border: Border.all(color: theme.colorScheme.outline),
-          ),
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: AppRadius.mdAll,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(title, style: theme.textTheme.titleMedium),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                LucideIcons.chevronRight,
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

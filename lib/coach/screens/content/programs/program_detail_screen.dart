@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/models/program.dart';
-import '../../../../core/models/session.dart' as models;
 import '../../../../core/services/program_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../shared/providers/route_observer_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/program_providers.dart';
 import '../../../widgets/detail_field.dart';
@@ -19,14 +19,48 @@ import '../sessions/session_detail_screen.dart';
 import 'program_form_screen.dart';
 import 'program_session_picker_screen.dart';
 
-class ProgramDetailScreen extends ConsumerWidget {
+class ProgramDetailScreen extends ConsumerStatefulWidget {
   const ProgramDetailScreen({super.key, required this.programId});
 
   final String programId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(programDetailProvider(programId));
+  ConsumerState<ProgramDetailScreen> createState() =>
+      _ProgramDetailScreenState();
+}
+
+class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen>
+    with RouteAware {
+  RouteObserver<ModalRoute<void>>? _observer;
+  ModalRoute<void>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final observer = ref.read(appRouteObserverProvider);
+    final route = ModalRoute.of(context);
+    if (route != null && (observer != _observer || route != _route)) {
+      _observer?.unsubscribe(this);
+      observer.subscribe(this, route);
+      _observer = observer;
+      _route = route;
+    }
+  }
+
+  @override
+  void dispose() {
+    _observer?.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref.invalidate(programDetailProvider(widget.programId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(programDetailProvider(widget.programId));
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -40,12 +74,12 @@ class ProgramDetailScreen extends ConsumerWidget {
                 IconButton(
                   tooltip: 'Modifier',
                   icon: const Icon(LucideIcons.pencil),
-                  onPressed: () => _edit(context, detail.program),
+                  onPressed: () => _edit(detail.program),
                 ),
                 IconButton(
                   tooltip: 'Supprimer',
                   icon: const Icon(LucideIcons.trash2),
-                  onPressed: () => _delete(context, ref, detail.program),
+                  onPressed: () => _delete(detail.program),
                 ),
               ],
             ),
@@ -55,7 +89,7 @@ class ProgramDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: async.maybeWhen(
         data: (_) => FloatingActionButton.extended(
-          onPressed: () => _openPicker(context),
+          onPressed: _openPicker,
           icon: const Icon(LucideIcons.plus),
           label: const Text('Ajouter'),
         ),
@@ -65,14 +99,15 @@ class ProgramDetailScreen extends ConsumerWidget {
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorView(
           message: 'Impossible de charger le programme.\n$e',
-          onRetry: () => ref.invalidate(programDetailProvider(programId)),
+          onRetry: () =>
+              ref.invalidate(programDetailProvider(widget.programId)),
         ),
         data: (detail) => _ProgramBody(detail: detail),
       ),
     );
   }
 
-  Future<void> _edit(BuildContext context, Program program) async {
+  Future<void> _edit(Program program) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ProgramFormScreen(existing: program),
@@ -80,11 +115,7 @@ class ProgramDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _delete(
-    BuildContext context,
-    WidgetRef ref,
-    Program program,
-  ) async {
+  Future<void> _delete(Program program) async {
     final confirm = await ConfirmationDialog.show(
       context,
       title: 'Supprimer le programme',
@@ -97,19 +128,20 @@ class ProgramDetailScreen extends ConsumerWidget {
     try {
       await ref.read(programServiceProvider).delete(program.id);
       ref.invalidate(coachProgramsProvider);
-      if (!context.mounted) return;
+      if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Programme supprimé');
       Navigator.of(context).pop();
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       AppSnackbar.showError(context, 'Erreur : $e');
     }
   }
 
-  Future<void> _openPicker(BuildContext context) async {
+  Future<void> _openPicker() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ProgramSessionPickerScreen(programId: programId),
+        builder: (_) =>
+            ProgramSessionPickerScreen(programId: widget.programId),
       ),
     );
   }
@@ -156,22 +188,6 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
       ref.invalidate(coachProgramsProvider);
       if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Séance retirée');
-    } catch (e) {
-      if (!mounted) return;
-      AppSnackbar.showError(context, 'Erreur : $e');
-    }
-  }
-
-  Future<void> _duplicate(models.Session session) async {
-    try {
-      await ref.read(programServiceProvider).addSession(
-            programId: widget.detail.program.id,
-            sessionId: session.id,
-          );
-      ref.invalidate(programDetailProvider(widget.detail.program.id));
-      ref.invalidate(coachProgramsProvider);
-      if (!mounted) return;
-      AppSnackbar.showSuccess(context, 'Séance dupliquée');
     } catch (e) {
       if (!mounted) return;
       AppSnackbar.showError(context, 'Erreur : $e');
@@ -266,7 +282,6 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
                 builder: (_) => SessionDetailScreen(sessionId: session.id),
               ),
             ),
-            onDuplicate: () => _duplicate(session),
             onRemove: () => _remove(link),
           ),
         );

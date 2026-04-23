@@ -118,7 +118,9 @@ class _ExerciseFormScreenState extends ConsumerState<ExerciseFormScreen> {
               label: 'Description',
               child: TextFormField(
                 controller: _descriptionController,
-                maxLines: 3,
+                minLines: 3,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
               ),
             ),

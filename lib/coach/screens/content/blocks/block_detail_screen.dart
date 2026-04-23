@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/models/block.dart';
-import '../../../../core/models/exercise.dart';
 import '../../../../core/services/block_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../shared/providers/route_observer_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/block_providers.dart';
 import '../../../widgets/category_chip.dart';
@@ -19,14 +19,47 @@ import '../exercises/exercise_detail_screen.dart';
 import 'block_exercise_picker_screen.dart';
 import 'block_form_screen.dart';
 
-class BlockDetailScreen extends ConsumerWidget {
+class BlockDetailScreen extends ConsumerStatefulWidget {
   const BlockDetailScreen({super.key, required this.blockId});
 
   final String blockId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(blockDetailProvider(blockId));
+  ConsumerState<BlockDetailScreen> createState() => _BlockDetailScreenState();
+}
+
+class _BlockDetailScreenState extends ConsumerState<BlockDetailScreen>
+    with RouteAware {
+  RouteObserver<ModalRoute<void>>? _observer;
+  ModalRoute<void>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final observer = ref.read(appRouteObserverProvider);
+    final route = ModalRoute.of(context);
+    if (route != null && (observer != _observer || route != _route)) {
+      _observer?.unsubscribe(this);
+      observer.subscribe(this, route);
+      _observer = observer;
+      _route = route;
+    }
+  }
+
+  @override
+  void dispose() {
+    _observer?.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref.invalidate(blockDetailProvider(widget.blockId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(blockDetailProvider(widget.blockId));
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -40,12 +73,12 @@ class BlockDetailScreen extends ConsumerWidget {
                 IconButton(
                   tooltip: 'Modifier',
                   icon: const Icon(LucideIcons.pencil),
-                  onPressed: () => _editBlock(context, detail.block),
+                  onPressed: () => _editBlock(detail.block),
                 ),
                 IconButton(
                   tooltip: 'Supprimer',
                   icon: const Icon(LucideIcons.trash2),
-                  onPressed: () => _deleteBlock(context, ref, detail.block),
+                  onPressed: () => _deleteBlock(detail.block),
                 ),
               ],
             ),
@@ -55,7 +88,7 @@ class BlockDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: async.maybeWhen(
         data: (_) => FloatingActionButton.extended(
-          onPressed: () => _openPicker(context),
+          onPressed: _openPicker,
           icon: const Icon(LucideIcons.plus),
           label: const Text('Ajouter'),
         ),
@@ -65,14 +98,14 @@ class BlockDetailScreen extends ConsumerWidget {
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorView(
           message: 'Impossible de charger le bloc.\n$e',
-          onRetry: () => ref.invalidate(blockDetailProvider(blockId)),
+          onRetry: () => ref.invalidate(blockDetailProvider(widget.blockId)),
         ),
         data: (detail) => _BlockBody(detail: detail),
       ),
     );
   }
 
-  Future<void> _editBlock(BuildContext context, Block block) async {
+  Future<void> _editBlock(Block block) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => BlockFormScreen(existing: block),
@@ -80,11 +113,7 @@ class BlockDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _deleteBlock(
-    BuildContext context,
-    WidgetRef ref,
-    Block block,
-  ) async {
+  Future<void> _deleteBlock(Block block) async {
     final confirm = await ConfirmationDialog.show(
       context,
       title: 'Supprimer le bloc',
@@ -97,19 +126,19 @@ class BlockDetailScreen extends ConsumerWidget {
     try {
       await ref.read(blockServiceProvider).delete(block.id);
       ref.invalidate(coachBlocksProvider);
-      if (!context.mounted) return;
+      if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Bloc supprimé');
       Navigator.of(context).pop();
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       AppSnackbar.showError(context, 'Erreur : $e');
     }
   }
 
-  Future<void> _openPicker(BuildContext context) async {
+  Future<void> _openPicker() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => BlockExercisePickerScreen(blockId: blockId),
+        builder: (_) => BlockExercisePickerScreen(blockId: widget.blockId),
       ),
     );
   }
@@ -162,23 +191,7 @@ class _BlockBodyState extends ConsumerState<_BlockBody> {
     }
   }
 
-  Future<void> _duplicate(Exercise exercise) async {
-    try {
-      await ref.read(blockServiceProvider).addExercise(
-            blockId: widget.detail.block.id,
-            exerciseId: exercise.id,
-          );
-      ref.invalidate(blockDetailProvider(widget.detail.block.id));
-      ref.invalidate(coachBlocksProvider);
-      if (!mounted) return;
-      AppSnackbar.showSuccess(context, 'Exercice dupliqué');
-    } catch (e) {
-      if (!mounted) return;
-      AppSnackbar.showError(context, 'Erreur : $e');
-    }
-  }
-
-  Future<void> _onReorder(int oldIndex, int newIndex) async {
+Future<void> _onReorder(int oldIndex, int newIndex) async {
     setState(() {
       if (newIndex > oldIndex) newIndex -= 1;
       final item = _links.removeAt(oldIndex);
@@ -267,7 +280,6 @@ class _BlockBodyState extends ConsumerState<_BlockBody> {
                     ExerciseDetailScreen(exerciseId: exercise.id),
               ),
             ),
-            onDuplicate: () => _duplicate(exercise),
             onRemove: () => _remove(link),
           ),
         );

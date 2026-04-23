@@ -70,6 +70,11 @@ class _StudentProgramFormScreenState
         );
       }
       ref.invalidate(studentProgramsProvider(widget.studentId));
+      if (_isEdit) {
+        ref.invalidate(
+          studentProgramEditorDetailProvider(widget.existing!.id),
+        );
+      }
       if (!mounted) return;
       AppSnackbar.showSuccess(
         context,
@@ -108,7 +113,9 @@ class _StudentProgramFormScreenState
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
               controller: _descriptionController,
-              maxLines: 3,
+              minLines: 3,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(

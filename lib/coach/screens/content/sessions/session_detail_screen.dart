@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/models/block.dart';
 import '../../../../core/models/session.dart' as models;
 import '../../../../core/services/session_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
@@ -10,6 +9,7 @@ import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../shared/providers/route_observer_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/session_providers.dart';
 import '../../../widgets/detail_field.dart';
@@ -19,14 +19,48 @@ import '../blocks/block_detail_screen.dart';
 import 'session_block_picker_screen.dart';
 import 'session_form_screen.dart';
 
-class SessionDetailScreen extends ConsumerWidget {
+class SessionDetailScreen extends ConsumerStatefulWidget {
   const SessionDetailScreen({super.key, required this.sessionId});
 
   final String sessionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(sessionDetailProvider(sessionId));
+  ConsumerState<SessionDetailScreen> createState() =>
+      _SessionDetailScreenState();
+}
+
+class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
+    with RouteAware {
+  RouteObserver<ModalRoute<void>>? _observer;
+  ModalRoute<void>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final observer = ref.read(appRouteObserverProvider);
+    final route = ModalRoute.of(context);
+    if (route != null && (observer != _observer || route != _route)) {
+      _observer?.unsubscribe(this);
+      observer.subscribe(this, route);
+      _observer = observer;
+      _route = route;
+    }
+  }
+
+  @override
+  void dispose() {
+    _observer?.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref.invalidate(sessionDetailProvider(widget.sessionId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(sessionDetailProvider(widget.sessionId));
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -40,12 +74,12 @@ class SessionDetailScreen extends ConsumerWidget {
                 IconButton(
                   tooltip: 'Modifier',
                   icon: const Icon(LucideIcons.pencil),
-                  onPressed: () => _edit(context, detail.session),
+                  onPressed: () => _edit(detail.session),
                 ),
                 IconButton(
                   tooltip: 'Supprimer',
                   icon: const Icon(LucideIcons.trash2),
-                  onPressed: () => _delete(context, ref, detail.session),
+                  onPressed: () => _delete(detail.session),
                 ),
               ],
             ),
@@ -55,7 +89,7 @@ class SessionDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: async.maybeWhen(
         data: (_) => FloatingActionButton.extended(
-          onPressed: () => _openPicker(context),
+          onPressed: _openPicker,
           icon: const Icon(LucideIcons.plus),
           label: const Text('Ajouter'),
         ),
@@ -65,14 +99,15 @@ class SessionDetailScreen extends ConsumerWidget {
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorView(
           message: 'Impossible de charger la séance.\n$e',
-          onRetry: () => ref.invalidate(sessionDetailProvider(sessionId)),
+          onRetry: () =>
+              ref.invalidate(sessionDetailProvider(widget.sessionId)),
         ),
         data: (detail) => _SessionBody(detail: detail),
       ),
     );
   }
 
-  Future<void> _edit(BuildContext context, models.Session session) async {
+  Future<void> _edit(models.Session session) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SessionFormScreen(existing: session),
@@ -80,11 +115,7 @@ class SessionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _delete(
-    BuildContext context,
-    WidgetRef ref,
-    models.Session session,
-  ) async {
+  Future<void> _delete(models.Session session) async {
     final confirm = await ConfirmationDialog.show(
       context,
       title: 'Supprimer la séance',
@@ -97,19 +128,19 @@ class SessionDetailScreen extends ConsumerWidget {
     try {
       await ref.read(sessionServiceProvider).delete(session.id);
       ref.invalidate(coachSessionsProvider);
-      if (!context.mounted) return;
+      if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Séance supprimée');
       Navigator.of(context).pop();
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       AppSnackbar.showError(context, 'Erreur : $e');
     }
   }
 
-  Future<void> _openPicker(BuildContext context) async {
+  Future<void> _openPicker() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => SessionBlockPickerScreen(sessionId: sessionId),
+        builder: (_) => SessionBlockPickerScreen(sessionId: widget.sessionId),
       ),
     );
   }
@@ -156,22 +187,6 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
       ref.invalidate(coachSessionsProvider);
       if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Bloc retiré');
-    } catch (e) {
-      if (!mounted) return;
-      AppSnackbar.showError(context, 'Erreur : $e');
-    }
-  }
-
-  Future<void> _duplicate(Block block) async {
-    try {
-      await ref.read(sessionServiceProvider).addBlock(
-            sessionId: widget.detail.session.id,
-            blockId: block.id,
-          );
-      ref.invalidate(sessionDetailProvider(widget.detail.session.id));
-      ref.invalidate(coachSessionsProvider);
-      if (!mounted) return;
-      AppSnackbar.showSuccess(context, 'Bloc dupliqué');
     } catch (e) {
       if (!mounted) return;
       AppSnackbar.showError(context, 'Erreur : $e');
@@ -260,7 +275,6 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
                 builder: (_) => BlockDetailScreen(blockId: block.id),
               ),
             ),
-            onDuplicate: () => _duplicate(block),
             onRemove: () => _remove(link),
           ),
         );
