@@ -10,13 +10,13 @@ import '../../shared/providers/student_data_providers.dart';
 import '../../shared/widgets/compact_history_row.dart';
 import '../../shared/widgets/empty_section_card.dart';
 import '../../shared/widgets/history_sheet.dart';
+import '../../shared/widgets/profile_identity_card.dart';
 import '../../shared/widgets/section_error.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/see_more_link.dart';
 import '../../shared/widgets/weight_evolution_chart.dart';
 import '../../shared/widgets/weight_measure_row.dart';
 import '../../shared/widgets/weight_measures_sheet.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../widgets/student_weight_measure_dialog.dart';
 
@@ -72,78 +72,23 @@ class _StatsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final countAsync =
         ref.watch(studentCompletedSessionCountProvider(studentId));
-    return Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            icon: LucideIcons.scale,
-            value: currentWeight != null
-                ? formatWeightKg(currentWeight!)
-                : '—',
-            label: 'Poids actuel',
-          ),
+    return ProfileStatsGrid(
+      tiles: [
+        ProfileStatTile(
+          icon: LucideIcons.scale,
+          value:
+              currentWeight != null ? formatWeightKg(currentWeight!) : null,
+          label: 'Poids actuel',
         ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: _StatCard(
-            icon: LucideIcons.activity,
-            value: countAsync.maybeWhen(
-              data: (c) => '$c',
-              orElse: () => '—',
-            ),
-            label: 'Séances terminées',
+        ProfileStatTile(
+          icon: LucideIcons.activity,
+          value: countAsync.maybeWhen(
+            data: (c) => '$c',
+            orElse: () => null,
           ),
+          label: 'Séances',
         ),
       ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  final IconData icon;
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 26, color: theme.colorScheme.primary),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
     );
   }
 }

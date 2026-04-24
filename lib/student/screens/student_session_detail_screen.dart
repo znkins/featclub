@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/models/student_session.dart';
 import '../../core/models/student_session_exercise.dart';
 import '../../core/services/student_program_service.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/video_launcher.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/error_view.dart';
@@ -15,7 +16,6 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_session_providers.dart';
 import '../widgets/complete_session_sheet.dart';
-import '../widgets/student_session_tile.dart';
 import 'student_session_execution_screen.dart';
 
 /// Détail d'une séance élève : méta + blocs + exercices, avec boutons

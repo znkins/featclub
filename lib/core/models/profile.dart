@@ -38,6 +38,29 @@ class Profile {
     return parts.join(' ');
   }
 
+  /// Initiales (jusqu'à 2 lettres, majuscules) dérivées du prénom + nom.
+  /// Fallback de l'avatar quand pas de photo.
+  String get initials {
+    final f = (firstName ?? '').trim();
+    final l = (lastName ?? '').trim();
+    final i1 = f.isNotEmpty ? f[0] : '';
+    final i2 = l.isNotEmpty ? l[0] : '';
+    return (i1 + i2).toUpperCase();
+  }
+
+  /// Âge calculé depuis `birthDate`, `null` si non renseigné.
+  int? get age {
+    final birth = birthDate;
+    if (birth == null) return null;
+    final now = DateTime.now();
+    var years = now.year - birth.year;
+    if (now.month < birth.month ||
+        (now.month == birth.month && now.day < birth.day)) {
+      years--;
+    }
+    return years;
+  }
+
   /// Le profil est considéré complet dès lors que le prénom est renseigné.
   bool get isComplete => (firstName ?? '').trim().isNotEmpty;
 

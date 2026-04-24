@@ -25,3 +25,16 @@ String formatWeightKg(double kg) {
   final rounded = kg.toStringAsFixed(kg % 1 == 0 ? 0 : 1);
   return '$rounded kg';
 }
+
+/// Affichage humain d'une date assignée : "Aujourd'hui" / "Demain" / date.
+/// Utilisé par l'accueil élève et la liste des séances du programme.
+String? formatAssignedDateLabel(DateTime? date) {
+  if (date == null) return null;
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final d = DateTime(date.year, date.month, date.day);
+  final diff = d.difference(today).inDays;
+  if (diff == 0) return 'Aujourd\'hui';
+  if (diff == 1) return 'Demain';
+  return formatDate(date);
+}

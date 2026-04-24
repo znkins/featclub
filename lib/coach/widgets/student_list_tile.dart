@@ -21,14 +21,6 @@ class StudentListTile extends StatelessWidget {
   final Profile profile;
   final VoidCallback onTap;
 
-  String get _initials {
-    final f = (profile.firstName ?? '').trim();
-    final l = (profile.lastName ?? '').trim();
-    final i1 = f.isNotEmpty ? f[0] : '';
-    final i2 = l.isNotEmpty ? l[0] : '';
-    return (i1 + i2).toUpperCase();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,7 +44,7 @@ class StudentListTile extends StatelessWidget {
             children: [
               UserAvatar(
                 avatarUrl: profile.avatarUrl,
-                initials: _initials,
+                initials: profile.initials,
                 size: 48,
               ),
               const SizedBox(width: AppSpacing.lg),

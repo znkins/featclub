@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../coach/widgets/duration_pill.dart';
 import '../../core/models/profile.dart';
 import '../../core/models/student_session.dart';
 import '../../core/services/student_program_service.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
 import '../../shared/providers/current_profile_provider.dart';
+import '../../shared/widgets/section_header.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_session_providers.dart';
-import '../widgets/student_session_tile.dart';
+import '../widgets/assigned_date_pill.dart';
+import 'student_session_detail_screen.dart';
 
 /// Accueil élève : bienvenue, prochaine séance, raccourcis, CTA profil.
 ///
@@ -64,10 +67,23 @@ class StudentHomeScreen extends ConsumerWidget {
               message: 'Impossible de charger ta prochaine séance.',
               onRetry: () => ref.invalidate(studentActiveProgramProvider),
             ),
-            data: (detail) => _NextSessionCard(
-              detail: detail,
-              onOpenProgram: () => onNavigate(_programTab),
-            ),
+            data: (detail) {
+              final next =
+                  detail.sessions.isEmpty ? null : detail.sessions.first;
+              return _NextSessionCard(
+                detail: detail,
+                onOpenProgram: () => onNavigate(_programTab),
+                onStartSession: next == null
+                    ? null
+                    : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => StudentSessionDetailScreen(
+                              sessionId: next.id,
+                            ),
+                          ),
+                        ),
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.xl),
           profileAsync.maybeWhen(
@@ -127,16 +143,25 @@ class _NextSessionCard extends StatelessWidget {
   const _NextSessionCard({
     required this.detail,
     required this.onOpenProgram,
+    required this.onStartSession,
   });
 
   final StudentActiveProgramDetail detail;
+
+  /// Tab-switch vers « Mon programme ». Utilisé pour l'état avec programme
+  /// mais sans prochaine séance (rien à commencer, on redirige vers la liste).
   final VoidCallback onOpenProgram;
+
+  /// Ouvre l'écran de détail de la prochaine séance. `null` quand il n'y
+  /// a pas de séance suivante (pas de programme, ou programme vide).
+  final VoidCallback? onStartSession;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final next = detail.sessions.isEmpty ? null : detail.sessions.first;
     final hasProgram = detail.program != null;
+    final cardTap = onStartSession ?? (hasProgram ? onOpenProgram : null);
 
     return Container(
       decoration: BoxDecoration(
@@ -146,7 +171,7 @@ class _NextSessionCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: hasProgram ? onOpenProgram : null,
+        onTap: cardTap,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
@@ -160,12 +185,20 @@ class _NextSessionCard extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Prochaine séance',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Expanded(
+                    child: Text(
+                      'Prochaine séance',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
+                  if (cardTap != null)
+                    Icon(
+                      LucideIcons.chevronRight,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
@@ -173,6 +206,17 @@ class _NextSessionCard extends StatelessWidget {
                 _NextSessionContent(session: next)
               else
                 _NextSessionEmpty(hasProgram: hasProgram),
+              if (onStartSession != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: onStartSession,
+                    icon: const Icon(LucideIcons.play, size: 18),
+                    label: const Text('Commencer la séance'),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -189,10 +233,8 @@ class _NextSessionContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final metaParts = <String>[
-      ?formatAssignedDateLabel(session.assignedDate),
-      if (session.durationMinutes != null) '${session.durationMinutes} min',
-    ];
+    final hasDate = session.assignedDate != null;
+    final hasDuration = session.durationMinutes != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,13 +245,15 @@ class _NextSessionContent extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        if (metaParts.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            metaParts.join(' · '),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+        if (hasDate || hasDuration) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            children: [
+              if (hasDate) AssignedDatePill(date: session.assignedDate!),
+              if (hasDuration) DurationPill(minutes: session.durationMinutes!),
+            ],
           ),
         ],
         if ((session.description ?? '').trim().isNotEmpty) ...[
@@ -303,11 +347,9 @@ class _ProfileCompletionBanner extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: AppRadius.lgAll,
           color: theme.colorScheme.secondary.withValues(alpha: 0.12),
-          border: Border.all(
-            color: theme.colorScheme.secondary.withValues(alpha: 0.4),
-          ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
               LucideIcons.userCircle2,
@@ -337,7 +379,8 @@ class _ProfileCompletionBanner extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Icon(
               LucideIcons.chevronRight,
-              color: theme.colorScheme.onSurfaceVariant,
+              size: 18,
+              color: theme.colorScheme.primary,
             ),
           ],
         ),
@@ -359,11 +402,10 @@ class _ShortcutsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Raccourcis', style: theme.textTheme.titleMedium),
+        const SectionHeader(title: 'Raccourcis'),
         const SizedBox(height: AppSpacing.md),
         _ShortcutTile(
           icon: LucideIcons.dumbbell,
@@ -452,7 +494,8 @@ class _ShortcutTile extends StatelessWidget {
               ),
               Icon(
                 LucideIcons.chevronRight,
-                color: theme.colorScheme.onSurfaceVariant,
+                size: 18,
+                color: theme.colorScheme.primary,
               ),
             ],
           ),

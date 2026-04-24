@@ -16,7 +16,9 @@ import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/auth_provider.dart';
 import '../providers/current_profile_provider.dart';
+import '../providers/student_data_providers.dart';
 import '../providers/supabase_providers.dart';
+import '../widgets/profile_identity_card.dart';
 import '../widgets/theme_mode_toggle.dart';
 
 /// Écran de profil partagé (élève + coach).
@@ -263,135 +265,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildProfile(BuildContext context, Profile profile, String? email) {
-    final theme = Theme.of(context);
+    final isStudent = profile.role == UserRole.eleve;
+    final displayName =
+        profile.fullName.isEmpty ? 'Feater' : profile.fullName;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildAvatarHeader(context, profile, email),
-          const SizedBox(height: AppSpacing.xl),
-          if (_isEditing)
-            _buildEditForm(context, profile)
-          else
-            _buildReadView(context, profile, theme),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatarHeader(
-      BuildContext context, Profile profile, String? email) {
-    final theme = Theme.of(context);
-    final avatar = _AvatarCircle(
-      avatarUrl: profile.avatarUrl,
-      initials: _initials(profile),
-    );
-
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            avatar,
-            Material(
-              color: theme.colorScheme.primary,
-              shape: const CircleBorder(),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap:
-                    _uploadingAvatar ? null : () => _pickAvatar(profile),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: _uploadingAvatar
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(
-                          LucideIcons.pencil,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          profile.fullName.isEmpty ? 'Sans nom' : profile.fullName,
-          style: theme.textTheme.headlineSmall,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        if (email != null)
-          Text(
-            email,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+          ProfileIdentityCard(
+            avatarUrl: profile.avatarUrl,
+            initials: profile.initials,
+            displayName: displayName,
+            subtitle: email,
+            // Chip rôle uniquement pour coach et admin : pour un élève
+            // consultant son propre profil, l'info n'apporte rien.
+            chip: !isStudent ? _RoleChip(role: profile.role) : null,
+            chipAsideAvatar: true,
+            avatarOverlay: _isEditing
+                ? _AvatarEditButton(
+                    uploading: _uploadingAvatar,
+                    onTap: () => _pickAvatar(profile),
+                  )
+                : null,
+            // En mode édition la carte reste minimale (identité seule) :
+            // les champs modifiables sont dans le formulaire en dessous.
+            body: _isEditing
+                ? null
+                : (isStudent
+                    ? _StudentProfileBody(profile: profile)
+                    : _CoachProfileBody(profile: profile)),
           ),
-        // Role chip affiché uniquement pour coach et admin : pour un élève
-        // qui consulte son propre profil, l'info est sans valeur.
-        if (profile.role != UserRole.eleve) ...[
-          const SizedBox(height: AppSpacing.sm),
-          _RoleChip(role: profile.role),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildReadView(
-      BuildContext context, Profile profile, ThemeData theme) {
-    final isStudent = profile.role == UserRole.eleve;
-    final fields = <Widget>[
-      _ReadField(
-        icon: LucideIcons.stickyNote,
-        label: 'Bio',
-        value: profile.bio,
-      ),
-      if (isStudent) ...[
-        _ReadField(
-          icon: LucideIcons.cake,
-          label: 'Date de naissance',
-          value: profile.birthDate != null
-              ? formatDate(profile.birthDate!)
-              : null,
-        ),
-        _ReadField(
-          icon: LucideIcons.moveVertical,
-          label: 'Taille',
-          value: profile.heightCm != null ? '${profile.heightCm} cm' : null,
-        ),
-        _ReadField(
-          icon: LucideIcons.target,
-          label: 'Objectif',
-          value: profile.goal,
-        ),
-      ],
-    ];
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < fields.length; i++) ...[
-            if (i > 0)
-              Divider(
-                height: AppSpacing.xl,
-                color: theme.colorScheme.outline,
-              ),
-            fields[i],
+          if (_isEditing) ...[
+            const SizedBox(height: AppSpacing.xl),
+            _buildEditForm(context, profile),
           ],
         ],
       ),
@@ -437,53 +345,124 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  String _initials(Profile profile) {
-    final f = (profile.firstName ?? '').trim();
-    final l = (profile.lastName ?? '').trim();
-    final i1 = f.isNotEmpty ? f[0] : '';
-    final i2 = l.isNotEmpty ? l[0] : '';
-    return (i1 + i2).toUpperCase();
+}
+
+class _StudentProfileBody extends ConsumerWidget {
+  const _StudentProfileBody({required this.profile});
+
+  final Profile profile;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sessionCountAsync =
+        ref.watch(studentCompletedSessionCountProvider(profile.id));
+    final age = profile.age;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ProfileStatsGrid(
+          tiles: [
+            ProfileStatTile(
+              icon: LucideIcons.cake,
+              value: age != null ? '$age ${age > 1 ? 'ans' : 'an'}' : null,
+              label: 'Âge',
+            ),
+            ProfileStatTile(
+              icon: LucideIcons.moveVertical,
+              value: profile.heightCm != null ? '${profile.heightCm} cm' : null,
+              label: 'Taille',
+            ),
+            ProfileStatTile(
+              icon: LucideIcons.scale,
+              value: profile.currentWeight != null
+                  ? formatWeightKg(profile.currentWeight!)
+                  : null,
+              label: 'Poids',
+            ),
+            ProfileStatTile(
+              icon: LucideIcons.activity,
+              value: sessionCountAsync.maybeWhen(
+                data: (c) => '$c',
+                orElse: () => null,
+              ),
+              label: 'Séances',
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        ProfileInfoCard(
+          rows: [
+            ProfileInfoRow(
+              icon: LucideIcons.target,
+              label: 'Objectif',
+              value: profile.goal,
+            ),
+            ProfileInfoRow(
+              icon: LucideIcons.stickyNote,
+              label: 'Bio',
+              value: profile.bio,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+}
+
+class _CoachProfileBody extends StatelessWidget {
+  const _CoachProfileBody({required this.profile});
+
+  final Profile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    return ProfileInfoCard(
+      rows: [
+        ProfileInfoRow(
+          icon: LucideIcons.stickyNote,
+          label: 'Bio',
+          value: profile.bio,
+        ),
+      ],
+    );
   }
 }
 
-class _AvatarCircle extends StatelessWidget {
-  const _AvatarCircle({required this.avatarUrl, required this.initials});
+class _AvatarEditButton extends StatelessWidget {
+  const _AvatarEditButton({required this.uploading, required this.onTap});
 
-  final String? avatarUrl;
-  final String initials;
+  final bool uploading;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const size = 120.0;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-        image: (avatarUrl != null && avatarUrl!.isNotEmpty)
-            ? DecorationImage(
-                image: NetworkImage(avatarUrl!),
-                fit: BoxFit.cover,
-              )
-            : null,
-      ),
-      alignment: Alignment.center,
-      child: (avatarUrl == null || avatarUrl!.isEmpty)
-          ? (initials.isNotEmpty
-              ? Text(
-                  initials,
-                  style: theme.textTheme.displayMedium?.copyWith(
-                    color: theme.colorScheme.primary,
+    return Material(
+      color: theme.colorScheme.primary,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: uploading ? null : onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: uploading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
                   ),
                 )
-              : Icon(
-                  LucideIcons.user,
-                  size: size * 0.45,
-                  color: theme.colorScheme.primary,
-                ))
-          : null,
+              : const Icon(
+                  LucideIcons.pencil,
+                  color: Colors.white,
+                  size: 18,
+                ),
+        ),
+      ),
     );
   }
 }
@@ -515,60 +494,6 @@ class _RoleChip extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-    );
-  }
-}
-
-class _ReadField extends StatelessWidget {
-  const _ReadField({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String? value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final shown = (value == null || value!.isEmpty) ? '—' : value!;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: AppRadius.mdAll,
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            icon,
-            size: 20,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(shown, style: theme.textTheme.bodyLarge),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
