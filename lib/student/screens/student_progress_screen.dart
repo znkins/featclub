@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../core/models/completed_session.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
 import '../../shared/providers/current_profile_provider.dart';
 import '../../shared/providers/student_data_providers.dart';
+import '../../shared/widgets/compact_history_row.dart';
+import '../../shared/widgets/empty_section_card.dart';
+import '../../shared/widgets/history_sheet.dart';
+import '../../shared/widgets/section_error.dart';
+import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/see_more_link.dart';
+import '../../shared/widgets/weight_evolution_chart.dart';
 import '../../shared/widgets/weight_measure_row.dart';
+import '../../shared/widgets/weight_measures_sheet.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../widgets/student_weight_measure_dialog.dart';
-import '../widgets/student_weight_measures_sheet.dart';
-import '../widgets/weight_evolution_chart.dart';
-import 'student_history_screen.dart';
 
 /// Onglet Progression élève : poids actuel, compteur complétions, graphique,
 /// 3 dernières mesures (+ voir plus), 3 dernières séances (+ voir plus).
@@ -144,134 +148,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.action});
-
-  final String title;
-  final Widget? action;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: Text(title, style: theme.textTheme.headlineSmall),
-        ),
-        ?action,
-      ],
-    );
-  }
-}
-
-class _EmptySectionCard extends StatelessWidget {
-  const _EmptySectionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xl,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: AppRadius.mdAll,
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 28, color: theme.colorScheme.primary),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            style: theme.textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionError extends StatelessWidget {
-  const _SectionError({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(LucideIcons.refreshCcw, size: 16),
-              label: const Text('Réessayer'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SeeMoreLink extends StatelessWidget {
-  const _SeeMoreLink({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(onPressed: onTap, child: const Text('Voir plus')),
-    );
-  }
-}
-
 class _WeightSection extends ConsumerWidget {
   const _WeightSection({required this.studentId});
 
@@ -283,7 +159,7 @@ class _WeightSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionHeader(
+        SectionHeader(
           title: 'Mes mesures',
           action: TextButton.icon(
             onPressed: () => showStudentWeightMeasureDialog(context),
@@ -297,13 +173,13 @@ class _WeightSection extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: LoadingIndicator(),
           ),
-          error: (e, _) => _SectionError(
+          error: (e, _) => SectionError(
             message: 'Impossible de charger tes mesures.\n$e',
             onRetry: () => ref.invalidate(studentWeightsProvider(studentId)),
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const _EmptySectionCard(
+              return const EmptySectionCard(
                 icon: LucideIcons.scale,
                 title: 'Aucune mesure',
                 subtitle: 'Ajoute ta première pesée pour démarrer le suivi.',
@@ -322,8 +198,8 @@ class _WeightSection extends ConsumerWidget {
                   WeightMeasureRow(measure: recent[i]),
                 ],
                 if (items.length > 3)
-                  _SeeMoreLink(
-                    onTap: () => showStudentWeightMeasuresSheet(
+                  SeeMoreLink(
+                    onTap: () => showWeightMeasuresSheet(
                       context,
                       studentId: studentId,
                     ),
@@ -348,21 +224,21 @@ class _HistorySection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionHeader(title: 'Historique'),
+        const SectionHeader(title: 'Historique'),
         const SizedBox(height: AppSpacing.md),
         async.when(
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: LoadingIndicator(),
           ),
-          error: (e, _) => _SectionError(
+          error: (e, _) => SectionError(
             message: 'Impossible de charger l\'historique.\n$e',
             onRetry: () =>
                 ref.invalidate(studentRecentHistoryProvider(studentId)),
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const _EmptySectionCard(
+              return const EmptySectionCard(
                 icon: LucideIcons.calendarCheck,
                 title: 'Aucune séance terminée',
                 subtitle:
@@ -375,15 +251,13 @@ class _HistorySection extends ConsumerWidget {
               children: [
                 for (var i = 0; i < recent.length; i++) ...[
                   if (i > 0) const SizedBox(height: AppSpacing.sm),
-                  _CompactHistoryRow(item: recent[i]),
+                  CompactHistoryRow(item: recent[i]),
                 ],
                 if (items.length > 3)
-                  _SeeMoreLink(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            StudentHistoryScreen(studentId: studentId),
-                      ),
+                  SeeMoreLink(
+                    onTap: () => showHistorySheet(
+                      context,
+                      studentId: studentId,
                     ),
                   ),
               ],
@@ -391,45 +265,6 @@ class _HistorySection extends ConsumerWidget {
           },
         ),
       ],
-    );
-  }
-}
-
-class _CompactHistoryRow extends StatelessWidget {
-  const _CompactHistoryRow({required this.item});
-
-  final CompletedSession item;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            item.sessionTitle,
-            style: theme.textTheme.titleMedium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            formatDate(item.completedAt),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

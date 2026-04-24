@@ -13,12 +13,38 @@ import '../../../providers/exercise_providers.dart';
 import '../../../widgets/category_chip.dart';
 import '../../../widgets/detail_field.dart';
 import '../../../widgets/detail_info_card.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import 'exercise_form_screen.dart';
 
 class ExerciseDetailScreen extends ConsumerWidget {
-  const ExerciseDetailScreen({super.key, required this.exerciseId});
+  const ExerciseDetailScreen({
+    super.key,
+    required this.exerciseId,
+    this.parents = const [],
+  });
 
   final String exerciseId;
+
+  /// Fil d'Ariane parent (chemin de navigation ayant mené à cet écran).
+  /// Vide quand on l'ouvre depuis la liste biblio ; rempli quand on arrive
+  /// via un programme / séance / bloc.
+  final List<EditorCrumb> parents;
+
+  /// Factory à utiliser systématiquement pour pousser l'écran : garantit que
+  /// `RouteSettings.name` est positionné pour que d'éventuels enfants
+  /// puissent remonter ici via le breadcrumb.
+  static Route<void> route({
+    required String exerciseId,
+    List<EditorCrumb> parents = const [],
+  }) {
+    return MaterialPageRoute(
+      settings: const RouteSettings(name: LibraryRoutes.exercise),
+      builder: (_) => ExerciseDetailScreen(
+        exerciseId: exerciseId,
+        parents: parents,
+      ),
+    );
+  }
 
   Future<void> _openVideo(BuildContext context, String url) async {
     final uri = Uri.tryParse(url);
@@ -69,12 +95,13 @@ class ExerciseDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(exerciseByIdProvider(exerciseId));
+    final currentTitle = async.valueOrNull?.title ?? 'Exercice';
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          async.valueOrNull?.title ?? 'Exercice',
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(currentTitle, overflow: TextOverflow.ellipsis),
+        bottom: parents.isEmpty
+            ? null
+            : EditorBreadcrumb(parents: parents, current: currentTitle),
         actions: [
           async.maybeWhen(
             data: (exercise) => Row(

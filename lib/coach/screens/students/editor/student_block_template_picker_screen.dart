@@ -22,9 +22,14 @@ class StudentBlockTemplatePickerScreen extends ConsumerStatefulWidget {
   const StudentBlockTemplatePickerScreen({
     super.key,
     required this.sessionId,
+    required this.programId,
   });
 
   final String sessionId;
+
+  /// Nécessaire pour invalider l'éditeur programme dont la `blockCount` de la
+  /// séance change quand on duplique un template.
+  final String programId;
 
   @override
   ConsumerState<StudentBlockTemplatePickerScreen> createState() =>
@@ -57,6 +62,7 @@ class _StudentBlockTemplatePickerScreenState
         );
       }
       ref.invalidate(studentSessionEditorDetailProvider(widget.sessionId));
+      ref.invalidate(studentProgramEditorDetailProvider(widget.programId));
       if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Blocs ajoutés');
       Navigator.of(context).pop();

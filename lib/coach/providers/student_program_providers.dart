@@ -16,9 +16,12 @@ final studentProgramsProvider =
 });
 
 /// Détail éditeur d'un programme : entête + séances ordonnées (avec compteurs).
+///
+/// `autoDispose` pour garantir la fraîcheur lors d'un `popUntil` via
+/// breadcrumb qui saute des niveaux intermédiaires.
 final studentProgramEditorDetailProvider =
-    FutureProvider.family<StudentProgramEditorDetail, String>(
-        (ref, programId) async {
+    FutureProvider.autoDispose
+        .family<StudentProgramEditorDetail, String>((ref, programId) async {
   return ref
       .watch(studentProgramServiceProvider)
       .fetchProgramEditorDetail(programId);
@@ -26,8 +29,8 @@ final studentProgramEditorDetailProvider =
 
 /// Détail éditeur d'une séance : entête + blocs ordonnés (avec compteurs).
 final studentSessionEditorDetailProvider =
-    FutureProvider.family<StudentSessionEditorDetail, String>(
-        (ref, sessionId) async {
+    FutureProvider.autoDispose
+        .family<StudentSessionEditorDetail, String>((ref, sessionId) async {
   return ref
       .watch(studentProgramServiceProvider)
       .fetchSessionEditorDetail(sessionId);
@@ -35,14 +38,15 @@ final studentSessionEditorDetailProvider =
 
 /// Détail éditeur d'un bloc : entête + exercices ordonnés.
 final studentBlockEditorDetailProvider =
-    FutureProvider.family<StudentBlockEditorDetail, String>(
-        (ref, blockId) async {
+    FutureProvider.autoDispose
+        .family<StudentBlockEditorDetail, String>((ref, blockId) async {
   return ref
       .watch(studentProgramServiceProvider)
       .fetchBlockEditorDetail(blockId);
 });
 
 /// Exercice élève (chargement direct pour l'éditeur d'exercice).
-final studentExerciseProvider = FutureProvider.family((ref, String id) async {
+final studentExerciseProvider =
+    FutureProvider.autoDispose.family((ref, String id) async {
   return ref.watch(studentProgramServiceProvider).fetchExerciseById(id);
 });

@@ -17,7 +17,9 @@ final coachExercisesProvider = FutureProvider<List<Exercise>>((ref) async {
 });
 
 /// Détail d'un exercice (pour l'écran détail).
+///
+/// `autoDispose` : fraîcheur garantie à chaque ré-entrée dans l'écran détail.
 final exerciseByIdProvider =
-    FutureProvider.family<Exercise, String>((ref, id) async {
+    FutureProvider.autoDispose.family<Exercise, String>((ref, id) async {
   return ref.watch(exerciseServiceProvider).fetchById(id);
 });

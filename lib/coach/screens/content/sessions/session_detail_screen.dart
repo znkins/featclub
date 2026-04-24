@@ -16,15 +16,34 @@ import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
 import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/duration_pill.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../blocks/block_detail_screen.dart';
 import 'session_block_picker_screen.dart';
 import 'session_form_screen.dart';
 
 class SessionDetailScreen extends ConsumerStatefulWidget {
-  const SessionDetailScreen({super.key, required this.sessionId});
+  const SessionDetailScreen({
+    super.key,
+    required this.sessionId,
+    this.parents = const [],
+  });
 
   final String sessionId;
+  final List<EditorCrumb> parents;
+
+  static Route<void> route({
+    required String sessionId,
+    List<EditorCrumb> parents = const [],
+  }) {
+    return MaterialPageRoute(
+      settings: const RouteSettings(name: LibraryRoutes.session),
+      builder: (_) => SessionDetailScreen(
+        sessionId: sessionId,
+        parents: parents,
+      ),
+    );
+  }
 
   @override
   ConsumerState<SessionDetailScreen> createState() =>
@@ -63,12 +82,16 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(sessionDetailProvider(widget.sessionId));
+    final currentTitle = async.valueOrNull?.session.title ?? 'Séance';
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          async.valueOrNull?.session.title ?? 'Séance',
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(currentTitle, overflow: TextOverflow.ellipsis),
+        bottom: widget.parents.isEmpty
+            ? null
+            : EditorBreadcrumb(
+                parents: widget.parents,
+                current: currentTitle,
+              ),
         actions: [
           async.maybeWhen(
             data: (detail) => Row(
@@ -104,7 +127,10 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
           onRetry: () =>
               ref.invalidate(sessionDetailProvider(widget.sessionId)),
         ),
-        data: (detail) => _SessionBody(detail: detail),
+        data: (detail) => _SessionBody(
+          detail: detail,
+          parents: widget.parents,
+        ),
       ),
     );
   }
@@ -149,9 +175,10 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
 }
 
 class _SessionBody extends ConsumerStatefulWidget {
-  const _SessionBody({required this.detail});
+  const _SessionBody({required this.detail, required this.parents});
 
   final SessionDetail detail;
+  final List<EditorCrumb> parents;
 
   @override
   ConsumerState<_SessionBody> createState() => _SessionBodyState();
@@ -272,8 +299,15 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
               description: hasDescription ? block.description : null,
             ),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => BlockDetailScreen(blockId: block.id),
+              BlockDetailScreen.route(
+                blockId: block.id,
+                parents: [
+                  ...widget.parents,
+                  EditorCrumb(
+                    label: widget.detail.session.title,
+                    routeName: LibraryRoutes.session,
+                  ),
+                ],
               ),
             ),
             onRemove: () => _remove(link),

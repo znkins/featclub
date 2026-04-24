@@ -15,6 +15,7 @@ import '../../../providers/program_providers.dart';
 import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
 import '../../../widgets/detail_info_card.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../../../widgets/session_meta_row.dart';
 import '../sessions/session_detail_screen.dart';
@@ -22,7 +23,26 @@ import 'program_form_screen.dart';
 import 'program_session_picker_screen.dart';
 
 class ProgramDetailScreen extends ConsumerStatefulWidget {
-  const ProgramDetailScreen({super.key, required this.programId});
+  const ProgramDetailScreen({
+    super.key,
+    required this.programId,
+    this.parents = const [],
+  });
+
+  final List<EditorCrumb> parents;
+
+  static Route<void> route({
+    required String programId,
+    List<EditorCrumb> parents = const [],
+  }) {
+    return MaterialPageRoute(
+      settings: const RouteSettings(name: LibraryRoutes.program),
+      builder: (_) => ProgramDetailScreen(
+        programId: programId,
+        parents: parents,
+      ),
+    );
+  }
 
   final String programId;
 
@@ -63,12 +83,16 @@ class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen>
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(programDetailProvider(widget.programId));
+    final currentTitle = async.valueOrNull?.program.title ?? 'Programme';
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          async.valueOrNull?.program.title ?? 'Programme',
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(currentTitle, overflow: TextOverflow.ellipsis),
+        bottom: widget.parents.isEmpty
+            ? null
+            : EditorBreadcrumb(
+                parents: widget.parents,
+                current: currentTitle,
+              ),
         actions: [
           async.maybeWhen(
             data: (detail) => Row(
@@ -104,7 +128,10 @@ class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen>
           onRetry: () =>
               ref.invalidate(programDetailProvider(widget.programId)),
         ),
-        data: (detail) => _ProgramBody(detail: detail),
+        data: (detail) => _ProgramBody(
+          detail: detail,
+          parents: widget.parents,
+        ),
       ),
     );
   }
@@ -150,9 +177,10 @@ class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen>
 }
 
 class _ProgramBody extends ConsumerStatefulWidget {
-  const _ProgramBody({required this.detail});
+  const _ProgramBody({required this.detail, required this.parents});
 
   final ProgramDetail detail;
+  final List<EditorCrumb> parents;
 
   @override
   ConsumerState<_ProgramBody> createState() => _ProgramBodyState();
@@ -274,8 +302,15 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
               description: hasDescription ? session.description : null,
             ),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => SessionDetailScreen(sessionId: session.id),
+              SessionDetailScreen.route(
+                sessionId: session.id,
+                parents: [
+                  ...widget.parents,
+                  EditorCrumb(
+                    label: widget.detail.program.title,
+                    routeName: LibraryRoutes.program,
+                  ),
+                ],
               ),
             ),
             onRemove: () => _remove(link),

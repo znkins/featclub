@@ -10,10 +10,13 @@ import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../theme/app_radius.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 import '../../../widgets/add_choice_sheet.dart';
+import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import 'student_block_form_screen.dart';
@@ -165,6 +168,9 @@ class StudentBlockEditorScreen extends ConsumerWidget {
     try {
       await ref.read(studentProgramServiceProvider).deleteBlock(block.id);
       ref.invalidate(studentSessionEditorDetailProvider(sessionId));
+      // Supprimer un bloc change la `blockCount` de la séance affichée dans
+      // l'éditeur programme → on invalide aussi ce niveau.
+      ref.invalidate(studentProgramEditorDetailProvider(programId));
       if (!context.mounted) return;
       AppSnackbar.showSuccess(context, 'Bloc supprimé');
       Navigator.of(context).pop();
@@ -206,8 +212,10 @@ class StudentBlockEditorScreen extends ConsumerWidget {
       case AddChoice.template:
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) =>
-                StudentExerciseLibraryPickerScreen(blockId: blockId),
+            builder: (_) => StudentExerciseLibraryPickerScreen(
+              blockId: blockId,
+              sessionId: sessionId,
+            ),
           ),
         );
     }
@@ -303,7 +311,6 @@ class _BlockBodyState extends ConsumerState<_BlockBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final block = widget.detail.block;
 
     if (_items.isEmpty) {
@@ -337,13 +344,7 @@ class _BlockBodyState extends ConsumerState<_BlockBody> {
           children: [
             _Header(block: block),
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              '${_items.length} exercice${_items.length > 1 ? 's' : ''}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ContentSectionHeader(title: 'Exercices', count: _items.length),
           ],
         ),
       ),
@@ -388,14 +389,12 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     final hasDescription =
         block.description != null && block.description!.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return DetailInfoCard(
       children: [
         DetailField(
           label: 'Titre',
           child: Text(block.title, style: theme.textTheme.bodyLarge),
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Description',
           child: hasDescription
@@ -418,39 +417,103 @@ class _ExerciseSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final parts = <String>[
-      if (exercise.reps != null && exercise.reps!.trim().isNotEmpty)
-        exercise.reps!.trim(),
-      if (exercise.load != null && exercise.load!.trim().isNotEmpty)
-        exercise.load!.trim(),
-      if (exercise.intensity != null && exercise.intensity!.trim().isNotEmpty)
-        exercise.intensity!.trim(),
-      if (exercise.rest != null && exercise.rest!.trim().isNotEmpty)
-        'repos ${exercise.rest!.trim()}',
+    final description = (exercise.description ?? '').trim();
+    final note = (exercise.note ?? '').trim();
+    final params = <(IconData, String)>[
+      if ((exercise.reps ?? '').trim().isNotEmpty)
+        (LucideIcons.repeat, exercise.reps!.trim()),
+      if ((exercise.load ?? '').trim().isNotEmpty)
+        (LucideIcons.dumbbell, exercise.load!.trim()),
+      if ((exercise.intensity ?? '').trim().isNotEmpty)
+        (LucideIcons.flame, exercise.intensity!.trim()),
+      if ((exercise.rest ?? '').trim().isNotEmpty)
+        (LucideIcons.timer, exercise.rest!.trim()),
     ];
-    final hasNote = exercise.note != null && exercise.note!.trim().isNotEmpty;
-    if (parts.isEmpty && !hasNote) return const SizedBox.shrink();
-    final mutedStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
+    if (description.isEmpty && params.isEmpty && note.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (parts.isNotEmpty)
+        if (description.isNotEmpty) ...[
           Text(
-            parts.join(' · '),
-            style: mutedStyle,
+            description,
+            style: theme.textTheme.bodyMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-        if (hasNote)
-          Text(
-            'Note : ${exercise.note!.trim()}',
-            style: mutedStyle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          if (params.isNotEmpty || note.isNotEmpty)
+            const SizedBox(height: AppSpacing.sm),
+        ],
+        if (params.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              borderRadius: AppRadius.mdAll,
+            ),
+            child: Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                for (final (icon, value) in params)
+                  _ParamInline(icon: icon, value: value),
+              ],
+            ),
           ),
+        if (note.isNotEmpty) ...[
+          if (params.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                LucideIcons.stickyNote,
+                size: 16,
+                color: theme.colorScheme.secondary,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  note,
+                  style: theme.textTheme.bodyMedium,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ParamInline extends StatelessWidget {
+  const _ParamInline({required this.icon, required this.value});
+
+  final IconData icon;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: theme.colorScheme.primary),
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

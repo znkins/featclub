@@ -17,7 +17,11 @@ final coachSessionsProvider =
 });
 
 /// Détail d'une séance template (entête + liaisons de blocs).
+///
+/// `autoDispose` : fraîcheur garantie à chaque ré-entrée dans l'écran détail
+/// (couvre le cas du `popUntil` breadcrumb qui saute des niveaux sans
+/// déclencher `didPopNext` sur les écrans traversés).
 final sessionDetailProvider =
-    FutureProvider.family<SessionDetail, String>((ref, id) async {
+    FutureProvider.autoDispose.family<SessionDetail, String>((ref, id) async {
   return ref.watch(sessionServiceProvider).fetchDetail(id);
 });

@@ -15,7 +15,9 @@ import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 import '../../../widgets/add_choice_sheet.dart';
+import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/duration_pill.dart';
 import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/reorderable_library_row.dart';
@@ -176,14 +178,19 @@ class StudentSessionEditorScreen extends ConsumerWidget {
       case AddChoice.empty:
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => StudentBlockFormScreen(sessionId: sessionId),
+            builder: (_) => StudentBlockFormScreen(
+              sessionId: sessionId,
+              programId: programId,
+            ),
           ),
         );
       case AddChoice.template:
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) =>
-                StudentBlockTemplatePickerScreen(sessionId: sessionId),
+            builder: (_) => StudentBlockTemplatePickerScreen(
+              sessionId: sessionId,
+              programId: programId,
+            ),
           ),
         );
     }
@@ -290,7 +297,6 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final session = widget.detail.session;
 
     if (_items.isEmpty) {
@@ -324,13 +330,7 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
           children: [
             _Header(session: session),
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              '${_items.length} bloc${_items.length > 1 ? 's' : ''}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ContentSectionHeader(title: 'Blocs', count: _items.length),
           ],
         ),
       ),
@@ -339,6 +339,8 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
       itemBuilder: (_, i) {
         final item = _items[i];
         final block = item.block;
+        final hasDescription =
+            block.description != null && block.description!.isNotEmpty;
         return Padding(
           key: ValueKey(block.id),
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -346,7 +348,10 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
             index: i,
             title: block.title,
             removeLabel: 'Supprimer',
-            subtitle: block.description,
+            subtitleWidget: _BlockSubtitle(
+              exerciseCount: item.exerciseCount,
+              description: hasDescription ? block.description : null,
+            ),
             onTap: () => Navigator.of(context).push(
               StudentBlockEditorScreen.route(
                 studentId: widget.studentId,
@@ -376,14 +381,12 @@ class _Header extends StatelessWidget {
     final hasDescription =
         session.description != null && session.description!.isNotEmpty;
     final day = DayOfWeek.fromStorage(session.dayOfWeek);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return DetailInfoCard(
       children: [
         DetailField(
           label: 'Titre',
           child: Text(session.title, style: theme.textTheme.bodyLarge),
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Durée',
           child: session.durationMinutes != null
@@ -393,7 +396,6 @@ class _Header extends StatelessWidget {
                 )
               : null,
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Jour',
           child: day != null
@@ -405,7 +407,6 @@ class _Header extends StatelessWidget {
                 )
               : null,
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Description',
           child: hasDescription
@@ -420,3 +421,38 @@ class _Header extends StatelessWidget {
   }
 }
 
+class _BlockSubtitle extends StatelessWidget {
+  const _BlockSubtitle({
+    required this.exerciseCount,
+    required this.description,
+  });
+
+  final int exerciseCount;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (description != null) ...[
+          Text(
+            description!,
+            style: theme.textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+        Text(
+          '$exerciseCount exercice${exerciseCount > 1 ? 's' : ''}',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -15,6 +15,7 @@ import '../../../providers/block_providers.dart';
 import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
 import '../../../widgets/detail_info_card.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/exercise_tile_subtitle.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../exercises/exercise_detail_screen.dart';
@@ -22,9 +23,24 @@ import 'block_exercise_picker_screen.dart';
 import 'block_form_screen.dart';
 
 class BlockDetailScreen extends ConsumerStatefulWidget {
-  const BlockDetailScreen({super.key, required this.blockId});
+  const BlockDetailScreen({
+    super.key,
+    required this.blockId,
+    this.parents = const [],
+  });
 
   final String blockId;
+  final List<EditorCrumb> parents;
+
+  static Route<void> route({
+    required String blockId,
+    List<EditorCrumb> parents = const [],
+  }) {
+    return MaterialPageRoute(
+      settings: const RouteSettings(name: LibraryRoutes.block),
+      builder: (_) => BlockDetailScreen(blockId: blockId, parents: parents),
+    );
+  }
 
   @override
   ConsumerState<BlockDetailScreen> createState() => _BlockDetailScreenState();
@@ -62,12 +78,16 @@ class _BlockDetailScreenState extends ConsumerState<BlockDetailScreen>
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(blockDetailProvider(widget.blockId));
+    final currentTitle = async.valueOrNull?.block.title ?? 'Bloc';
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          async.valueOrNull?.block.title ?? 'Bloc',
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(currentTitle, overflow: TextOverflow.ellipsis),
+        bottom: widget.parents.isEmpty
+            ? null
+            : EditorBreadcrumb(
+                parents: widget.parents,
+                current: currentTitle,
+              ),
         actions: [
           async.maybeWhen(
             data: (detail) => Row(
@@ -102,7 +122,10 @@ class _BlockDetailScreenState extends ConsumerState<BlockDetailScreen>
           message: 'Impossible de charger le bloc.\n$e',
           onRetry: () => ref.invalidate(blockDetailProvider(widget.blockId)),
         ),
-        data: (detail) => _BlockBody(detail: detail),
+        data: (detail) => _BlockBody(
+          detail: detail,
+          parents: widget.parents,
+        ),
       ),
     );
   }
@@ -147,9 +170,10 @@ class _BlockDetailScreenState extends ConsumerState<BlockDetailScreen>
 }
 
 class _BlockBody extends ConsumerStatefulWidget {
-  const _BlockBody({required this.detail});
+  const _BlockBody({required this.detail, required this.parents});
 
   final BlockDetail detail;
+  final List<EditorCrumb> parents;
 
   @override
   ConsumerState<_BlockBody> createState() => _BlockBodyState();
@@ -273,9 +297,15 @@ Future<void> _onReorder(int oldIndex, int newIndex) async {
                   )
                 : null,
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    ExerciseDetailScreen(exerciseId: exercise.id),
+              ExerciseDetailScreen.route(
+                exerciseId: exercise.id,
+                parents: [
+                  ...widget.parents,
+                  EditorCrumb(
+                    label: widget.detail.block.title,
+                    routeName: LibraryRoutes.block,
+                  ),
+                ],
               ),
             ),
             onRemove: () => _remove(link),

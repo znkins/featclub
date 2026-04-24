@@ -6,10 +6,13 @@ import '../../core/utils/formatters.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Graphique d'évolution du poids pour l'onglet Progression de l'élève.
+/// Graphique d'évolution du poids partagé coach (fiche élève) et élève
+/// (onglet Progression).
 ///
 /// Affiche au moins 2 mesures. Trié chronologiquement ; tiebreaker sur
 /// `createdAt` quand plusieurs mesures partagent la même date.
+/// Indicateur de touch en couleur secondaire (orange) pour rester cohérent
+/// avec les dots oranges du graphique.
 class WeightEvolutionChart extends StatelessWidget {
   const WeightEvolutionChart({super.key, required this.measures});
 
@@ -58,6 +61,26 @@ class WeightEvolutionChart extends StatelessWidget {
                   );
                 }).toList(),
               ),
+              getTouchedSpotIndicator: (barData, spotIndexes) {
+                return spotIndexes
+                    .map(
+                      (_) => TouchedSpotIndicatorData(
+                        FlLine(
+                          color: theme.colorScheme.secondary,
+                          strokeWidth: 2,
+                        ),
+                        FlDotData(
+                          show: true,
+                          getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                            radius: 5,
+                            color: theme.colorScheme.secondary,
+                            strokeWidth: 0,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList();
+              },
             ),
             lineBarsData: [
               LineChartBarData(

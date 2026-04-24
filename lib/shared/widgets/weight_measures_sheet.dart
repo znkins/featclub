@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
-import '../../shared/providers/student_data_providers.dart';
-import '../../shared/widgets/weight_measure_row.dart';
 import '../../theme/app_spacing.dart';
+import '../providers/student_data_providers.dart';
+import 'weight_measure_row.dart';
 
-/// Bottom sheet : toutes les mesures de poids de l'élève courant.
-Future<void> showStudentWeightMeasuresSheet(
+/// Bottom sheet listant toutes les mesures de poids d'un élève.
+///
+/// Utilisé par la fiche élève coach et par l'onglet progression élève (même
+/// présentation, même provider, le `studentId` change selon l'appelant).
+Future<void> showWeightMeasuresSheet(
   BuildContext context, {
   required String studentId,
 }) {
@@ -22,7 +25,7 @@ Future<void> showStudentWeightMeasuresSheet(
       minChildSize: 0.4,
       maxChildSize: 0.95,
       expand: false,
-      builder: (_, controller) => _StudentWeightMeasuresSheet(
+      builder: (_, controller) => _WeightMeasuresSheet(
         studentId: studentId,
         scrollController: controller,
       ),
@@ -30,8 +33,8 @@ Future<void> showStudentWeightMeasuresSheet(
   );
 }
 
-class _StudentWeightMeasuresSheet extends ConsumerWidget {
-  const _StudentWeightMeasuresSheet({
+class _WeightMeasuresSheet extends ConsumerWidget {
+  const _WeightMeasuresSheet({
     required this.studentId,
     required this.scrollController,
   });

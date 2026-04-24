@@ -14,7 +14,9 @@ import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 import '../../../widgets/add_choice_sheet.dart';
+import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../../../widgets/session_meta_row.dart';
@@ -278,7 +280,6 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final program = widget.detail.program;
 
     if (_items.isEmpty) {
@@ -312,13 +313,7 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
           children: [
             _Header(program: program),
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              '${_items.length} séance${_items.length > 1 ? 's' : ''}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ContentSectionHeader(title: 'Séances', count: _items.length),
           ],
         ),
       ),
@@ -368,14 +363,12 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     final hasDescription =
         program.description != null && program.description!.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return DetailInfoCard(
       children: [
         DetailField(
           label: 'Titre',
           child: Text(program.title, style: theme.textTheme.bodyLarge),
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Description',
           child: hasDescription
@@ -410,24 +403,17 @@ class _SessionSubtitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (dayOfWeek != null)
-          Text(
-            dayOfWeek!.frenchLabel,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        if (description != null)
+        if (description != null) ...[
           Text(
             description!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
         SessionMetaRow(
+          dayOfWeek: dayOfWeek,
           blockCount: blockCount,
           durationMinutes: durationMinutes,
         ),

@@ -16,7 +16,12 @@ final coachBlocksProvider = FutureProvider<List<BlockListItem>>((ref) async {
 });
 
 /// Détail d'un bloc (entête + liaisons d'exercices).
+///
+/// `autoDispose` pour garantir la fraîcheur : quand l'écran détail est
+/// disposé (pop direct ou `popUntil` via breadcrumb), le cache est vidé.
+/// Prochaine entrée = fetch frais, sans dépendre de `didPopNext` qui ne
+/// déclenche que sur le niveau où on atterrit.
 final blockDetailProvider =
-    FutureProvider.family<BlockDetail, String>((ref, id) async {
+    FutureProvider.autoDispose.family<BlockDetail, String>((ref, id) async {
   return ref.watch(blockServiceProvider).fetchDetail(id);
 });

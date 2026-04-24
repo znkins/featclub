@@ -17,7 +17,11 @@ final coachProgramsProvider =
 });
 
 /// Détail d'un programme template (entête + liaisons de séances).
+///
+/// `autoDispose` : fraîcheur garantie à chaque ré-entrée dans l'écran détail
+/// (couvre le cas du `popUntil` breadcrumb qui saute des niveaux sans
+/// déclencher `didPopNext` sur les écrans traversés).
 final programDetailProvider =
-    FutureProvider.family<ProgramDetail, String>((ref, id) async {
+    FutureProvider.autoDispose.family<ProgramDetail, String>((ref, id) async {
   return ref.watch(programServiceProvider).fetchDetail(id);
 });

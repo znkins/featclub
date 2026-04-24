@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/widgets/error_view.dart';
-import '../../../core/widgets/loading_indicator.dart';
-import '../../../shared/widgets/weight_measure_row.dart';
-import '../../../theme/app_spacing.dart';
-import '../../providers/weight_measure_providers.dart';
+import '../../core/widgets/error_view.dart';
+import '../../core/widgets/loading_indicator.dart';
+import '../../theme/app_spacing.dart';
+import '../providers/student_data_providers.dart';
+import 'compact_history_row.dart';
 
-/// Affiche un bottom sheet modal avec l'historique complet des mesures.
-Future<void> showWeightMeasuresSheet(
+/// Bottom sheet listant l'historique complet des séances terminées d'un
+/// élève. Utilisé par la fiche élève coach et par l'onglet progression
+/// élève (même présentation, même provider, le `studentId` change selon
+/// l'appelant).
+Future<void> showHistorySheet(
   BuildContext context, {
   required String studentId,
 }) {
@@ -22,7 +25,7 @@ Future<void> showWeightMeasuresSheet(
       minChildSize: 0.4,
       maxChildSize: 0.95,
       expand: false,
-      builder: (_, controller) => _WeightMeasuresSheet(
+      builder: (_, controller) => _HistorySheet(
         studentId: studentId,
         scrollController: controller,
       ),
@@ -30,9 +33,8 @@ Future<void> showWeightMeasuresSheet(
   );
 }
 
-/// Liste en lecture seule de toutes les mesures d'un élève.
-class _WeightMeasuresSheet extends ConsumerWidget {
-  const _WeightMeasuresSheet({
+class _HistorySheet extends ConsumerWidget {
+  const _HistorySheet({
     required this.studentId,
     required this.scrollController,
   });
@@ -43,7 +45,7 @@ class _WeightMeasuresSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final async = ref.watch(studentWeightsProvider(studentId));
+    final async = ref.watch(studentHistoryProvider(studentId));
     return Column(
       children: [
         Padding(
@@ -57,7 +59,7 @@ class _WeightMeasuresSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Toutes les mesures',
+                  'Historique des séances',
                   style: theme.textTheme.titleLarge,
                 ),
               ),
@@ -68,9 +70,9 @@ class _WeightMeasuresSheet extends ConsumerWidget {
           child: async.when(
             loading: () => const LoadingIndicator(),
             error: (e, _) => ErrorView(
-              message: 'Impossible de charger les mesures.\n$e',
+              message: 'Impossible de charger l\'historique.\n$e',
               onRetry: () =>
-                  ref.invalidate(studentWeightsProvider(studentId)),
+                  ref.invalidate(studentHistoryProvider(studentId)),
             ),
             data: (items) {
               if (items.isEmpty) {
@@ -78,7 +80,7 @@ class _WeightMeasuresSheet extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xl),
                     child: Text(
-                      'Aucune mesure enregistrée.',
+                      'Aucune séance terminée pour l\'instant.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -98,7 +100,10 @@ class _WeightMeasuresSheet extends ConsumerWidget {
                 itemCount: items.length,
                 separatorBuilder: (_, _) =>
                     const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (_, i) => WeightMeasureRow(measure: items[i]),
+                itemBuilder: (_, i) => CompactHistoryRow(
+                  item: items[i],
+                  showComment: true,
+                ),
               );
             },
           ),

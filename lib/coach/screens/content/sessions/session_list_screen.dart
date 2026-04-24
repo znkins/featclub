@@ -9,6 +9,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/session_providers.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/library_list_tile.dart';
 import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_type_icon.dart';
@@ -44,8 +45,15 @@ class _SessionListScreenState extends ConsumerState<SessionListScreen> {
 
   void _openDetail(models.Session session) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SessionDetailScreen(sessionId: session.id),
+      SessionDetailScreen.route(
+        sessionId: session.id,
+        parents: [
+          EditorCrumb(
+            label: 'Séances',
+            onTap: () =>
+                Navigator.of(context).popUntil((r) => r.isFirst),
+          ),
+        ],
       ),
     );
   }

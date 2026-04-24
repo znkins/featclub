@@ -8,6 +8,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/exercise_providers.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/exercise_tile_subtitle.dart';
 import '../../../widgets/library_list_tile.dart';
 import '../../../widgets/library_search_field.dart';
@@ -45,8 +46,15 @@ class _ExerciseListScreenState extends ConsumerState<ExerciseListScreen> {
 
   void _openDetail(Exercise exercise) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ExerciseDetailScreen(exerciseId: exercise.id),
+      ExerciseDetailScreen.route(
+        exerciseId: exercise.id,
+        parents: [
+          EditorCrumb(
+            label: 'Exercices',
+            onTap: () =>
+                Navigator.of(context).popUntil((r) => r.isFirst),
+          ),
+        ],
       ),
     );
   }

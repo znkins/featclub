@@ -14,11 +14,16 @@ class StudentBlockFormScreen extends ConsumerStatefulWidget {
   const StudentBlockFormScreen({
     super.key,
     this.sessionId,
+    this.programId,
     this.existing,
   }) : assert(sessionId != null || existing != null,
             'sessionId requis en création');
 
   final String? sessionId;
+
+  /// Utilisé en création pour invalider l'éditeur programme dont la
+  /// `blockCount` de la séance parente change quand on ajoute un bloc.
+  final String? programId;
   final StudentSessionBlock? existing;
 
   @override
@@ -77,6 +82,13 @@ class _StudentBlockFormScreenState
           description: _descriptionController.text,
         );
         sessionIdToInvalidate = widget.sessionId!;
+        // Création d'un bloc → la `blockCount` de la séance change, donc
+        // l'éditeur programme doit refetch quand on y remonte.
+        if (widget.programId != null) {
+          ref.invalidate(
+            studentProgramEditorDetailProvider(widget.programId!),
+          );
+        }
       }
       ref.invalidate(
         studentSessionEditorDetailProvider(sessionIdToInvalidate),

@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/day_of_week.dart';
 import '../../theme/app_spacing.dart';
+import 'day_of_week_pill.dart';
 import 'duration_pill.dart';
 
-/// Ligne de méta-infos pour une séance : compteur de blocs + pastille de durée.
+/// Ligne de méta-infos pour une séance : jour assigné (éditeur élève) +
+/// compteur de blocs + pastille de durée.
 ///
-/// Utilisée dans la liste des séances, l'entête du détail et les pickers.
+/// `dayOfWeek` n'est renseigné que dans le contexte éditeur élève, où une
+/// séance peut avoir un jour assigné. Côté biblio, les séances templates
+/// n'ont pas de jour, le paramètre reste `null`.
 class SessionMetaRow extends StatelessWidget {
   const SessionMetaRow({
     super.key,
+    this.dayOfWeek,
     this.blockCount,
     this.durationMinutes,
   });
 
+  final DayOfWeek? dayOfWeek;
   final int? blockCount;
   final int? durationMinutes;
 
@@ -28,6 +35,9 @@ class SessionMetaRow extends StatelessWidget {
           color: theme.colorScheme.onSurfaceVariant,
         ),
       ));
+    }
+    if (dayOfWeek != null) {
+      items.add(DayOfWeekPill(dayOfWeek: dayOfWeek!));
     }
     if (durationMinutes != null) {
       items.add(DurationPill(minutes: durationMinutes!));

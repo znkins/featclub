@@ -1,21 +1,25 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../core/models/completed_session.dart';
 import '../../../core/models/profile.dart';
 import '../../../core/models/student_program.dart';
-import '../../../core/models/weight_measure.dart';
 import '../../../core/services/student_program_service.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_snackbar.dart';
-import '../../../core/widgets/confirmation_dialog.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../shared/providers/route_observer_provider.dart';
+import '../../../shared/widgets/compact_history_row.dart';
+import '../../../shared/widgets/empty_section_card.dart';
+import '../../../shared/widgets/history_sheet.dart';
+import '../../../shared/widgets/section_error.dart';
+import '../../../shared/widgets/section_header.dart';
+import '../../../shared/widgets/see_more_link.dart';
+import '../../../shared/widgets/weight_evolution_chart.dart';
 import '../../../shared/widgets/weight_measure_row.dart';
+import '../../../shared/widgets/weight_measures_sheet.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../providers/completed_session_providers.dart';
@@ -25,11 +29,9 @@ import '../../providers/weight_measure_providers.dart';
 import '../../widgets/add_choice_sheet.dart';
 import '../../widgets/student_program_tile.dart';
 import 'editor/student_program_editor_screen.dart';
-import 'student_history_list_screen.dart';
 import 'student_program_form_screen.dart';
 import 'student_program_template_picker_screen.dart';
 import 'weight_measure_form_dialog.dart';
-import 'weight_measures_sheet.dart';
 
 /// Fiche élève côté coach : identité + programmes + mesures + historique.
 class StudentDetailScreen extends ConsumerStatefulWidget {
@@ -144,8 +146,6 @@ class _StudentHeaderCard extends ConsumerWidget {
 
     const bannerHeight = 72.0;
     const avatarSize = 112.0;
-    final primary = theme.colorScheme.primary;
-    final primaryDark = Color.lerp(primary, Colors.black, 0.18)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -161,13 +161,7 @@ class _StudentHeaderCard extends ConsumerWidget {
             children: [
               Container(
                 height: bannerHeight,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [primary, primaryDark],
-                  ),
-                ),
+                color: theme.colorScheme.primary,
               ),
               const SizedBox(height: avatarSize / 2 + AppSpacing.lg),
               Padding(
@@ -337,10 +331,7 @@ class _GoalNoteCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         borderRadius: AppRadius.lgAll,
-        color: theme.colorScheme.secondary.withValues(alpha: 0.15),
-        border: Border.all(
-          color: theme.colorScheme.secondary.withValues(alpha: 0.4),
-        ),
+        color: theme.colorScheme.secondary.withValues(alpha: 0.10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -350,7 +341,7 @@ class _GoalNoteCard extends StatelessWidget {
             label: 'Objectif',
             value: goal,
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           _GoalNoteRow(
             icon: LucideIcons.stickyNote,
             label: 'Note',
@@ -373,182 +364,48 @@ class _GoalNoteRow extends StatelessWidget {
   final String label;
   final String? value;
 
+  // Largeur totale icône + gap utilisée pour indenter la valeur sous le
+  // label (doit matcher `Icon.size` + `SizedBox(width)` ci-dessous).
+  static const double _labelIndent = 20 + AppSpacing.md;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasValue = value != null && value!.trim().isNotEmpty;
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: theme.colorScheme.secondary),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.1,
-                ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(icon, size: 20, color: theme.colorScheme.secondary),
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              Text(
-                hasValue ? value!.trim() : '—',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  height: 1.1,
-                  fontStyle: hasValue ? FontStyle.normal : FontStyle.italic,
-                  color: hasValue
-                      ? null
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.action});
-
-  final String title;
-  final Widget? action;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Expanded(
+        const SizedBox(height: AppSpacing.xs),
+        Padding(
+          padding: const EdgeInsets.only(left: _labelIndent),
           child: Text(
-            title,
-            style: theme.textTheme.headlineSmall,
+            hasValue ? value!.trim() : '—',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontStyle: hasValue ? FontStyle.normal : FontStyle.italic,
+              color:
+                  hasValue ? null : theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
-        ?action,
       ],
     );
   }
 }
 
-class _SectionError extends StatelessWidget {
-  const _SectionError({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(LucideIcons.refreshCcw, size: 16),
-              label: const Text('Réessayer'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptySectionCard extends StatelessWidget {
-  const _EmptySectionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xl,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: AppRadius.mdAll,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              icon,
-              size: 28,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            title,
-            style: theme.textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SeeMoreLink extends StatelessWidget {
-  const _SeeMoreLink({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: onTap,
-        child: const Text('Voir plus'),
-      ),
-    );
-  }
-}
 
 class _ProgramsSection extends ConsumerStatefulWidget {
   const _ProgramsSection({required this.studentId});
@@ -591,37 +448,6 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
     }
   }
 
-  Future<void> _edit(StudentProgram program) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => StudentProgramFormScreen(
-          studentId: widget.studentId,
-          existing: program,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _delete(StudentProgram program) async {
-    final confirm = await ConfirmationDialog.show(
-      context,
-      title: 'Supprimer le programme',
-      message:
-          'Supprimer « ${program.title} » ? Les séances et exercices personnalisés seront définitivement perdus.',
-      confirmLabel: 'Supprimer',
-      variant: ConfirmationVariant.destructive,
-    );
-    if (!confirm) return;
-    try {
-      await ref.read(studentProgramServiceProvider).delete(program.id);
-      ref.invalidate(studentProgramsProvider(widget.studentId));
-      if (!mounted) return;
-      AppSnackbar.showSuccess(context, 'Programme supprimé');
-    } catch (e) {
-      if (!mounted) return;
-      AppSnackbar.showError(context, 'Erreur : $e');
-    }
-  }
 
   Future<void> _toggleActive(StudentProgram program, bool active) async {
     if (_togglingIds.contains(program.id)) return;
@@ -652,7 +478,7 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionHeader(
+        SectionHeader(
           title: 'Programmes',
           action: TextButton.icon(
             onPressed: _openAddSheet,
@@ -666,7 +492,7 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
             padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: LoadingIndicator(),
           ),
-          error: (e, _) => _SectionError(
+          error: (e, _) => SectionError(
             message: 'Impossible de charger les programmes.\n$e',
             onRetry: () =>
                 ref.invalidate(studentProgramsProvider(widget.studentId)),
@@ -679,7 +505,7 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
 
   Widget _buildList(List<StudentProgramListItem> items) {
     if (items.isEmpty) {
-      return const _EmptySectionCard(
+      return const EmptySectionCard(
         icon: LucideIcons.dumbbell,
         title: 'Aucun programme',
         subtitle: 'Crée un programme vide ou copie un template pour démarrer.',
@@ -700,8 +526,6 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
               ),
             ),
             onToggleActive: (v) => _toggleActive(items[i].program, v),
-            onEdit: () => _edit(items[i].program),
-            onDelete: () => _delete(items[i].program),
           ),
         ],
       ],
@@ -720,7 +544,7 @@ class _WeightSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SectionHeader(
+        SectionHeader(
           title: 'Mesures',
           action: TextButton.icon(
             onPressed: () =>
@@ -735,13 +559,13 @@ class _WeightSection extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: LoadingIndicator(),
           ),
-          error: (e, _) => _SectionError(
+          error: (e, _) => SectionError(
             message: 'Impossible de charger les mesures.\n$e',
             onRetry: () => ref.invalidate(studentWeightsProvider(studentId)),
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const _EmptySectionCard(
+              return const EmptySectionCard(
                 icon: LucideIcons.scale,
                 title: 'Aucune mesure',
                 subtitle: 'Ajoute la première pesée de ton élève.',
@@ -752,7 +576,7 @@ class _WeightSection extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (items.length >= 2) ...[
-                  _WeightChart(measures: items),
+                  WeightEvolutionChart(measures: items),
                   const SizedBox(height: AppSpacing.md),
                 ],
                 for (var i = 0; i < recent.length; i++) ...[
@@ -760,7 +584,7 @@ class _WeightSection extends ConsumerWidget {
                   WeightMeasureRow(measure: recent[i]),
                 ],
                 if (items.length > 3)
-                  _SeeMoreLink(
+                  SeeMoreLink(
                     onTap: () => showWeightMeasuresSheet(
                       context,
                       studentId: studentId,
@@ -775,85 +599,6 @@ class _WeightSection extends ConsumerWidget {
   }
 }
 
-class _WeightChart extends StatelessWidget {
-  const _WeightChart({required this.measures});
-
-  final List<WeightMeasure> measures;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // En ordre chronologique pour le graphique. Tiebreaker sur `createdAt`
-    // quand plusieurs mesures partagent la même date : on préserve l'ordre
-    // réel de saisie au lieu de garder l'ordre descendant du provider.
-    final sorted = [...measures]
-      ..sort((a, b) {
-        final byDate = a.measuredAt.compareTo(b.measuredAt);
-        if (byDate != 0) return byDate;
-        return a.createdAt.compareTo(b.createdAt);
-      });
-    final spots = <FlSpot>[
-      for (var i = 0; i < sorted.length; i++)
-        FlSpot(i.toDouble(), sorted[i].valueKg),
-    ];
-    final values = sorted.map((m) => m.valueKg).toList();
-    final minY = values.reduce((a, b) => a < b ? a : b);
-    final maxY = values.reduce((a, b) => a > b ? a : b);
-    final pad = (maxY - minY) < 1 ? 1.0 : (maxY - minY) * 0.2;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: SizedBox(
-        height: 160,
-        child: LineChart(
-          LineChartData(
-            minY: minY - pad,
-            maxY: maxY + pad,
-            gridData: const FlGridData(show: false),
-            titlesData: const FlTitlesData(show: false),
-            borderData: FlBorderData(show: false),
-            lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipItems: (touched) => touched.map((t) {
-                  final m = sorted[t.spotIndex];
-                  return LineTooltipItem(
-                    '${formatDateShort(m.measuredAt)}\n${formatWeightKg(m.valueKg)}',
-                    theme.textTheme.bodySmall!.copyWith(color: Colors.white),
-                  );
-                }).toList(),
-              ),
-            ),
-            lineBarsData: [
-              LineChartBarData(
-                spots: spots,
-                isCurved: true,
-                curveSmoothness: 0.2,
-                barWidth: 2.5,
-                color: theme.colorScheme.primary,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (_, _, _, _) => FlDotCirclePainter(
-                    radius: 4.5,
-                    color: theme.colorScheme.secondary,
-                    strokeWidth: 0,
-                  ),
-                ),
-                belowBarData: BarAreaData(
-                  show: true,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _HistorySection extends ConsumerWidget {
   const _HistorySection({required this.studentId});
@@ -866,21 +611,21 @@ class _HistorySection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const _SectionHeader(title: 'Historique'),
+        const SectionHeader(title: 'Historique'),
         const SizedBox(height: AppSpacing.md),
         async.when(
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
             child: LoadingIndicator(),
           ),
-          error: (e, _) => _SectionError(
+          error: (e, _) => SectionError(
             message: 'Impossible de charger l\'historique.\n$e',
             onRetry: () =>
                 ref.invalidate(studentRecentHistoryProvider(studentId)),
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const _EmptySectionCard(
+              return const EmptySectionCard(
                 icon: LucideIcons.calendarCheck,
                 title: 'Aucune séance terminée',
                 subtitle:
@@ -893,15 +638,13 @@ class _HistorySection extends ConsumerWidget {
               children: [
                 for (var i = 0; i < recent.length; i++) ...[
                   if (i > 0) const SizedBox(height: AppSpacing.sm),
-                  _CompactHistoryRow(item: recent[i]),
+                  CompactHistoryRow(item: recent[i]),
                 ],
                 if (items.length > 3)
-                  _SeeMoreLink(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            StudentHistoryListScreen(studentId: studentId),
-                      ),
+                  SeeMoreLink(
+                    onTap: () => showHistorySheet(
+                      context,
+                      studentId: studentId,
                     ),
                   ),
               ],
@@ -913,41 +656,3 @@ class _HistorySection extends ConsumerWidget {
   }
 }
 
-class _CompactHistoryRow extends StatelessWidget {
-  const _CompactHistoryRow({required this.item});
-
-  final CompletedSession item;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            item.sessionTitle,
-            style: theme.textTheme.titleMedium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            formatDate(item.completedAt),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

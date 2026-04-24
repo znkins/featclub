@@ -6,7 +6,11 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import 'library_type_icon.dart';
 
-/// Tuile d'un programme élève : icône + infos + switch actif + menu actions.
+/// Tuile d'un programme élève : icône + infos + switch actif.
+///
+/// Les actions "Modifier" et "Supprimer" ne sont pas exposées ici : elles sont
+/// accessibles via l'AppBar de l'écran détail (`StudentProgramEditorScreen`).
+/// On évite ainsi le doublon avec un overflow menu redondant.
 class StudentProgramTile extends StatelessWidget {
   const StudentProgramTile({
     super.key,
@@ -14,8 +18,6 @@ class StudentProgramTile extends StatelessWidget {
     required this.sessionCount,
     this.onTap,
     required this.onToggleActive,
-    required this.onEdit,
-    required this.onDelete,
     this.busy = false,
   });
 
@@ -23,8 +25,6 @@ class StudentProgramTile extends StatelessWidget {
   final int sessionCount;
   final VoidCallback? onTap;
   final ValueChanged<bool> onToggleActive;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
   final bool busy;
 
   @override
@@ -65,13 +65,16 @@ class StudentProgramTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (hasDescription)
+                    if (hasDescription) ...[
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         program.description!,
                         style: theme.textTheme.bodyMedium,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+                    ],
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       '$sessionCount séance${sessionCount > 1 ? 's' : ''}',
                       style: muted,
@@ -79,65 +82,12 @@ class StudentProgramTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  PopupMenuButton<_TileAction>(
-                    tooltip: 'Plus d\'actions',
-                    padding: EdgeInsets.zero,
-                    icon: Icon(
-                      LucideIcons.moreVertical,
-                      color: theme.colorScheme.secondary,
-                      size: 20,
-                    ),
-                    onSelected: (a) {
-                      switch (a) {
-                        case _TileAction.edit:
-                          onEdit();
-                        case _TileAction.delete:
-                          onDelete();
-                      }
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: _TileAction.edit,
-                        child: Row(
-                          children: [
-                            Icon(
-                              LucideIcons.pencil,
-                              size: 18,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            const Text('Modifier'),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: _TileAction.delete,
-                        child: Row(
-                          children: [
-                            Icon(
-                              LucideIcons.trash2,
-                              size: 18,
-                              color: theme.colorScheme.error,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            const Text('Supprimer'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Transform.scale(
-                    scale: 0.85,
-                    child: Switch(
-                      value: active,
-                      onChanged: busy ? null : onToggleActive,
-                    ),
-                  ),
-                ],
+              Transform.scale(
+                scale: 0.85,
+                child: Switch(
+                  value: active,
+                  onChanged: busy ? null : onToggleActive,
+                ),
               ),
             ],
           ),
@@ -146,5 +96,3 @@ class StudentProgramTile extends StatelessWidget {
     );
   }
 }
-
-enum _TileAction { edit, delete }

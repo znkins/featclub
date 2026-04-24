@@ -24,9 +24,14 @@ class StudentExerciseLibraryPickerScreen extends ConsumerStatefulWidget {
   const StudentExerciseLibraryPickerScreen({
     super.key,
     required this.blockId,
+    required this.sessionId,
   });
 
   final String blockId;
+
+  /// Nécessaire pour invalider l'éditeur séance dont la `exerciseCount` du
+  /// bloc change quand on copie un exercice.
+  final String sessionId;
 
   @override
   ConsumerState<StudentExerciseLibraryPickerScreen> createState() =>
@@ -61,6 +66,7 @@ class _StudentExerciseLibraryPickerScreenState
         );
       }
       ref.invalidate(studentBlockEditorDetailProvider(widget.blockId));
+      ref.invalidate(studentSessionEditorDetailProvider(widget.sessionId));
       if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Exercices ajoutés');
       Navigator.of(context).pop();

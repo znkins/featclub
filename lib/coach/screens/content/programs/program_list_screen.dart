@@ -9,6 +9,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/program_providers.dart';
+import '../../../widgets/editor_breadcrumb.dart';
 import '../../../widgets/library_list_tile.dart';
 import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_type_icon.dart';
@@ -43,8 +44,15 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
 
   void _openDetail(Program program) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ProgramDetailScreen(programId: program.id),
+      ProgramDetailScreen.route(
+        programId: program.id,
+        parents: [
+          EditorCrumb(
+            label: 'Programmes',
+            onTap: () =>
+                Navigator.of(context).popUntil((r) => r.isFirst),
+          ),
+        ],
       ),
     );
   }

@@ -5,15 +5,26 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_providers.dart';
 
-/// Segment d'un fil d'Ariane : libellé à afficher + nom de route à remonter.
+/// Segment d'un fil d'Ariane : libellé + action de navigation.
 ///
-/// `routeName` doit correspondre au `RouteSettings.name` de la route cible ;
-/// le breadcrumb utilise `Navigator.popUntil` pour y remonter.
+/// Deux façons de définir la destination :
+/// - `routeName` : le breadcrumb fait `popUntil` jusqu'à la route portant
+///   ce `RouteSettings.name` (cas standard pour un écran poussé via factory).
+/// - `onTap` : callback custom (ex: remonter au shell racine via `isFirst`
+///   quand la cible n'est pas une route pushée mais un onglet du shell).
+///
+/// Au moins l'un des deux doit être fourni.
 class EditorCrumb {
-  const EditorCrumb({required this.label, required this.routeName});
+  const EditorCrumb({
+    required this.label,
+    this.routeName,
+    this.onTap,
+  }) : assert(routeName != null || onTap != null,
+            'Fournir routeName ou onTap');
 
   final String label;
-  final String routeName;
+  final String? routeName;
+  final VoidCallback? onTap;
 }
 
 /// Fil d'Ariane pour les écrans de l'éditeur de programme élève.
@@ -49,9 +60,10 @@ class EditorBreadcrumb extends StatelessWidget implements PreferredSizeWidget {
           children: [
             for (final crumb in parents) ...[
               InkWell(
-                onTap: () => Navigator.of(context).popUntil(
-                  (r) => r.settings.name == crumb.routeName,
-                ),
+                onTap: crumb.onTap ??
+                    () => Navigator.of(context).popUntil(
+                          (r) => r.settings.name == crumb.routeName,
+                        ),
                 borderRadius: BorderRadius.circular(6),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -102,6 +114,17 @@ class EditorRoutes {
   static const session = '/coach/student/editor/session';
   static const block = '/coach/student/editor/block';
   static const exercise = '/coach/student/editor/exercise';
+}
+
+/// Noms de routes des écrans détail de la bibliothèque. Permet à un écran
+/// détail ouvert en profondeur (ex: exercice depuis un programme) d'afficher
+/// un breadcrumb cliquable remontant jusqu'à la racine du parcours.
+class LibraryRoutes {
+  const LibraryRoutes._();
+  static const program = '/coach/library/program';
+  static const session = '/coach/library/session';
+  static const block = '/coach/library/block';
+  static const exercise = '/coach/library/exercise';
 }
 
 /// Résout le nom de l'élève via le provider partagé (cache Riverpod → lookup

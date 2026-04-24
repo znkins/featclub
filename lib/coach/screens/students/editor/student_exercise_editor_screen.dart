@@ -185,6 +185,9 @@ class _StudentExerciseEditorScreenState
           rest: _restController.text,
           note: _noteController.text,
         );
+        // Création d'un exercice → la `exerciseCount` du bloc affiché dans
+        // l'éditeur séance change, donc on invalide ce niveau aussi.
+        ref.invalidate(studentSessionEditorDetailProvider(widget.sessionId));
       }
       ref.invalidate(studentBlockEditorDetailProvider(widget.blockId));
       if (!mounted) return;
@@ -216,6 +219,9 @@ class _StudentExerciseEditorScreenState
           .read(studentProgramServiceProvider)
           .deleteExercise(widget.exerciseId!);
       ref.invalidate(studentBlockEditorDetailProvider(widget.blockId));
+      // Suppression d'un exercice → la `exerciseCount` du bloc change dans
+      // l'éditeur séance.
+      ref.invalidate(studentSessionEditorDetailProvider(widget.sessionId));
       if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Exercice supprimé');
       Navigator.of(context).pop();
