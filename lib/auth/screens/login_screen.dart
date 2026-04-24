@@ -8,6 +8,7 @@ import '../../shared/providers/supabase_providers.dart';
 import '../../theme/app_spacing.dart';
 import '../utils/auth_validators.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/featclub_wordmark.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -74,18 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: AppSpacing.xxl),
-                  Text('Featclub',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.displayMedium),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Connecte-toi pour accéder à tes séances',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  const FeatclubWordmark(),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthTextField(
                     controller: _emailController,
@@ -104,18 +94,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     validator: AuthValidators.password,
                     onFieldSubmitted: (_) => _submit(),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _loading
-                          ? null
-                          : () => context.push('/forgot-password'),
-                      child: const Text('Mot de passe oublié ?'),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.xl),
                   FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.colorScheme.secondary,
+                    ),
                     onPressed: _loading ? null : _submit,
                     child: _loading
                         ? const SizedBox(
@@ -128,7 +111,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           )
                         : const Text('Se connecter'),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.sm),
+                  Center(
+                    child: TextButton(
+                      onPressed: _loading
+                          ? null
+                          : () => context.push('/forgot-password'),
+                      child: const Text('Mot de passe oublié ?'),
+                    ),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,

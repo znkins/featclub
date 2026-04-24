@@ -176,6 +176,9 @@ class _StudentSessionFormScreenState
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.colorScheme.secondary,
+              ),
               onPressed: _saving ? null : _save,
               child: _saving
                   ? const SizedBox(

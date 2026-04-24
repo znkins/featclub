@@ -107,12 +107,15 @@ class _BlockListScreenState extends ConsumerState<BlockListScreen> {
                         const SizedBox(height: AppSpacing.md),
                     itemBuilder: (_, i) {
                       final it = filtered[i];
-                      final count = it.exerciseCount;
-                      final subtitle =
-                          '$count exercice${count > 1 ? 's' : ''}';
+                      final hasDescription = it.block.description != null &&
+                          it.block.description!.trim().isNotEmpty;
                       return LibraryListTile(
                         title: it.block.title,
-                        subtitle: subtitle,
+                        subtitleWidget: _BlockTileSubtitle(
+                          exerciseCount: it.exerciseCount,
+                          description:
+                              hasDescription ? it.block.description : null,
+                        ),
                         leading: const LibraryTypeIcon(
                           icon: LucideIcons.layers,
                         ),
@@ -126,6 +129,42 @@ class _BlockListScreenState extends ConsumerState<BlockListScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BlockTileSubtitle extends StatelessWidget {
+  const _BlockTileSubtitle({
+    required this.exerciseCount,
+    required this.description,
+  });
+
+  final int exerciseCount;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (description != null) ...[
+          Text(
+            description!,
+            style: theme.textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+        Text(
+          '$exerciseCount exercice${exerciseCount > 1 ? 's' : ''}',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -83,6 +83,7 @@ class ReorderableLibraryRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (hasSubtitle) ...[
+                      const SizedBox(height: AppSpacing.xs),
                       subtitleWidget ??
                           Text(
                             subtitle!,
@@ -96,7 +97,7 @@ class ReorderableLibraryRow extends StatelessWidget {
                   ],
                 ),
               ),
-              if (onDuplicate != null || onRemove != null)
+              if (onDuplicate != null && onRemove != null)
                 PopupMenuButton<_RowAction>(
                   tooltip: 'Plus d\'actions',
                   icon: Icon(
@@ -113,37 +114,47 @@ class ReorderableLibraryRow extends StatelessWidget {
                     }
                   },
                   itemBuilder: (_) => [
-                    if (onDuplicate != null)
-                      PopupMenuItem(
-                        value: _RowAction.duplicate,
-                        child: Row(
-                          children: [
-                            Icon(
-                              LucideIcons.copyPlus,
-                              size: 18,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            const Text('Dupliquer'),
-                          ],
-                        ),
+                    PopupMenuItem(
+                      value: _RowAction.duplicate,
+                      child: Row(
+                        children: [
+                          Icon(
+                            LucideIcons.copyPlus,
+                            size: 18,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          const Text('Dupliquer'),
+                        ],
                       ),
-                    if (onRemove != null)
-                      PopupMenuItem(
-                        value: _RowAction.remove,
-                        child: Row(
-                          children: [
-                            Icon(
-                              LucideIcons.minusCircle,
-                              size: 18,
-                              color: theme.colorScheme.secondary,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Text(removeLabel),
-                          ],
-                        ),
+                    ),
+                    PopupMenuItem(
+                      value: _RowAction.remove,
+                      child: Row(
+                        children: [
+                          Icon(
+                            LucideIcons.minusCircle,
+                            size: 18,
+                            color: theme.colorScheme.secondary,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(removeLabel),
+                        ],
                       ),
+                    ),
                   ],
+                )
+              else if (onRemove != null)
+                // Action unique (retirer) : icône directe plutôt qu'un menu
+                // overflow à un seul item. Un tap au lieu de deux.
+                IconButton(
+                  tooltip: removeLabel,
+                  icon: Icon(
+                    LucideIcons.minusCircle,
+                    color: theme.colorScheme.secondary,
+                    size: 20,
+                  ),
+                  onPressed: onRemove,
                 ),
               const SizedBox(width: AppSpacing.xs),
               Padding(

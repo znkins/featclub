@@ -11,7 +11,8 @@ class SessionListItem {
   final int blockCount;
 }
 
-/// Liaison séance ↔ bloc (ligne de `session_blocks`) avec le bloc résolu.
+/// Liaison séance ↔ bloc (ligne de `session_blocks`) avec le bloc résolu
+/// et son nombre d'exercices (affiché dans la tuile de liste).
 ///
 /// Le même bloc peut apparaître plusieurs fois dans une séance : chaque
 /// apparition est identifiée par son `linkId` (id de la ligne pivot).
@@ -20,11 +21,13 @@ class SessionBlockLink {
     required this.linkId,
     required this.block,
     required this.position,
+    required this.exerciseCount,
   });
 
   final String linkId;
   final Block block;
   final int position;
+  final int exerciseCount;
 }
 
 /// Détail d'une séance template : entête + liaisons de blocs dans l'ordre.
@@ -134,15 +137,24 @@ class SessionService {
   Future<List<SessionBlockLink>> listLinks(String sessionId) async {
     final rows = await _client
         .from('session_blocks')
-        .select('id, position, block:blocks($_blockColumns)')
+        .select(
+          'id, position, '
+          'block:blocks($_blockColumns, block_exercises(count))',
+        )
         .eq('session_id', sessionId)
         .order('position', ascending: true);
     return (rows as List).map((r) {
       final map = r as Map<String, dynamic>;
+      final blockMap = map['block'] as Map<String, dynamic>;
+      final agg = blockMap['block_exercises'];
+      final exerciseCount = agg is List && agg.isNotEmpty
+          ? ((agg.first as Map)['count'] as int? ?? 0)
+          : 0;
       return SessionBlockLink(
         linkId: map['id'] as String,
         position: map['position'] as int,
-        block: Block.fromJson(map['block'] as Map<String, dynamic>),
+        block: Block.fromJson(blockMap),
+        exerciseCount: exerciseCount,
       );
     }).toList();
   }

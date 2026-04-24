@@ -12,8 +12,10 @@ import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../shared/providers/route_observer_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/block_providers.dart';
-import '../../../widgets/category_chip.dart';
+import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
+import '../../../widgets/exercise_tile_subtitle.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../exercises/exercise_detail_screen.dart';
 import 'block_exercise_picker_screen.dart';
@@ -120,7 +122,7 @@ class _BlockDetailScreenState extends ConsumerState<BlockDetailScreen>
       message:
           'Supprimer « ${block.title} » ? Les exercices restent dans ta bibliothèque.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -177,6 +179,7 @@ class _BlockBodyState extends ConsumerState<_BlockBody> {
       message:
           'Retirer « ${link.exercise.title} » du bloc ? Il reste dans ta bibliothèque.',
       confirmLabel: 'Retirer',
+      variant: ConfirmationVariant.warning,
     );
     if (!confirm) return;
     try {
@@ -212,7 +215,6 @@ Future<void> _onReorder(int oldIndex, int newIndex) async {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final block = widget.detail.block;
 
     if (_links.isEmpty) {
@@ -246,13 +248,7 @@ Future<void> _onReorder(int oldIndex, int newIndex) async {
           children: [
             _Header(block: block),
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              '${_links.length} exercice${_links.length > 1 ? 's' : ''}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ContentSectionHeader(title: 'Exercices', count: _links.length),
           ],
         ),
       ),
@@ -267,13 +263,15 @@ Future<void> _onReorder(int oldIndex, int newIndex) async {
           child: ReorderableLibraryRow(
             index: i,
             title: exercise.title,
-            subtitleWidget:
-                exercise.category != null && exercise.category!.isNotEmpty
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: CategoryChip(label: exercise.category!),
-                      )
-                    : null,
+            subtitleWidget: ExerciseTileSubtitle.hasContent(
+              description: exercise.description,
+              category: exercise.category,
+            )
+                ? ExerciseTileSubtitle(
+                    description: exercise.description,
+                    category: exercise.category,
+                  )
+                : null,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) =>
@@ -297,14 +295,12 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     final hasDescription =
         block.description != null && block.description!.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return DetailInfoCard(
       children: [
         DetailField(
           label: 'Titre',
           child: Text(block.title, style: theme.textTheme.bodyLarge),
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Description',
           child: hasDescription

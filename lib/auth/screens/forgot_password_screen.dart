@@ -61,51 +61,56 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('Mot de passe oublié')),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Mot de passe oublié',
-                      style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    "Indique ton email, on t'envoie un lien pour le réinitialiser.",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.lg,
+            AppSpacing.xl,
+            AppSpacing.xl,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Indique ton email, on t'envoie un lien pour le réinitialiser.",
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  AuthTextField(
-                    controller: _emailController,
-                    label: 'Email',
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    textInputAction: TextInputAction.done,
-                    validator: AuthValidators.email,
-                    onFieldSubmitted: (_) => _submit(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AuthTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  textInputAction: TextInputAction.done,
+                  validator: AuthValidators.email,
+                  onFieldSubmitted: (_) => _submit(),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondary,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  FilledButton(
-                    onPressed: _loading ? null : _submit,
-                    child: _loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text('Envoyer le lien'),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  TextButton(
+                  onPressed: _loading ? null : _submit,
+                  child: _loading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Envoyer le lien'),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Center(
+                  child: TextButton(
                     onPressed: _loading
                         ? null
                         : () {
@@ -117,8 +122,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           },
                     child: const Text('Retour à la connexion'),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

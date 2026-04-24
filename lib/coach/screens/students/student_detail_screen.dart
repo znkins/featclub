@@ -609,7 +609,7 @@ class _ProgramsSectionState extends ConsumerState<_ProgramsSection> {
       message:
           'Supprimer « ${program.title} » ? Les séances et exercices personnalisés seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {

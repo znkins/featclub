@@ -12,7 +12,9 @@ import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../shared/providers/route_observer_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/session_providers.dart';
+import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/duration_pill.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../blocks/block_detail_screen.dart';
@@ -122,7 +124,7 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
       message:
           'Supprimer « ${session.title} » ? Les blocs restent dans ta bibliothèque.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -179,6 +181,7 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
       message:
           'Retirer « ${link.block.title} » de la séance ? Il reste dans ta bibliothèque.',
       confirmLabel: 'Retirer',
+      variant: ConfirmationVariant.warning,
     );
     if (!confirm) return;
     try {
@@ -214,7 +217,6 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final session = widget.detail.session;
 
     if (_links.isEmpty) {
@@ -248,13 +250,7 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
           children: [
             _Header(session: session),
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              '${_links.length} bloc${_links.length > 1 ? 's' : ''}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ContentSectionHeader(title: 'Blocs', count: _links.length),
           ],
         ),
       ),
@@ -263,13 +259,18 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
       itemBuilder: (_, i) {
         final link = _links[i];
         final block = link.block;
+        final hasDescription =
+            block.description != null && block.description!.isNotEmpty;
         return Padding(
           key: ValueKey(link.linkId),
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: ReorderableLibraryRow(
             index: i,
             title: block.title,
-            subtitle: block.description,
+            subtitleWidget: _SessionBlockSubtitle(
+              exerciseCount: link.exerciseCount,
+              description: hasDescription ? block.description : null,
+            ),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => BlockDetailScreen(blockId: block.id),
@@ -292,14 +293,12 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     final hasDescription =
         session.description != null && session.description!.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return DetailInfoCard(
       children: [
         DetailField(
           label: 'Titre',
           child: Text(session.title, style: theme.textTheme.bodyLarge),
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Durée',
           child: session.durationMinutes != null
@@ -309,7 +308,6 @@ class _Header extends StatelessWidget {
                 )
               : null,
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Description',
           child: hasDescription
@@ -323,3 +321,40 @@ class _Header extends StatelessWidget {
     );
   }
 }
+
+class _SessionBlockSubtitle extends StatelessWidget {
+  const _SessionBlockSubtitle({
+    required this.exerciseCount,
+    required this.description,
+  });
+
+  final int exerciseCount;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (description != null) ...[
+          Text(
+            description!,
+            style: theme.textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+        Text(
+          '$exerciseCount exercice${exerciseCount > 1 ? 's' : ''}',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+

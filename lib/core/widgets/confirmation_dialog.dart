@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// Variante visuelle du bouton de confirmation.
+///
+/// Utilisée pour aligner la couleur du bouton sur la nature de l'action :
+/// - [standard]   : confirmation neutre (se déconnecter, dupliquer, etc.)
+///   → primaire teal.
+/// - [warning]    : retrait d'un lien / action réversible qui "enlève" sans
+///   détruire. Cohérent avec l'icône orange `minusCircle` qui a initié le flow.
+///   → secondaire orange.
+/// - [destructive] : suppression définitive côté DB (cascade sur les données
+///   dépendantes). Danger à signaler clairement.
+///   → error rouge.
+enum ConfirmationVariant { standard, warning, destructive }
+
 /// Dialogue de confirmation standard.
 ///
 /// Renvoie `true` si l'utilisateur a confirmé, `false` sinon (annulation
@@ -11,14 +24,14 @@ class ConfirmationDialog extends StatelessWidget {
     required this.message,
     this.confirmLabel = 'Confirmer',
     this.cancelLabel = 'Annuler',
-    this.destructive = false,
+    this.variant = ConfirmationVariant.standard,
   });
 
   final String title;
   final String message;
   final String confirmLabel;
   final String cancelLabel;
-  final bool destructive;
+  final ConfirmationVariant variant;
 
   static Future<bool> show(
     BuildContext context, {
@@ -26,7 +39,7 @@ class ConfirmationDialog extends StatelessWidget {
     required String message,
     String confirmLabel = 'Confirmer',
     String cancelLabel = 'Annuler',
-    bool destructive = false,
+    ConfirmationVariant variant = ConfirmationVariant.standard,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -35,7 +48,7 @@ class ConfirmationDialog extends StatelessWidget {
         message: message,
         confirmLabel: confirmLabel,
         cancelLabel: cancelLabel,
-        destructive: destructive,
+        variant: variant,
       ),
     );
     return result ?? false;
@@ -44,6 +57,11 @@ class ConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final background = switch (variant) {
+      ConfirmationVariant.standard => null,
+      ConfirmationVariant.warning => theme.colorScheme.secondary,
+      ConfirmationVariant.destructive => theme.colorScheme.error,
+    };
     return AlertDialog(
       title: Text(title),
       content: Text(message),
@@ -53,10 +71,8 @@ class ConfirmationDialog extends StatelessWidget {
           child: Text(cancelLabel),
         ),
         FilledButton(
-          style: destructive
-              ? FilledButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                )
+          style: background != null
+              ? FilledButton.styleFrom(backgroundColor: background)
               : null,
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(confirmLabel),

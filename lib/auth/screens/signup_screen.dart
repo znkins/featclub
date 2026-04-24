@@ -66,65 +66,71 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('Créer un compte')),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Créer un compte', style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Tu recevras un email de confirmation après l\'inscription.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.lg,
+            AppSpacing.xl,
+            AppSpacing.xl,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Tu recevras un email de confirmation après l\'inscription.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  AuthTextField(
-                    controller: _emailController,
-                    label: 'Email',
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    validator: AuthValidators.email,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AuthTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  validator: AuthValidators.email,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AuthTextField(
+                  controller: _passwordController,
+                  label: 'Mot de passe',
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.newPassword],
+                  validator: AuthValidators.password,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AuthTextField(
+                  controller: _confirmController,
+                  label: 'Confirmer le mot de passe',
+                  obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  validator: AuthValidators.confirmPassword(_passwordController),
+                  onFieldSubmitted: (_) => _submit(),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondary,
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  AuthTextField(
-                    controller: _passwordController,
-                    label: 'Mot de passe',
-                    obscureText: true,
-                    autofillHints: const [AutofillHints.newPassword],
-                    validator: AuthValidators.password,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  AuthTextField(
-                    controller: _confirmController,
-                    label: 'Confirmer le mot de passe',
-                    obscureText: true,
-                    textInputAction: TextInputAction.done,
-                    validator: AuthValidators.confirmPassword(_passwordController),
-                    onFieldSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  FilledButton(
-                    onPressed: _loading ? null : _submit,
-                    child: _loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text('Créer le compte'),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  TextButton(
+                  onPressed: _loading ? null : _submit,
+                  child: _loading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Créer le compte'),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Center(
+                  child: TextButton(
                     onPressed: _loading
                         ? null
                         : () {
@@ -136,8 +142,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           },
                     child: const Text("J'ai déjà un compte"),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

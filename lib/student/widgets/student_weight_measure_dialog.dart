@@ -134,6 +134,9 @@ class _StudentWeightMeasureDialogState
           child: const Text('Annuler'),
         ),
         FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: theme.colorScheme.secondary,
+          ),
           onPressed: _saving ? null : _save,
           child: _saving
               ? const SizedBox(

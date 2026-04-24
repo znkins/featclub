@@ -147,7 +147,7 @@ class StudentSessionEditorScreen extends ConsumerWidget {
       message:
           'Supprimer « ${session.title} » ? Les blocs et exercices de cette séance seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -231,7 +231,7 @@ class _SessionBodyState extends ConsumerState<_SessionBody> {
       message:
           'Supprimer « ${block.title} » ? Les exercices de ce bloc seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {

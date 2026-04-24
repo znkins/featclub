@@ -146,23 +146,24 @@ class _ProgramTileSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (description != null)
+        if (description != null) ...[
           Text(
             description!,
-            style: muted,
+            style: theme.textTheme.bodyMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
         Text(
           '$sessionCount séance${sessionCount > 1 ? 's' : ''}',
-          style: muted,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

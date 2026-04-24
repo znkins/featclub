@@ -148,6 +148,9 @@ class _CompleteSessionSheetState
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondary,
+                  ),
                   onPressed: _saving ? null : _save,
                   child: _saving
                       ? const SizedBox(

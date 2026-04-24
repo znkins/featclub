@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../shared/screens/profile_screen.dart';
-import '../../shared/widgets/theme_mode_toggle.dart';
 import 'coach_content_screen.dart';
 import 'coach_featers_screen.dart';
 import 'coach_home_screen.dart';
@@ -31,13 +30,12 @@ class _CoachShellState extends State<CoachShell> {
 
   @override
   Widget build(BuildContext context) {
+    // L'onglet Profil fournit son propre Scaffold + AppBar (actions qui
+    // changent selon le mode lecture/édition), on masque donc celui du shell
+    // pour éviter un double AppBar.
+    final isProfile = _index == _profileTabIndex;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_index]),
-        actions: [
-          if (_index == _profileTabIndex) const ThemeModeToggle(),
-        ],
-      ),
+      appBar: isProfile ? null : AppBar(title: Text(_titles[_index])),
       body: IndexedStack(index: _index, children: _tabs),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,

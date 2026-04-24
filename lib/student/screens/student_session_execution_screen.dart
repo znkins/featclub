@@ -126,7 +126,7 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
           'disponible pour la reprendre plus tard.',
       confirmLabel: 'Quitter',
       cancelLabel: 'Continuer',
-      destructive: true,
+      variant: ConfirmationVariant.warning,
     );
   }
 

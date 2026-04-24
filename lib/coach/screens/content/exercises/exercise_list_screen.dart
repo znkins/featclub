@@ -8,7 +8,7 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/exercise_providers.dart';
-import '../../../widgets/category_chip.dart';
+import '../../../widgets/exercise_tile_subtitle.dart';
 import '../../../widgets/library_list_tile.dart';
 import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_type_icon.dart';
@@ -111,10 +111,15 @@ class _ExerciseListScreenState extends ConsumerState<ExerciseListScreen> {
                       final e = filtered[i];
                       return LibraryListTile(
                         title: e.title,
-                        subtitleWidget:
-                            e.category != null && e.category!.isNotEmpty
-                                ? CategoryChip(label: e.category!)
-                                : null,
+                        subtitleWidget: ExerciseTileSubtitle.hasContent(
+                          description: e.description,
+                          category: e.category,
+                        )
+                            ? ExerciseTileSubtitle(
+                                description: e.description,
+                                category: e.category,
+                              )
+                            : null,
                         leading: const LibraryTypeIcon(
                           icon: LucideIcons.dumbbell,
                         ),
@@ -131,3 +136,4 @@ class _ExerciseListScreenState extends ConsumerState<ExerciseListScreen> {
     );
   }
 }
+

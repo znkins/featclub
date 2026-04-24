@@ -147,6 +147,9 @@ class _ExerciseFormScreenState extends ConsumerState<ExerciseFormScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+              ),
               onPressed: _saving ? null : _save,
               child: _saving
                   ? const SizedBox(

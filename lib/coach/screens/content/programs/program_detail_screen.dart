@@ -12,7 +12,9 @@ import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../shared/providers/route_observer_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/program_providers.dart';
+import '../../../widgets/content_section_header.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/reorderable_library_row.dart';
 import '../../../widgets/session_meta_row.dart';
 import '../sessions/session_detail_screen.dart';
@@ -122,7 +124,7 @@ class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen>
       message:
           'Supprimer « ${program.title} » ? Les séances restent dans ta bibliothèque.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -180,6 +182,7 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
       message:
           'Retirer « ${link.session.title} » du programme ? Elle reste dans ta bibliothèque.',
       confirmLabel: 'Retirer',
+      variant: ConfirmationVariant.warning,
     );
     if (!confirm) return;
     try {
@@ -215,7 +218,6 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final program = widget.detail.program;
 
     if (_links.isEmpty) {
@@ -249,13 +251,7 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
           children: [
             _Header(program: program),
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              '${_links.length} séance${_links.length > 1 ? 's' : ''}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ContentSectionHeader(title: 'Séances', count: _links.length),
           ],
         ),
       ),
@@ -299,14 +295,12 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     final hasDescription =
         program.description != null && program.description!.isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return DetailInfoCard(
       children: [
         DetailField(
           label: 'Titre',
           child: Text(program.title, style: theme.textTheme.bodyLarge),
         ),
-        const SizedBox(height: AppSpacing.xl),
         DetailField(
           label: 'Description',
           child: hasDescription
@@ -339,15 +333,15 @@ class _ProgramSessionSubtitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (description != null)
+        if (description != null) ...[
           Text(
             description!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
         SessionMetaRow(
           blockCount: blockCount,
           durationMinutes: durationMinutes,

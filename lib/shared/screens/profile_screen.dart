@@ -17,6 +17,7 @@ import '../../theme/app_spacing.dart';
 import '../providers/auth_provider.dart';
 import '../providers/current_profile_provider.dart';
 import '../providers/supabase_providers.dart';
+import '../widgets/theme_mode_toggle.dart';
 
 /// Écran de profil partagé (élève + coach).
 ///
@@ -195,22 +196,70 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(currentProfileProvider);
     final session = ref.watch(currentSessionProvider);
 
-    return profileAsync.when(
-      loading: () => const LoadingIndicator(),
-      error: (e, _) => ErrorView(
-        message: 'Impossible de charger le profil.\n$e',
-        onRetry: () => ref.invalidate(currentProfileProvider),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profil'),
+        actions: _buildAppBarActions(profileAsync.valueOrNull),
       ),
-      data: (profile) {
-        if (profile == null) {
-          return ErrorView(
-            message: 'Profil introuvable',
-            onRetry: () => ref.invalidate(currentProfileProvider),
-          );
-        }
-        return _buildProfile(context, profile, session?.user.email);
-      },
+      body: profileAsync.when(
+        loading: () => const LoadingIndicator(),
+        error: (e, _) => ErrorView(
+          message: 'Impossible de charger le profil.\n$e',
+          onRetry: () => ref.invalidate(currentProfileProvider),
+        ),
+        data: (profile) {
+          if (profile == null) {
+            return ErrorView(
+              message: 'Profil introuvable',
+              onRetry: () => ref.invalidate(currentProfileProvider),
+            );
+          }
+          return _buildProfile(context, profile, session?.user.email);
+        },
+      ),
     );
+  }
+
+  /// Actions de l'AppBar du profil.
+  ///
+  /// Lecture : `[🌙 thème] [✏️ éditer] [🚪 logout]`.
+  /// Édition  : `[✕ annuler] [✓ enregistrer]` uniquement, pour éviter
+  /// toute action destructive pendant qu'une saisie est en cours.
+  List<Widget> _buildAppBarActions(Profile? profile) {
+    if (profile == null) return const [ThemeModeToggle()];
+    if (_isEditing) {
+      return [
+        IconButton(
+          tooltip: 'Annuler',
+          icon: const Icon(LucideIcons.x),
+          onPressed: _saving ? null : _cancelEditing,
+        ),
+        IconButton(
+          tooltip: 'Enregistrer',
+          icon: _saving
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                )
+              : const Icon(LucideIcons.check),
+          onPressed: _saving ? null : () => _save(profile),
+        ),
+      ];
+    }
+    return [
+      IconButton(
+        tooltip: 'Modifier',
+        icon: const Icon(LucideIcons.pencil),
+        onPressed: () => _startEditing(profile),
+      ),
+      const ThemeModeToggle(),
+      IconButton(
+        tooltip: 'Se déconnecter',
+        icon: const Icon(LucideIcons.logOut),
+        onPressed: _logout,
+      ),
+    ];
   }
 
   Widget _buildProfile(BuildContext context, Profile profile, String? email) {
@@ -222,18 +271,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           _buildAvatarHeader(context, profile, email),
           const SizedBox(height: AppSpacing.xl),
-          _buildActionsRow(context, profile),
-          const SizedBox(height: AppSpacing.xl),
           if (_isEditing)
             _buildEditForm(context, profile)
           else
             _buildReadView(context, profile, theme),
-          const SizedBox(height: AppSpacing.xl),
-          OutlinedButton.icon(
-            onPressed: _saving ? null : _logout,
-            icon: const Icon(LucideIcons.logOut),
-            label: const Text('Se déconnecter'),
-          ),
         ],
       ),
     );
@@ -295,70 +336,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-        const SizedBox(height: AppSpacing.sm),
-        _RoleChip(role: profile.role),
-      ],
-    );
-  }
-
-  Widget _buildActionsRow(BuildContext context, Profile profile) {
-    if (_isEditing) {
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: _saving ? null : _cancelEditing,
-              child: const Text('Annuler'),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: FilledButton(
-              onPressed: _saving ? null : () => _save(profile),
-              child: _saving
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('Enregistrer'),
-            ),
-          ),
+        // Role chip affiché uniquement pour coach et admin : pour un élève
+        // qui consulte son propre profil, l'info est sans valeur.
+        if (profile.role != UserRole.eleve) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _RoleChip(role: profile.role),
         ],
-      );
-    }
-
-    return FilledButton.icon(
-      onPressed: () => _startEditing(profile),
-      icon: const Icon(LucideIcons.pencil, color: Colors.white),
-      label: const Text('Modifier le profil'),
+      ],
     );
   }
 
   Widget _buildReadView(
       BuildContext context, Profile profile, ThemeData theme) {
     final isStudent = profile.role == UserRole.eleve;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _ReadField(label: 'Bio', value: profile.bio),
-        if (isStudent) ...[
-          _ReadField(
-            label: 'Date de naissance',
-            value: profile.birthDate != null
-                ? formatDate(profile.birthDate!)
-                : null,
-          ),
-          _ReadField(
-            label: 'Taille',
-            value: profile.heightCm != null ? '${profile.heightCm} cm' : null,
-          ),
-          _ReadField(label: 'Objectif', value: profile.goal),
-        ],
+    final fields = <Widget>[
+      _ReadField(
+        icon: LucideIcons.stickyNote,
+        label: 'Bio',
+        value: profile.bio,
+      ),
+      if (isStudent) ...[
+        _ReadField(
+          icon: LucideIcons.cake,
+          label: 'Date de naissance',
+          value: profile.birthDate != null
+              ? formatDate(profile.birthDate!)
+              : null,
+        ),
+        _ReadField(
+          icon: LucideIcons.moveVertical,
+          label: 'Taille',
+          value: profile.heightCm != null ? '${profile.heightCm} cm' : null,
+        ),
+        _ReadField(
+          icon: LucideIcons.target,
+          label: 'Objectif',
+          value: profile.goal,
+        ),
       ],
+    ];
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(color: theme.colorScheme.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < fields.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: AppSpacing.xl,
+                color: theme.colorScheme.outline,
+              ),
+            fields[i],
+          ],
+        ],
+      ),
     );
   }
 
@@ -484,8 +520,13 @@ class _RoleChip extends StatelessWidget {
 }
 
 class _ReadField extends StatelessWidget {
-  const _ReadField({required this.label, required this.value});
+  const _ReadField({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
+  final IconData icon;
   final String label;
   final String? value;
 
@@ -493,21 +534,41 @@ class _ReadField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final shown = (value == null || value!.isEmpty) ? '—' : value!;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: AppRadius.mdAll,
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(shown, style: theme.textTheme.bodyLarge),
-        ],
-      ),
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: 20,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(shown, style: theme.textTheme.bodyLarge),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

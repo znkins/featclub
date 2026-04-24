@@ -189,8 +189,10 @@ class AppTheme {
       ),
 
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.snackbarBackground,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        // Pas de backgroundColor ni contentTextStyle : Material 3 utilise
+        // par défaut `inverseSurface` / `onInverseSurface`, ce qui donne un
+        // snackbar automatiquement contrasté avec le thème courant
+        // (fond sombre en light mode, fond clair en dark mode).
         actionTextColor: AppColors.brandSecondary,
         behavior: SnackBarBehavior.floating,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
@@ -215,7 +217,7 @@ class AppTheme {
         ),
       ),
 
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.brandSecondary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -223,8 +225,11 @@ class AppTheme {
         hoverElevation: 0,
         highlightElevation: 0,
         disabledElevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
         extendedIconLabelSpacing: AppSpacing.sm,
+        extendedTextStyle: textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
       ),
 
       tabBarTheme: TabBarThemeData(

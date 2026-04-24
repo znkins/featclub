@@ -30,7 +30,4 @@ class AppColors {
   static const Color darkTextPrimary = Color(0xFFF1F1F3);
   static const Color darkTextSecondary = Color(0xFF9CA3AF);
   static const Color darkSeparator = Color(0xFF2D3140);
-
-  // Couleur de fond des snackbars (constante en light et dark pour contraste).
-  static const Color snackbarBackground = Color(0xFF1A1A2E);
 }

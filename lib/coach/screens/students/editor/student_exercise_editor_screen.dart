@@ -208,7 +208,7 @@ class _StudentExerciseEditorScreenState
       message:
           'Supprimer « ${_titleController.text.trim()} » ? Les paramètres personnalisés seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -393,6 +393,9 @@ class _StudentExerciseEditorScreenState
           ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.secondary,
+            ),
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const SizedBox(

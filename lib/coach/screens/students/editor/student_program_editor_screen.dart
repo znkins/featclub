@@ -138,7 +138,7 @@ class StudentProgramEditorScreen extends ConsumerWidget {
       message:
           'Supprimer « ${program.title} » ? Les séances et exercices personnalisés seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -219,7 +219,7 @@ class _ProgramBodyState extends ConsumerState<_ProgramBody> {
       message:
           'Supprimer « ${session.title} » ? Les blocs et exercices de cette séance seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {

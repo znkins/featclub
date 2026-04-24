@@ -159,7 +159,7 @@ class StudentBlockEditorScreen extends ConsumerWidget {
       message:
           'Supprimer « ${block.title} » ? Les exercices de ce bloc seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -259,7 +259,7 @@ class _BlockBodyState extends ConsumerState<_BlockBody> {
       message:
           'Supprimer « ${exercise.title} » ? Les paramètres personnalisés seront définitivement perdus.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {

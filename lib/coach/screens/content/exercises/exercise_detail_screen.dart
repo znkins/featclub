@@ -12,6 +12,7 @@ import '../../../../theme/app_spacing.dart';
 import '../../../providers/exercise_providers.dart';
 import '../../../widgets/category_chip.dart';
 import '../../../widgets/detail_field.dart';
+import '../../../widgets/detail_info_card.dart';
 import 'exercise_form_screen.dart';
 
 class ExerciseDetailScreen extends ConsumerWidget {
@@ -50,7 +51,7 @@ class ExerciseDetailScreen extends ConsumerWidget {
       message:
           'Supprimer « ${exercise.title} » ? Il sera retiré de ta bibliothèque.',
       confirmLabel: 'Supprimer',
-      destructive: true,
+      variant: ConfirmationVariant.destructive,
     );
     if (!confirm) return;
     try {
@@ -116,45 +117,40 @@ class ExerciseDetailScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        DetailField(
-          label: 'Titre',
-          child: Text(exercise.title, style: theme.textTheme.bodyLarge),
+        DetailInfoCard(
+          children: [
+            DetailField(
+              label: 'Titre',
+              child: Text(exercise.title, style: theme.textTheme.bodyLarge),
+            ),
+            DetailField(
+              label: 'Catégorie',
+              child: hasCategory
+                  ? Align(
+                      alignment: Alignment.centerLeft,
+                      child: CategoryChip(label: exercise.category!),
+                    )
+                  : null,
+            ),
+            DetailField(
+              label: 'Description',
+              child: hasDescription
+                  ? Text(
+                      exercise.description!,
+                      style: theme.textTheme.bodyLarge,
+                    )
+                  : null,
+            ),
+          ],
         ),
-        const SizedBox(height: AppSpacing.xl),
-        DetailField(
-          label: 'Catégorie',
-          child: hasCategory
-              ? Align(
-                  alignment: Alignment.centerLeft,
-                  child: CategoryChip(label: exercise.category!),
-                )
-              : null,
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        DetailField(
-          label: 'Description',
-          child: hasDescription
-              ? Text(
-                  exercise.description!,
-                  style: theme.textTheme.bodyLarge,
-                )
-              : null,
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        DetailField(
-          label: 'Vidéo',
-          child: hasVideo
-              ? Align(
-                  alignment: Alignment.centerLeft,
-                  child: FilledButton.icon(
-                    onPressed: () => _openVideo(context, exercise.videoUrl!),
-                    icon: const Icon(LucideIcons.playCircle,
-                        color: Colors.white),
-                    label: const Text('Lire la vidéo'),
-                  ),
-                )
-              : null,
-        ),
+        if (hasVideo) ...[
+          const SizedBox(height: AppSpacing.xl),
+          FilledButton.icon(
+            onPressed: () => _openVideo(context, exercise.videoUrl!),
+            icon: const Icon(LucideIcons.playCircle, color: Colors.white),
+            label: const Text('Lire la vidéo'),
+          ),
+        ],
       ],
     );
   }

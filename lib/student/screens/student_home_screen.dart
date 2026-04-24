@@ -373,7 +373,7 @@ class _ShortcutsGrid extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         _ShortcutTile(
-          icon: LucideIcons.lineChart,
+          icon: LucideIcons.trendingUp,
           title: 'Progression',
           subtitle: 'Suivre mes mesures et mon historique',
           onTap: onProgress,
