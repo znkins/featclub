@@ -7,16 +7,17 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/models/student_session_exercise.dart';
 import '../../core/services/student_program_service.dart';
 import '../../core/utils/video_launcher.dart';
-import '../../core/widgets/app_snackbar.dart';
+import '../../coach/widgets/content_section_header.dart';
 import '../../core/widgets/confirmation_dialog.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
-import '../../shared/providers/current_profile_provider.dart';
-import '../../shared/providers/student_data_providers.dart';
+import '../../shared/widgets/exercise_note_row.dart';
+import '../../shared/widgets/exercise_params_row.dart';
 import '../../theme/app_radius.dart';
+import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_session_providers.dart';
-import '../widgets/complete_session_sheet.dart';
+import '../widgets/complete_session_dialog.dart';
 
 /// Mode d'exécution guidé : l'élève parcourt la séance bloc par bloc, avec un
 /// chronomètre libre et la possibilité de terminer la séance depuis le dernier
@@ -131,20 +132,13 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
   }
 
   Future<void> _complete() async {
-    final completed = await showCompleteSessionSheet(
+    final completed = await showCompleteSessionDialog(
       context,
       studentSessionId: widget.content.session.id,
       sessionTitle: widget.content.session.title,
     );
     if (completed == true && mounted) {
-      final profile = ref.read(currentProfileProvider).valueOrNull;
-      if (profile != null) {
-        ref.invalidate(studentRecentHistoryProvider(profile.id));
-        ref.invalidate(studentHistoryProvider(profile.id));
-        ref.invalidate(studentCompletedSessionCountProvider(profile.id));
-      }
-      AppSnackbar.showSuccess(context, 'Séance enregistrée');
-      if (mounted) Navigator.of(context).pop();
+      afterSessionCompletion(context, ref);
     }
   }
 
@@ -186,6 +180,15 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
               onToggle: _toggleStopwatch,
               onReset: _resetStopwatch,
             ),
+            // Progression visuelle dans la séance : remplace l'ancien badge
+            // « Bloc N / N ». Le step montre le bloc en cours sur le total.
+            LinearProgressIndicator(
+              value: (_index + 1) / blocks.length,
+              minHeight: AppSizes.progressBarHeight,
+              backgroundColor: theme.colorScheme.outline,
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+            ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
@@ -195,24 +198,6 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
                   AppSpacing.xl,
                 ),
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: AppRadius.fullAll,
-                    ),
-                    child: Text(
-                      'Bloc ${_index + 1} / ${blocks.length}',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
                   Text(
                     current.block.title,
                     style: theme.textTheme.headlineSmall,
@@ -221,34 +206,25 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       current.block.description!.trim(),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                      style: theme.textTheme.bodyLarge,
                     ),
                   ],
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    '${current.exercises.length} exercice${current.exercises.length > 1 ? 's' : ''}',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  // Si le bloc est vide, on n'affiche aucune section : c'est
+                  // une anomalie côté coach que l'élève ne peut résoudre.
+                  if (current.exercises.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xl),
+                    ContentSectionHeader(
+                      title: 'Exercices',
+                      count: current.exercises.length,
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (current.exercises.isEmpty)
-                    Text(
-                      'Aucun exercice dans ce bloc.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    )
-                  else
+                    const SizedBox(height: AppSpacing.md),
                     for (var i = 0; i < current.exercises.length; i++) ...[
                       if (i > 0) const SizedBox(height: AppSpacing.md),
                       _ExecutionExerciseCard(
                         exercise: current.exercises[i],
                       ),
                     ],
+                  ],
                 ],
               ),
             ),
@@ -277,6 +253,10 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
                   child: isLast
                       ? FilledButton.icon(
                           onPressed: _complete,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: theme.colorScheme.secondary,
+                            foregroundColor: theme.colorScheme.onSecondary,
+                          ),
                           icon: const Icon(LucideIcons.checkCircle2),
                           label: const Text('Terminer'),
                         )
@@ -319,9 +299,6 @@ class _StopwatchBar extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        border: Border(
-          bottom: BorderSide(color: theme.colorScheme.outline),
-        ),
       ),
       child: Row(
         children: [
@@ -334,16 +311,24 @@ class _StopwatchBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          IconButton.filledTonal(
-            tooltip: isRunning ? 'Arrêter' : 'Démarrer',
-            onPressed: onToggle,
-            icon: Icon(isRunning ? LucideIcons.pause : LucideIcons.play),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          IconButton(
+          IconButton.outlined(
             tooltip: 'Réinitialiser',
             onPressed: elapsed == Duration.zero && !isRunning ? null : onReset,
+            style: IconButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+              side: BorderSide(color: theme.colorScheme.primary),
+            ),
             icon: const Icon(LucideIcons.rotateCcw),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          IconButton.filled(
+            tooltip: isRunning ? 'Arrêter' : 'Démarrer',
+            onPressed: onToggle,
+            style: IconButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
+            icon: Icon(isRunning ? LucideIcons.pause : LucideIcons.play),
           ),
         ],
       ),
@@ -363,16 +348,7 @@ class _ExecutionExerciseCard extends StatelessWidget {
     final note = (exercise.note ?? '').trim();
     final video = (exercise.videoUrl ?? '').trim();
 
-    final params = <(IconData, String, String)>[
-      if ((exercise.reps ?? '').trim().isNotEmpty)
-        (LucideIcons.repeat, 'Reps', exercise.reps!.trim()),
-      if ((exercise.load ?? '').trim().isNotEmpty)
-        (LucideIcons.dumbbell, 'Charge', exercise.load!.trim()),
-      if ((exercise.intensity ?? '').trim().isNotEmpty)
-        (LucideIcons.flame, 'Intensité', exercise.intensity!.trim()),
-      if ((exercise.rest ?? '').trim().isNotEmpty)
-        (LucideIcons.timer, 'Repos', exercise.rest!.trim()),
-    ];
+    final hasParams = ExerciseParamsRow.hasContent(exercise);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -394,40 +370,13 @@ class _ExecutionExerciseCard extends StatelessWidget {
               ),
             ),
           ],
-          if (params.isNotEmpty) ...[
+          if (hasParams) ...[
             const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                for (final p in params)
-                  _ExecParamChip(icon: p.$1, label: p.$2, value: p.$3),
-              ],
-            ),
+            ExerciseParamsRow(exercise: exercise),
           ],
           if (note.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                borderRadius: AppRadius.mdAll,
-                color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    LucideIcons.stickyNote,
-                    size: 16,
-                    color: theme.colorScheme.secondary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(note, style: theme.textTheme.bodyMedium),
-                  ),
-                ],
-              ),
-            ),
+            ExerciseNoteRow(note: note),
           ],
           if (video.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -440,52 +389,6 @@ class _ExecutionExerciseCard extends StatelessWidget {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ExecParamChip extends StatelessWidget {
-  const _ExecParamChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.fullAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '$label : ',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
         ],
       ),
     );

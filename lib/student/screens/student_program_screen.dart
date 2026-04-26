@@ -30,27 +30,31 @@ class StudentProgramScreen extends ConsumerWidget {
         ),
         data: (detail) {
           if (detail.program == null) {
-            return ListView(
-              children: const [
-                SizedBox(height: 120),
-                EmptyView(
-                  icon: LucideIcons.dumbbell,
-                  wrapIcon: true,
-                  message:
-                      'Ton coach ne t\'a pas encore assigné de programme.\nReviens bientôt !',
+            return CustomScrollView(
+              slivers: const [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyView(
+                    icon: LucideIcons.dumbbell,
+                    wrapIcon: true,
+                    message:
+                        'Ton coach ne t\'a pas encore assigné de programme.\nReviens bientôt !',
+                  ),
                 ),
               ],
             );
           }
           if (detail.sessions.isEmpty) {
-            return ListView(
-              children: const [
-                SizedBox(height: 120),
-                EmptyView(
-                  icon: LucideIcons.calendarX,
-                  wrapIcon: true,
-                  message:
-                      'Ton programme ne contient pas encore de séance.\nReviens bientôt !',
+            return CustomScrollView(
+              slivers: const [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: EmptyView(
+                    icon: LucideIcons.calendarX,
+                    wrapIcon: true,
+                    message:
+                        'Ton programme ne contient pas encore de séance.\nReviens bientôt !',
+                  ),
                 ),
               ],
             );

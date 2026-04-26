@@ -1,33 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../auth/widgets/featclub_wordmark.dart';
 import '../../shared/screens/profile_screen.dart';
+import '../providers/student_shell_providers.dart';
 import 'student_home_screen.dart';
 import 'student_program_screen.dart';
 import 'student_progress_screen.dart';
 
 /// Conteneur élève : 4 onglets (Accueil, Programme, Progression, Profil).
-class StudentShell extends StatefulWidget {
+class StudentShell extends ConsumerWidget {
   const StudentShell({super.key});
-
-  @override
-  State<StudentShell> createState() => _StudentShellState();
-}
-
-class _StudentShellState extends State<StudentShell> {
-  int _index = 0;
 
   static const _titles = ['Accueil', 'Mon programme', 'Progression', 'Profil'];
   static const _homeTabIndex = 0;
   static const _profileTabIndex = 3;
 
-  void _navigateToTab(int i) => setState(() => _index = i);
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final index = ref.watch(studentActiveTabProvider);
+    void navigateToTab(int i) =>
+        ref.read(studentActiveTabProvider.notifier).state = i;
+
     final tabs = <Widget>[
-      StudentHomeScreen(onNavigate: _navigateToTab),
+      StudentHomeScreen(onNavigate: navigateToTab),
       const StudentProgramScreen(),
       const StudentProgressScreen(),
       const ProfileScreen(),
@@ -35,8 +32,8 @@ class _StudentShellState extends State<StudentShell> {
     // Profil fournit son propre Scaffold + AppBar (actions qui changent
     // selon le mode lecture/édition) : on masque celui du shell.
     // Accueil affiche le logo de marque centré en place du titre.
-    final isProfile = _index == _profileTabIndex;
-    final isHome = _index == _homeTabIndex;
+    final isProfile = index == _profileTabIndex;
+    final isHome = index == _homeTabIndex;
     return Scaffold(
       appBar: isProfile
           ? null
@@ -48,12 +45,12 @@ class _StudentShellState extends State<StudentShell> {
                       showBaseline: false,
                       logoHeight: 24,
                     )
-                  : Text(_titles[_index]),
+                  : Text(_titles[index]),
             ),
-      body: IndexedStack(index: _index, children: tabs),
+      body: IndexedStack(index: index, children: tabs),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: _navigateToTab,
+        selectedIndex: index,
+        onDestinationSelected: navigateToTab,
         destinations: const [
           NavigationDestination(
             icon: Icon(LucideIcons.home),

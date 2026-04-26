@@ -10,7 +10,8 @@ import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_indicator.dart';
-import '../../../../theme/app_radius.dart';
+import '../../../../shared/widgets/exercise_note_row.dart';
+import '../../../../shared/widgets/exercise_params_row.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 import '../../../widgets/add_choice_sheet.dart';
@@ -419,17 +420,8 @@ class _ExerciseSubtitle extends StatelessWidget {
     final theme = Theme.of(context);
     final description = (exercise.description ?? '').trim();
     final note = (exercise.note ?? '').trim();
-    final params = <(IconData, String)>[
-      if ((exercise.reps ?? '').trim().isNotEmpty)
-        (LucideIcons.repeat, exercise.reps!.trim()),
-      if ((exercise.load ?? '').trim().isNotEmpty)
-        (LucideIcons.dumbbell, exercise.load!.trim()),
-      if ((exercise.intensity ?? '').trim().isNotEmpty)
-        (LucideIcons.flame, exercise.intensity!.trim()),
-      if ((exercise.rest ?? '').trim().isNotEmpty)
-        (LucideIcons.timer, exercise.rest!.trim()),
-    ];
-    if (description.isEmpty && params.isEmpty && note.isEmpty) {
+    final hasParams = ExerciseParamsRow.hasContent(exercise);
+    if (description.isEmpty && !hasParams && note.isEmpty) {
       return const SizedBox.shrink();
     }
     return Column(
@@ -443,77 +435,17 @@ class _ExerciseSubtitle extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          if (params.isNotEmpty || note.isNotEmpty)
+          if (hasParams || note.isNotEmpty)
             const SizedBox(height: AppSpacing.sm),
         ],
-        if (params.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
-              borderRadius: AppRadius.mdAll,
-            ),
-            child: Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                for (final (icon, value) in params)
-                  _ParamInline(icon: icon, value: value),
-              ],
-            ),
-          ),
+        if (hasParams) ExerciseParamsRow(exercise: exercise),
         if (note.isNotEmpty) ...[
-          if (params.isNotEmpty) const SizedBox(height: AppSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                LucideIcons.stickyNote,
-                size: 16,
-                color: theme.colorScheme.secondary,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: Text(
-                  note,
-                  style: theme.textTheme.bodyMedium,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
+          if (hasParams) const SizedBox(height: AppSpacing.sm),
+          // `maxLines: 3` borne le texte dans le contexte dense de
+          // l'éditeur (les tuiles d'exos doivent garder une hauteur
+          // raisonnable même si le coach saisit une note longue).
+          ExerciseNoteRow(note: note, maxLines: 3),
         ],
-      ],
-    );
-  }
-}
-
-class _ParamInline extends StatelessWidget {
-  const _ParamInline({required this.icon, required this.value});
-
-  final IconData icon;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: theme.colorScheme.primary),
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
       ],
     );
   }

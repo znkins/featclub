@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../coach/widgets/duration_pill.dart';
 import '../../core/models/student_session.dart';
-import '../../core/utils/formatters.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import 'assigned_date_pill.dart';
 
 /// Carte d'une séance élève dans la liste du programme.
 ///
-/// Affiche titre, date (label humain : "Aujourd'hui"/"Demain"/`JJ/MM/AAAA`),
-/// durée estimée et description courte si renseignée.
+/// Titre + pills (date "Aujourd'hui"/"Demain"/`JJ/MM/AAAA` + durée) +
+/// description courte si renseignée. Cohérent avec la carte « Prochaine
+/// séance » de l'accueil.
 class StudentSessionTile extends StatelessWidget {
   const StudentSessionTile({
     super.key,
@@ -23,10 +25,8 @@ class StudentSessionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dateLabel = formatAssignedDateLabel(session.assignedDate);
-    final duration = session.durationMinutes != null
-        ? '${session.durationMinutes} min'
-        : null;
+    final hasDate = session.assignedDate != null;
+    final hasDuration = session.durationMinutes != null;
     final description = (session.description ?? '').trim();
 
     return Material(
@@ -57,44 +57,20 @@ class StudentSessionTile extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Icon(
                     LucideIcons.chevronRight,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 18,
+                    color: theme.colorScheme.primary,
                   ),
                 ],
               ),
-              if (dateLabel != null || duration != null) ...[
+              if (hasDate || hasDuration) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Row(
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
                   children: [
-                    if (dateLabel != null) ...[
-                      Icon(
-                        LucideIcons.calendar,
-                        size: 16,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        dateLabel,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                    if (dateLabel != null && duration != null)
-                      const SizedBox(width: AppSpacing.md),
-                    if (duration != null) ...[
-                      Icon(
-                        LucideIcons.clock,
-                        size: 16,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        duration,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                    if (hasDate) AssignedDatePill(date: session.assignedDate!),
+                    if (hasDuration)
+                      DurationPill(minutes: session.durationMinutes!),
                   ],
                 ),
               ],

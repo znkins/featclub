@@ -197,7 +197,12 @@ class _NextSessionCard extends StatelessWidget {
                     Icon(
                       LucideIcons.chevronRight,
                       size: 18,
-                      color: theme.colorScheme.primary,
+                      // Chevron orange quand la carte est un CTA fort
+                      // (commencer la prochaine séance), teal quand c'est
+                      // de la simple navigation (vers le tab Programme).
+                      color: onStartSession != null
+                          ? theme.colorScheme.secondary
+                          : theme.colorScheme.primary,
                     ),
                 ],
               ),
@@ -206,17 +211,6 @@ class _NextSessionCard extends StatelessWidget {
                 _NextSessionContent(session: next)
               else
                 _NextSessionEmpty(hasProgram: hasProgram),
-              if (onStartSession != null) ...[
-                const SizedBox(height: AppSpacing.lg),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: onStartSession,
-                    icon: const Icon(LucideIcons.play, size: 18),
-                    label: const Text('Commencer la séance'),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -254,17 +248,6 @@ class _NextSessionContent extends StatelessWidget {
               if (hasDate) AssignedDatePill(date: session.assignedDate!),
               if (hasDuration) DurationPill(minutes: session.durationMinutes!),
             ],
-          ),
-        ],
-        if ((session.description ?? '').trim().isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            session.description!.trim(),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ],
@@ -347,6 +330,9 @@ class _ProfileCompletionBanner extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: AppRadius.lgAll,
           color: theme.colorScheme.secondary.withValues(alpha: 0.12),
+          border: Border.all(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.4),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,7 +366,7 @@ class _ProfileCompletionBanner extends StatelessWidget {
             Icon(
               LucideIcons.chevronRight,
               size: 18,
-              color: theme.colorScheme.primary,
+              color: theme.colorScheme.secondary,
             ),
           ],
         ),

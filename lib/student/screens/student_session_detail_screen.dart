@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../coach/widgets/duration_pill.dart';
 import '../../core/models/student_session.dart';
 import '../../core/models/student_session_exercise.dart';
 import '../../core/services/student_program_service.dart';
-import '../../core/utils/formatters.dart';
 import '../../core/utils/video_launcher.dart';
-import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
-import '../../shared/providers/current_profile_provider.dart';
-import '../../shared/providers/student_data_providers.dart';
+import '../../shared/widgets/exercise_note_row.dart';
+import '../../shared/widgets/exercise_params_row.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_session_providers.dart';
-import '../widgets/complete_session_sheet.dart';
+import '../widgets/assigned_date_pill.dart';
+import '../widgets/block_count_pill.dart';
+import '../widgets/complete_session_dialog.dart';
 import 'student_session_execution_screen.dart';
 
 /// Détail d'une séance élève : méta + blocs + exercices, avec boutons
@@ -94,77 +95,27 @@ class _SessionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dateLabel = formatAssignedDateLabel(session.assignedDate);
     final description = (session.description ?? '').trim();
+    final hasDate = session.assignedDate != null;
+    final hasDuration = session.durationMinutes != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(session.title, style: theme.textTheme.headlineSmall),
         if (description.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            description,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
+          Text(description, style: theme.textTheme.bodyLarge),
+          const SizedBox(height: AppSpacing.lg),
         ],
-        const SizedBox(height: AppSpacing.lg),
         Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
           children: [
-            if (dateLabel != null)
-              _MetaPill(icon: LucideIcons.calendar, label: dateLabel),
-            if (session.durationMinutes != null)
-              _MetaPill(
-                icon: LucideIcons.clock,
-                label: '${session.durationMinutes} min',
-              ),
-            _MetaPill(
-              icon: LucideIcons.layers,
-              label: '$blockCount bloc${blockCount > 1 ? 's' : ''}',
-            ),
+            if (hasDate) AssignedDatePill(date: session.assignedDate!),
+            if (hasDuration) DurationPill(minutes: session.durationMinutes!),
+            BlockCountPill(count: blockCount),
           ],
         ),
       ],
-    );
-  }
-}
-
-class _MetaPill extends StatelessWidget {
-  const _MetaPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.fullAll,
-        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: theme.colorScheme.primary),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -188,7 +139,7 @@ class _EmptyBlocks extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Cette séance ne contient pas encore de bloc.',
+            'Aucun contenu pour cette séance.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
@@ -259,23 +210,12 @@ class _BlockCard extends StatelessWidget {
           ),
           if (description.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              description,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+            Text(description, style: theme.textTheme.bodyMedium),
           ],
-          const SizedBox(height: AppSpacing.md),
-          if (blockContent.exercises.isEmpty)
-            Text(
-              'Aucun exercice dans ce bloc.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
-              ),
-            )
-          else
+          // Si le bloc est vide, on n'affiche aucun message : c'est une
+          // anomalie côté coach que l'élève ne peut pas résoudre.
+          if (blockContent.exercises.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
             for (var i = 0; i < blockContent.exercises.length; i++) ...[
               if (i > 0)
                 Divider(
@@ -284,6 +224,7 @@ class _BlockCard extends StatelessWidget {
                 ),
               _ExerciseRow(exercise: blockContent.exercises[i]),
             ],
+          ],
         ],
       ),
     );
@@ -302,16 +243,7 @@ class _ExerciseRow extends StatelessWidget {
     final note = (exercise.note ?? '').trim();
     final video = (exercise.videoUrl ?? '').trim();
 
-    final params = <(IconData, String, String)>[
-      if ((exercise.reps ?? '').trim().isNotEmpty)
-        (LucideIcons.repeat, 'Reps', exercise.reps!.trim()),
-      if ((exercise.load ?? '').trim().isNotEmpty)
-        (LucideIcons.dumbbell, 'Charge', exercise.load!.trim()),
-      if ((exercise.intensity ?? '').trim().isNotEmpty)
-        (LucideIcons.flame, 'Intensité', exercise.intensity!.trim()),
-      if ((exercise.rest ?? '').trim().isNotEmpty)
-        (LucideIcons.timer, 'Repos', exercise.rest!.trim()),
-    ];
+    final hasParams = ExerciseParamsRow.hasContent(exercise);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,45 +258,13 @@ class _ExerciseRow extends StatelessWidget {
             ),
           ),
         ],
-        if (params.isNotEmpty) ...[
+        if (hasParams) ...[
           const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.xs,
-            children: [
-              for (final p in params)
-                _ParamChip(icon: p.$1, label: p.$2, value: p.$3),
-            ],
-          ),
+          ExerciseParamsRow(exercise: exercise),
         ],
         if (note.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.mdAll,
-              color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  LucideIcons.stickyNote,
-                  size: 16,
-                  color: theme.colorScheme.secondary,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    note,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ExerciseNoteRow(note: note),
         ],
         if (video.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
@@ -378,56 +278,6 @@ class _ExerciseRow extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _ParamChip extends StatelessWidget {
-  const _ParamChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.fullAll,
-        border: Border.all(color: theme.colorScheme.outline),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '$label : ',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -449,25 +299,22 @@ class _SessionActionsBar extends ConsumerWidget {
   }
 
   Future<void> _complete(BuildContext context, WidgetRef ref) async {
-    final completed = await showCompleteSessionSheet(
+    final completed = await showCompleteSessionDialog(
       context,
       studentSessionId: content.session.id,
       sessionTitle: content.session.title,
     );
     if (completed == true && context.mounted) {
-      final profile = ref.read(currentProfileProvider).valueOrNull;
-      if (profile != null) {
-        ref.invalidate(studentRecentHistoryProvider(profile.id));
-        ref.invalidate(studentHistoryProvider(profile.id));
-        ref.invalidate(studentCompletedSessionCountProvider(profile.id));
-      }
-      AppSnackbar.showSuccess(context, 'Séance enregistrée');
+      afterSessionCompletion(context, ref);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasBlocks = content.blocks.isNotEmpty;
+    final theme = Theme.of(context);
+    // Démarrer n'a de sens que si la séance contient au moins un exercice.
+    // Une séance avec des blocs tous vides est une anomalie côté coach.
+    final hasExercises = content.blocks.any((b) => b.exercises.isNotEmpty);
     return SafeArea(
       top: false,
       child: Padding(
@@ -482,6 +329,10 @@ class _SessionActionsBar extends ConsumerWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _complete(context, ref),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: theme.colorScheme.secondary,
+                  side: BorderSide(color: theme.colorScheme.secondary),
+                ),
                 icon: const Icon(LucideIcons.checkCircle2),
                 label: const Text('Terminer'),
               ),
@@ -489,7 +340,11 @@ class _SessionActionsBar extends ConsumerWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: FilledButton.icon(
-                onPressed: hasBlocks ? () => _start(context) : null,
+                onPressed: hasExercises ? () => _start(context) : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.colorScheme.secondary,
+                  foregroundColor: theme.colorScheme.onSecondary,
+                ),
                 icon: const Icon(LucideIcons.play),
                 label: const Text('Démarrer'),
               ),
