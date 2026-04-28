@@ -6,14 +6,10 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_providers.dart';
 
-/// Segment d'un fil d'Ariane : libellé + action de navigation.
-///
-/// Deux façons de définir la destination :
-/// - `routeName` : le breadcrumb fait `popUntil` jusqu'à la route portant
-///   ce `RouteSettings.name` (cas standard pour un écran poussé via factory).
-/// - `onTap` : callback custom (ex: remonter au shell racine via `isFirst`
-///   quand la cible n'est pas une route pushée mais un onglet du shell).
-///
+/// Segment d'un fil d'Ariane.
+/// Cible :
+/// - `routeName` → le breadcrumb fait `popUntil` sur cette route nommée ;
+/// - `onTap` → callback custom (ex. revenir au shell racine).
 /// Au moins l'un des deux doit être fourni.
 class EditorCrumb {
   const EditorCrumb({
@@ -28,10 +24,8 @@ class EditorCrumb {
   final VoidCallback? onTap;
 }
 
-/// Fil d'Ariane pour les écrans de l'éditeur de programme élève.
-///
-/// Affiche les segments parents cliquables + le segment courant en gras.
-/// Un tap sur un segment remonte via `popUntil` jusqu'à la route nommée.
+/// Fil d'Ariane des écrans de l'éditeur de programme élève.
+/// Segments parents cliquables + segment courant en gras.
 class EditorBreadcrumb extends StatelessWidget implements PreferredSizeWidget {
   const EditorBreadcrumb({
     super.key,
@@ -106,8 +100,8 @@ class EditorBreadcrumb extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Noms de routes des écrans de l'éditeur (utilisés par le breadcrumb pour
-/// remonter via `popUntil`).
+/// Noms des routes des écrans de l'éditeur élève (utilisés par le
+/// breadcrumb pour remonter via `popUntil`).
 class EditorRoutes {
   const EditorRoutes._();
   static const studentDetail = '/coach/student/detail';
@@ -117,9 +111,8 @@ class EditorRoutes {
   static const exercise = '/coach/student/editor/exercise';
 }
 
-/// Noms de routes des écrans détail de la bibliothèque. Permet à un écran
-/// détail ouvert en profondeur (ex: exercice depuis un programme) d'afficher
-/// un breadcrumb cliquable remontant jusqu'à la racine du parcours.
+/// Noms des routes des écrans de la bibliothèque (pour breadcrumb sur le
+/// flow de consultation détail).
 class LibraryRoutes {
   const LibraryRoutes._();
   static const program = '/coach/library/program';
@@ -128,12 +121,9 @@ class LibraryRoutes {
   static const exercise = '/coach/library/exercise';
 }
 
-/// Résout le nom de l'élève via le provider partagé (cache Riverpod → lookup
-/// gratuit si la fiche élève a déjà été visitée, ce qui est le cas standard
-/// d'entrée dans l'éditeur).
-///
-/// Utilisé par chaque écran de l'éditeur pour construire le crumb racine
-/// sans avoir à threader le nom dans tous les constructeurs.
+/// Récupère le nom d'un élève via le provider partagé (cache Riverpod).
+/// Utilisé par les écrans de l'éditeur pour construire le crumb racine
+/// sans threader le nom dans tous les constructeurs.
 String resolveStudentName(WidgetRef ref, String studentId) {
   final profile = ref.watch(studentByIdProvider(studentId)).valueOrNull;
   final name = profile?.fullName.trim() ?? '';

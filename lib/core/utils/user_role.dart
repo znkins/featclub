@@ -1,7 +1,4 @@
-/// Énumération des rôles applicatifs Featclub.
-///
-/// Les valeurs `name` correspondent à celles stockées dans la colonne
-/// `profiles.role` (cf. schema_featclub.sql).
+/// Rôle applicatif (mappé sur la colonne `profiles.role`).
 enum UserRole {
   eleve,
   coach,
@@ -15,7 +12,7 @@ enum UserRole {
   }
 }
 
-/// Statuts d'accès stockés dans `profiles.status`.
+/// Statut d'accès (mappé sur la colonne `profiles.status`).
 enum AccessStatus {
   active,
   disabled;

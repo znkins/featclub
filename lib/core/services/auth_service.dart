@@ -11,12 +11,9 @@ class AuthService {
 
   Stream<AuthState> get onAuthStateChange => _client.auth.onAuthStateChange;
 
-  /// Crée un compte Supabase. Le profil applicatif est créé automatiquement
-  /// par le trigger DB `handle_new_user`.
-  ///
-  /// La confirmation d'email étant requise, Supabase ne renvoie pas de session
-  /// à l'inscription : on force un `signOut` au cas où, pour partir d'un état
-  /// propre côté client.
+  /// Crée un compte. Le profil applicatif est créé par le trigger DB
+  /// `handle_new_user`. La confirmation d'email étant requise, on force
+  /// un signOut pour partir d'un état propre côté client.
   Future<void> signUp({
     required String email,
     required String password,
@@ -27,10 +24,6 @@ class AuthService {
     }
   }
 
-  /// Connexion par email / mot de passe.
-  ///
-  /// Lève [AuthException] si l'email n'est pas confirmé ou si les
-  /// identifiants sont invalides.
   Future<AuthResponse> signIn({
     required String email,
     required String password,

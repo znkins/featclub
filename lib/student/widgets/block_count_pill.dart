@@ -3,10 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../shared/widgets/meta_pill.dart';
 
-/// Pastille « nombre de blocs » : icône layers + `X bloc(s)`.
-///
-/// Utilisée dans le header du détail de séance, à côté de
-/// [AssignedDatePill] et [DurationPill].
+/// Pastille « X bloc(s) » utilisée dans le header du détail séance.
 class BlockCountPill extends StatelessWidget {
   const BlockCountPill({super.key, required this.count});
 

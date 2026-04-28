@@ -10,12 +10,9 @@ import '../../shared/providers/data_providers.dart';
 import '../../theme/app_spacing.dart';
 import '../widgets/activity_list_tile.dart';
 
-/// Page Activité coach : feed des dernières séances complétées par tous les
-/// élèves. Ouverte depuis l'accueil coach (Navigator.push).
-///
-/// Pagination cursor-based (curseur = `completed_at`) avec scroll infini :
-/// la première page est chargée en `initState`, les suivantes au scroll
-/// (déclenchement à 300 px du bas). Pull-to-refresh remet à zéro.
+/// Page Activité coach : feed des dernières séances complétées par tous
+/// ses élèves. Pagination cursor-based (curseur = `completed_at`) + scroll
+/// infini : 1ère page chargée en `initState`, suivantes au scroll.
 class CoachActivityScreen extends ConsumerStatefulWidget {
   const CoachActivityScreen({super.key});
 
@@ -95,8 +92,8 @@ class _CoachActivityScreenState extends ConsumerState<CoachActivityScreen> {
         _loadingMore = false;
       });
     } catch (_) {
-      // Échec silencieux côté loadMore : on autorise un nouvel essai au
-      // prochain scroll. On ne casse pas l'écran déjà rempli.
+      // Échec silencieux : on garde l'écran déjà rempli, le prochain
+      // scroll réessaiera.
       if (!mounted) return;
       setState(() => _loadingMore = false);
     }
@@ -156,7 +153,7 @@ class _CoachActivityScreenState extends ConsumerState<CoachActivityScreen> {
           AppSpacing.lg,
           AppSpacing.xxl,
         ),
-        // +1 pour le sentinel de bas de liste (loader ou rien selon hasMore).
+        // +1 pour le sentinel de bas de liste (loader ou rien).
         itemCount: _items.length + 1,
         separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
         itemBuilder: (_, i) {

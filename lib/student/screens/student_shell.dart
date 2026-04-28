@@ -9,7 +9,8 @@ import 'student_home_screen.dart';
 import 'student_program_screen.dart';
 import 'student_progress_screen.dart';
 
-/// Conteneur élève : 4 onglets (Accueil, Programme, Progression, Profil).
+/// Coquille de l'espace élève : héberge le `NavigationBar` et les
+/// 4 onglets (Accueil, Programme, Progression, Profil).
 class StudentShell extends ConsumerWidget {
   const StudentShell({super.key});
 
@@ -29,9 +30,9 @@ class StudentShell extends ConsumerWidget {
       const StudentProgressScreen(),
       const ProfileScreen(),
     ];
-    // Profil fournit son propre Scaffold + AppBar (actions qui changent
-    // selon le mode lecture/édition) : on masque celui du shell.
-    // Accueil affiche le logo de marque centré en place du titre.
+    // Profil fournit son propre Scaffold + AppBar (actions qui changent en
+    // mode édition) : on masque celle du shell.
+    // Accueil affiche le wordmark centré en place du titre.
     final isProfile = index == _profileTabIndex;
     final isHome = index == _homeTabIndex;
     return Scaffold(

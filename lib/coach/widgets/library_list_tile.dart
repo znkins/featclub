@@ -4,12 +4,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Tuile générique pour les listes de contenu coach.
-///
-/// Carte avec bordure, titre + sous-titre optionnel + chevron (si `onTap`).
-///
-/// `subtitleWidget` remplace `subtitle` quand fourni (permet d'afficher
-/// un badge/chip à la place d'une simple ligne de texte).
+/// Tuile générique pour les listes de contenu coach (carte avec bordure,
+/// titre, sous-titre optionnel, chevron quand `onTap` est fourni).
+/// `subtitleWidget` remplace `subtitle` pour afficher un widget custom.
 class LibraryListTile extends StatelessWidget {
   const LibraryListTile({
     super.key,

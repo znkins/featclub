@@ -22,6 +22,8 @@ import '../exercises/exercise_detail_screen.dart';
 import 'block_exercise_picker_screen.dart';
 import 'block_form_screen.dart';
 
+/// Écran détail d'un bloc template : entête + liste réordonnable des
+/// exercices du bloc + FAB d'ajout. AppBar : Modifier + Supprimer.
 class BlockDetailScreen extends ConsumerStatefulWidget {
   const BlockDetailScreen({
     super.key,
@@ -72,6 +74,7 @@ class _BlockDetailScreenState extends ConsumerState<BlockDetailScreen>
 
   @override
   void didPopNext() {
+    // Re-fetch quand on revient depuis un écran enfant (édition, picker).
     ref.invalidate(blockDetailProvider(widget.blockId));
   }
 

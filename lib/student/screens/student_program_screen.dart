@@ -13,8 +13,8 @@ import '../providers/student_session_providers.dart';
 import '../widgets/student_session_tile.dart';
 import 'student_session_detail_screen.dart';
 
-/// Onglet « Mon programme » : séances du programme actif, triées pour mettre
-/// la prochaine séance en haut, plus compteur des séances de la semaine.
+/// Onglet « Mon programme » de l'élève : compteur de séances de la
+/// semaine + liste des séances triées (prochaine en premier).
 class StudentProgramScreen extends ConsumerWidget {
   const StudentProgramScreen({super.key});
 
@@ -91,9 +91,9 @@ class StudentProgramScreen extends ConsumerWidget {
   }
 }
 
-/// Compteur des séances restantes sur la semaine calendaire en cours
-/// (jusqu'à dimanche). Une séance complétée cette semaine voit sa
-/// `nextOccurrence` rouler à la semaine suivante et sort donc du décompte.
+/// Compteur des séances restantes sur la semaine en cours. Une séance
+/// complétée cette semaine voit sa `nextOccurrence` rouler à la semaine
+/// suivante, donc elle sort du décompte.
 class _WeekCounter extends StatelessWidget {
   const _WeekCounter({required this.sessions});
 

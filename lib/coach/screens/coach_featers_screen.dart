@@ -13,7 +13,7 @@ import '../widgets/library_search_field.dart';
 import '../widgets/student_list_tile.dart';
 import 'students/student_detail_screen.dart';
 
-/// Onglet Featers : liste des élèves actifs + recherche.
+/// Onglet Featers du coach : liste des élèves actifs + recherche.
 class CoachFeatersScreen extends ConsumerStatefulWidget {
   const CoachFeatersScreen({super.key});
 

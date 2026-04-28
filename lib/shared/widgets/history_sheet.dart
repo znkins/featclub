@@ -8,9 +8,8 @@ import '../providers/student_data_providers.dart';
 import 'compact_history_row.dart';
 
 /// Bottom sheet listant l'historique complet des séances terminées d'un
-/// élève. Utilisé par la fiche élève coach et par l'onglet progression
-/// élève (même présentation, même provider, le `studentId` change selon
-/// l'appelant).
+/// élève. Utilisé par la fiche coach et l'onglet progression élève
+/// (le `studentId` change selon l'appelant).
 Future<void> showHistorySheet(
   BuildContext context, {
   required String studentId,

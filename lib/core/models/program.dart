@@ -1,8 +1,8 @@
-/// Programme template (table `public.programs`).
+/// Programme template (table `public.programs`, toujours `is_template = true`).
 ///
-/// Toujours `is_template = true` côté coach. Lors de l'affectation à un élève,
-/// la RPC `duplicate_program_template_for_student` crée un `student_program`
-/// indépendant avec une copie profonde de la structure.
+/// Lors de l'affectation à un élève, la RPC
+/// `duplicate_program_template_for_student` crée un `student_program`
+/// indépendant (copie profonde de la structure).
 class Program {
   Program({
     required this.id,

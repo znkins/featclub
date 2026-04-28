@@ -1,8 +1,9 @@
+// Service Supabase pour la table `exercises` (bibliothèque d'exercices coach).
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/exercise.dart';
 
-/// Bibliothèque d'exercices coach (`public.exercises`).
 class ExerciseService {
   ExerciseService(this._client);
 

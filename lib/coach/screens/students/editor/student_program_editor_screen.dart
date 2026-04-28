@@ -25,10 +25,9 @@ import 'student_session_editor_screen.dart';
 import 'student_session_form_screen.dart';
 import 'student_session_template_picker_screen.dart';
 
-/// Éditeur racine d'un programme élève : métadonnées + liste des séances.
-///
-/// Le coach peut y ajouter des séances (vides ou depuis template), les
-/// réordonner, les supprimer, et ouvrir chaque séance pour éditer ses blocs.
+/// Éditeur racine du programme d'un élève : métadonnées + liste des séances.
+/// Le coach ajoute des séances (vides ou depuis template), les réordonne,
+/// les supprime, et ouvre chacune pour éditer ses blocs.
 class StudentProgramEditorScreen extends ConsumerWidget {
   const StudentProgramEditorScreen({
     super.key,

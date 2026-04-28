@@ -4,13 +4,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
 /// Pastille générique « icône + libellé » sur fond primaire léger.
-///
-/// Pattern visuel partagé par toutes les meta info de l'app : durée,
-/// date assignée, jour de la semaine, compteur de blocs, paramètres
-/// d'exercice (reps, charge, intensité, repos), etc.
-///
-/// Les pills spécifiques (DurationPill, AssignedDatePill, etc.) délèguent
-/// le rendu ici et n'encapsulent que leur formatage propre.
+/// Brique de base des pills spécifiques (DurationPill, AssignedDatePill,
+/// pills de paramètres d'exercice, etc.).
 class MetaPill extends StatelessWidget {
   const MetaPill({super.key, required this.icon, required this.label});
 

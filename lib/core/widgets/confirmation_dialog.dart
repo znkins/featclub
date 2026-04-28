@@ -1,22 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// Variante visuelle du bouton de confirmation.
-///
-/// Utilisée pour aligner la couleur du bouton sur la nature de l'action :
-/// - [standard]   : confirmation neutre (se déconnecter, dupliquer, etc.)
-///   → primaire teal.
-/// - [warning]    : retrait d'un lien / action réversible qui "enlève" sans
-///   détruire. Cohérent avec l'icône orange `minusCircle` qui a initié le flow.
-///   → secondaire orange.
-/// - [destructive] : suppression définitive côté DB (cascade sur les données
-///   dépendantes). Danger à signaler clairement.
-///   → error rouge.
+/// - [standard]    : action neutre (déconnexion, duplication) → primaire teal.
+/// - [warning]     : retrait réversible (cohérent avec l'icône orange) → orange.
+/// - [destructive] : suppression définitive avec cascade → rouge erreur.
 enum ConfirmationVariant { standard, warning, destructive }
 
 /// Dialogue de confirmation standard.
-///
-/// Renvoie `true` si l'utilisateur a confirmé, `false` sinon (annulation
-/// ou fermeture).
+/// `show` renvoie `true` si l'utilisateur confirme, `false` sinon.
 class ConfirmationDialog extends StatelessWidget {
   const ConfirmationDialog({
     super.key,

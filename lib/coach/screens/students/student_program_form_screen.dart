@@ -7,7 +7,8 @@ import '../../../theme/app_spacing.dart';
 import '../../providers/student_program_providers.dart';
 
 /// Création vide ou édition des métadonnées (titre + description) d'un
-/// programme élève. L'édition profonde (séances/blocs) sera ajoutée en 3.c.
+/// programme assigné à un élève. La structure (séances, blocs, exercices)
+/// se gère depuis l'éditeur.
 class StudentProgramFormScreen extends ConsumerStatefulWidget {
   const StudentProgramFormScreen({
     super.key,

@@ -5,9 +5,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
 /// Tuile sélectionnable pour les écrans « picker » (ajout multiple).
-///
-/// Même structure que [LibraryListTile] mais avec une checkbox à droite au
-/// lieu d'un chevron, et un état `checked` qui rehausse la bordure.
+/// Même structure que `LibraryListTile` avec une checkbox à droite et
+/// une bordure rehaussée quand `checked` est `true`.
 class LibrarySelectableTile extends StatelessWidget {
   const LibrarySelectableTile({
     super.key,

@@ -16,10 +16,8 @@ import '../widgets/admin_pills.dart';
 import '../widgets/admin_user_tile.dart';
 import 'admin_user_detail_screen.dart';
 
-/// Espace admin (page unique) : liste des comptes + recherche.
-///
-/// Ouvre une fiche utilisateur en push pour modifier rôle / statut ou
-/// supprimer un élève. Pas de bottom nav par design (cf. parcours doc 7.1).
+/// Écran unique de l'espace admin : liste des comptes + recherche.
+/// Tap sur une tuile pour ouvrir la fiche détaillée.
 class AdminHomeScreen extends ConsumerStatefulWidget {
   const AdminHomeScreen({super.key});
 
@@ -30,9 +28,8 @@ class AdminHomeScreen extends ConsumerStatefulWidget {
 class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
   String _query = '';
 
-  /// Filtre client-side : matche prénom, nom, nom complet, email,
-  /// libellé du rôle (« coach », « élève », « admin », ou les valeurs
-  /// brutes), et libellé du statut (« désactivé » ou « disabled »).
+  /// Filtre côté client : matche prénom, nom, email, libellé du rôle
+  /// et libellé du statut (« désactivé » / « actif »).
   List<AdminUserRow> _filter(List<AdminUserRow> users) {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return users;
@@ -146,4 +143,3 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
     );
   }
 }
-

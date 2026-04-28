@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 
-/// Vue d'erreur avec message et bouton de retry.
+/// Vue d'erreur standard : message + bouton « Réessayer ».
 class ErrorView extends StatelessWidget {
   const ErrorView({
     super.key,

@@ -4,13 +4,9 @@ import '../../core/widgets/user_avatar.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Carte d'identité partagée entre la fiche élève coach et les profils
-/// perso (élève + coach).
-///
-/// Structure : bandeau teal + avatar flottant centré + nom + sous-titre
-/// optionnel (email) + chip optionnel (rôle) + `body` libre (tuiles de
-/// stats, carte d'infos, etc.). L'`avatarOverlay` permet de poser un
-/// bouton d'édition sur l'avatar (utilisé en mode édition du profil).
+/// Carte d'identité partagée : bandeau primaire + avatar centré flottant +
+/// nom + sous-titre optionnel + chip optionnel + body libre.
+/// Utilisée par la fiche élève (côté coach) et les écrans Profil.
 class ProfileIdentityCard extends StatelessWidget {
   const ProfileIdentityCard({
     super.key,
@@ -30,10 +26,12 @@ class ProfileIdentityCard extends StatelessWidget {
   final String? subtitle;
   final Widget? chip;
 
-  /// Quand `true` et un `chip` est fourni, il flotte en haut-droite de la
-  /// bande blanche (sous le bandeau) plutôt que centré sous le nom.
+  /// Si `true`, le chip flotte en haut-droite plutôt que centré sous le nom.
   final bool chipAsideAvatar;
+
+  /// Widget posé en bas-droite de l'avatar (bouton d'édition, etc.).
   final Widget? avatarOverlay;
+
   final Widget? body;
 
   @override
@@ -148,12 +146,8 @@ class ProfileIdentityCard extends StatelessWidget {
   }
 }
 
-/// Tuile statistique compacte : icône + valeur + label. Utilisée dans le
-/// body de [ProfileIdentityCard] via [ProfileStatsGrid].
-///
-/// `value == null` rend un `—` atténué + italique (même pattern que
-/// [ProfileInfoRow]) pour signaler une donnée non remplie sans prendre
-/// autant de présence visuelle qu'une vraie valeur.
+/// Tuile statistique compacte : icône + valeur + label.
+/// `value == null` rend un `—` italique (donnée non renseignée).
 class ProfileStatTile extends StatelessWidget {
   const ProfileStatTile({
     super.key,
@@ -221,7 +215,7 @@ class ProfileStatTile extends StatelessWidget {
   }
 }
 
-/// Grille de tuiles statistiques. 4 tuiles → 2x2, sinon une seule ligne.
+/// Grille de tuiles statistiques (4 tuiles → 2x2, sinon une seule ligne).
 class ProfileStatsGrid extends StatelessWidget {
   const ProfileStatsGrid({super.key, required this.tiles});
 
@@ -254,7 +248,6 @@ class ProfileStatsGrid extends StatelessWidget {
 }
 
 /// Carte d'informations sur fond orange léger (Objectif, Note, Bio, etc.).
-/// Utilisée dans le body de [ProfileIdentityCard].
 class ProfileInfoCard extends StatelessWidget {
   const ProfileInfoCard({super.key, required this.rows});
 
@@ -282,8 +275,8 @@ class ProfileInfoCard extends StatelessWidget {
   }
 }
 
-/// Ligne d'info : icône secondaire + label muet + valeur indentée sous le
-/// label. Rendue en italique + "—" quand `value` est nul/vide.
+/// Ligne d'info : icône orange + label muet + valeur indentée sous le label.
+/// `value` nul/vide rend un `—` italique.
 class ProfileInfoRow extends StatelessWidget {
   const ProfileInfoRow({
     super.key,
@@ -296,7 +289,7 @@ class ProfileInfoRow extends StatelessWidget {
   final String label;
   final String? value;
 
-  // Largeur totale icône + gap pour aligner la valeur sous le label
+  // Largeur icône + gap pour aligner la valeur sous le label
   // (doit matcher l'icône 20 + SizedBox md).
   static const double _labelIndent = 20 + AppSpacing.md;
 

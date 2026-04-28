@@ -4,11 +4,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/day_of_week.dart';
 import '../../shared/widgets/meta_pill.dart';
 
-/// Pastille « jour » : icône calendrier + libellé français du jour.
-///
-/// Utilisée dans l'éditeur de programme élève et la meta row des tuiles
-/// séance, pour afficher le jour d'assignation de manière cohérente avec
-/// les autres pills.
+/// Pastille du jour assigné d'une séance élève (« Lundi », etc.).
+/// Variante côté coach (jour abstrait) du `AssignedDatePill` côté élève
+/// (date concrète).
 class DayOfWeekPill extends StatelessWidget {
   const DayOfWeekPill({super.key, required this.dayOfWeek});
 

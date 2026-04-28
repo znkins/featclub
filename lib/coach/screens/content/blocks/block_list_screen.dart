@@ -16,6 +16,8 @@ import '../../../widgets/library_type_icon.dart';
 import 'block_detail_screen.dart';
 import 'block_form_screen.dart';
 
+/// Onglet « Blocs » de la bibliothèque coach : liste filtrable +
+/// FAB de création + tap pour ouvrir le détail.
 class BlockListScreen extends ConsumerStatefulWidget {
   const BlockListScreen({super.key});
 

@@ -1,4 +1,4 @@
-/// Pivot bloc <-> exercice (table `public.block_exercises`).
+/// Pivot bloc ↔ exercice (table `public.block_exercises`).
 class BlockExercise {
   BlockExercise({
     required this.id,

@@ -3,12 +3,8 @@ import 'package:flutter/material.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Tuile regroupant plusieurs [DetailField] (ou équivalents) dans une carte
-/// bordée avec séparateurs internes.
-///
-/// Pattern réutilisé sur les écrans de détail (exercice, bloc, séance,
-/// programme) pour distinguer visuellement le bloc "infos" du bloc
-/// "liste d'enfants" (exercices, blocs, séances).
+/// Carte regroupant plusieurs `DetailField` avec séparateurs internes.
+/// Utilisée sur les écrans détail (exercice, bloc, séance, programme).
 class DetailInfoCard extends StatelessWidget {
   const DetailInfoCard({super.key, required this.children});
 

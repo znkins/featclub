@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_spacing.dart';
 
-/// Section d'un écran de détail : libellé + valeur ou placeholder.
-///
-/// Si `child` est `null`, affiche `emptyLabel` en italique atténué pour indiquer
-/// qu'il s'agit d'un champ à renseigner.
+/// Section d'un écran de détail : libellé + valeur (ou placeholder).
+/// `child == null` affiche `emptyLabel` en italique atténué.
 class DetailField extends StatelessWidget {
   const DetailField({
     super.key,

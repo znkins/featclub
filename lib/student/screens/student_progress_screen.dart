@@ -20,8 +20,8 @@ import '../../shared/widgets/weight_measures_sheet.dart';
 import '../../theme/app_spacing.dart';
 import '../widgets/student_weight_measure_dialog.dart';
 
-/// Onglet Progression élève : poids actuel, compteur complétions, graphique,
-/// 3 dernières mesures (+ voir plus), 3 dernières séances (+ voir plus).
+/// Onglet Progression de l'élève : poids actuel, compteur de séances,
+/// graphique d'évolution, 3 dernières mesures, 3 dernières séances.
 class StudentProgressScreen extends ConsumerWidget {
   const StudentProgressScreen({super.key});
 

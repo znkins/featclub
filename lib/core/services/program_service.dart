@@ -1,9 +1,11 @@
+// Service Supabase pour `programs` + `program_sessions` (bibliothèque coach).
+
 import 'package:supabase_flutter/supabase_flutter.dart' hide Session;
 
 import '../models/program.dart';
 import '../models/session.dart';
 
-/// Élément de la liste des programmes coach (entête + nombre de séances liées).
+/// Programme + nombre de séances liées (utilisé par la liste).
 class ProgramListItem {
   const ProgramListItem({required this.program, required this.sessionCount});
 
@@ -11,10 +13,9 @@ class ProgramListItem {
   final int sessionCount;
 }
 
-/// Liaison programme ↔ séance (ligne de `program_sessions`) avec la séance résolue.
-///
-/// La même séance peut apparaître plusieurs fois dans un programme : chaque
-/// apparition est identifiée par son `linkId` (id de la ligne pivot).
+/// Liaison programme ↔ séance (ligne pivot) avec la séance résolue.
+/// La même séance peut apparaître plusieurs fois : chaque apparition
+/// est identifiée par son `linkId`.
 class ProgramSessionLink {
   const ProgramSessionLink({
     required this.linkId,
@@ -29,7 +30,7 @@ class ProgramSessionLink {
   final int blockCount;
 }
 
-/// Détail d'un programme template : entête + liaisons de séances dans l'ordre.
+/// Détail d'un programme template : entête + liaisons de séances ordonnées.
 class ProgramDetail {
   const ProgramDetail({required this.program, required this.links});
 
@@ -37,8 +38,6 @@ class ProgramDetail {
   final List<ProgramSessionLink> links;
 }
 
-/// Bibliothèque de programmes templates
-/// (`public.programs` + `public.program_sessions`).
 class ProgramService {
   ProgramService(this._client);
 
@@ -152,10 +151,7 @@ class ProgramService {
     }).toList();
   }
 
-  /// Ajoute une séance template à la fin du programme.
-  ///
-  /// Les duplicats sont autorisés : appeler plusieurs fois insère plusieurs
-  /// lignes pivot distinctes.
+  /// Ajoute une séance à la fin du programme (les duplicats sont autorisés).
   Future<void> addSession({
     required String programId,
     required String sessionId,

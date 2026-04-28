@@ -16,14 +16,13 @@ class PickedAvatar {
 }
 
 /// Sélectionne une image (galerie ou caméra) puis la recadre en carré.
-///
-/// Renvoie `null` si l'utilisateur annule.
 class AvatarPicker {
   AvatarPicker._();
 
   static final ImagePicker _picker = ImagePicker();
   static final ImageCropper _cropper = ImageCropper();
 
+  /// Renvoie `null` si l'utilisateur annule la sélection ou le recadrage.
   static Future<PickedAvatar?> pick({required ImageSource source}) async {
     final picked = await _picker.pickImage(
       source: source,

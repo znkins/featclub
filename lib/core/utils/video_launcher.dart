@@ -3,10 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../widgets/app_snackbar.dart';
 
-/// Ouvre une URL vidéo dans l'application externe par défaut.
-///
-/// Affiche un snackbar d'erreur si l'URL est invalide ou si aucune app ne
-/// peut la gérer.
+/// Ouvre une URL vidéo dans l'app externe par défaut.
+/// Affiche un snackbar d'erreur si l'URL est invalide ou non gérable.
 Future<void> openVideoUrl(BuildContext context, String url) async {
   final uri = Uri.tryParse(url);
   if (uri == null) {

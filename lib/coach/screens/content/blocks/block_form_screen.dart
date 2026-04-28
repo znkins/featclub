@@ -7,6 +7,8 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/block_providers.dart';
 
+/// Formulaire de création / édition d'un bloc template (titre + description).
+/// Les exercices sont ajoutés ensuite via l'écran détail (picker).
 class BlockFormScreen extends ConsumerStatefulWidget {
   const BlockFormScreen({super.key, this.existing});
 

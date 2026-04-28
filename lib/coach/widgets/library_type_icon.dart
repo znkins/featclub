@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_radius.dart';
 
-/// Icône « type » (exercice/bloc/séance/programme) dans une pastille arrondie.
-///
-/// Fond primaire léger (alpha 0.1), icône en couleur primaire.
-/// Taille fixe pour offrir un ancrage visuel homogène dans les listes.
+/// Pastille « icône type » (exercice/bloc/séance/programme) — fond primaire
+/// léger, taille fixe, ancrage visuel homogène pour les listes.
 class LibraryTypeIcon extends StatelessWidget {
   const LibraryTypeIcon({super.key, required this.icon});
 

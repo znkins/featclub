@@ -1,7 +1,6 @@
 /// Mesure de poids (table `public.weight_measures`).
-///
 /// L'insertion déclenche le trigger `update_current_weight` qui met à jour
-/// `profiles.current_weight` automatiquement.
+/// `profiles.current_weight`.
 class WeightMeasure {
   WeightMeasure({
     required this.id,

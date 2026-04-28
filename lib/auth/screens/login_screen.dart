@@ -10,6 +10,9 @@ import '../utils/auth_validators.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/featclub_wordmark.dart';
 
+/// Écran de connexion : email + mot de passe.
+/// La redirection vers l'espace du rôle est faite par le routeur dès que
+/// la session Supabase est créée.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -39,7 +42,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      // La redirection est prise en charge par le router (currentSessionProvider).
     } on AuthException catch (e) {
       if (!mounted) return;
       AppSnackbar.showError(context, _humanize(e));

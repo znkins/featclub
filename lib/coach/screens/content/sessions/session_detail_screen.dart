@@ -22,6 +22,8 @@ import '../blocks/block_detail_screen.dart';
 import 'session_block_picker_screen.dart';
 import 'session_form_screen.dart';
 
+/// Écran détail d'une séance template : entête + liste réordonnable des
+/// blocs + FAB d'ajout. AppBar : Modifier + Supprimer.
 class SessionDetailScreen extends ConsumerStatefulWidget {
   const SessionDetailScreen({
     super.key,
@@ -391,4 +393,3 @@ class _SessionBlockSubtitle extends StatelessWidget {
     );
   }
 }
-

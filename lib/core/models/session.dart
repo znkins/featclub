@@ -1,7 +1,5 @@
-/// Séance template (table `public.sessions`).
-///
-/// `is_template` est toujours `true` côté coach. Ces séances sont dupliquées
-/// vers `student_sessions` lors de l'attribution à un élève.
+/// Séance template (table `public.sessions`, toujours `is_template = true`).
+/// Dupliquée vers `student_sessions` lors de l'attribution à un élève.
 class Session {
   Session({
     required this.id,

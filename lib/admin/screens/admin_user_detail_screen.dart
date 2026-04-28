@@ -16,8 +16,8 @@ import '../../theme/app_spacing.dart';
 import '../providers/admin_users_provider.dart';
 import '../widgets/admin_pills.dart';
 
-/// Fiche admin d'un utilisateur : identité + édition rôle/statut +
-/// suppression réservée aux comptes élève.
+/// Fiche admin d'un utilisateur : édition rôle/statut, suppression
+/// (réservée aux comptes élève via la RPC `admin_delete_student`).
 class AdminUserDetailScreen extends ConsumerStatefulWidget {
   const AdminUserDetailScreen({super.key, required this.userId});
 
@@ -99,10 +99,9 @@ class _AdminUserDetailScreenState
     }
   }
 
-  /// Traduit l'erreur en message utilisateur. La RPC refuse la suppression
-  /// quand le compte possède du contenu coach (exercices, blocs, séances,
-  /// programmes) — on détecte cette signature pour donner un message clair
-  /// plutôt que la stack trace Postgres brute.
+  /// Message utilisateur pour les erreurs de la RPC `admin_delete_student`.
+  /// La RPC refuse la suppression si le compte possède du contenu coach :
+  /// on transforme la signature SQL en message clair.
   String _deleteErrorMessage(Object e) {
     final raw = e.toString();
     if (raw.contains('contenu en bibliothèque')) {

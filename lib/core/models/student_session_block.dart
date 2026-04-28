@@ -1,7 +1,6 @@
 /// Bloc d'une séance élève (table `public.student_session_blocks`).
-///
-/// Indépendant des blocs templates : copie autonome dont le coach modifie
-/// le titre, la description et l'ordre librement.
+/// Copie autonome (titre, description, ordre) modifiable sans impacter
+/// les blocs templates de la bibliothèque coach.
 class StudentSessionBlock {
   StudentSessionBlock({
     required this.id,

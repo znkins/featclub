@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-/// Avatar circulaire partagé (liste élèves, fiche élève, feed, etc.).
-///
-/// Affiche l'image de l'`avatarUrl` si présente, sinon les initiales,
-/// sinon une icône utilisateur neutre. La taille est paramétrable pour
-/// couvrir les usages list (48) et header (72+).
+/// Avatar circulaire : image si `avatarUrl` présent, sinon initiales,
+/// sinon icône utilisateur neutre. Taille paramétrable (48 par défaut).
 class UserAvatar extends StatelessWidget {
   const UserAvatar({
     super.key,

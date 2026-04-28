@@ -6,13 +6,9 @@ import '../../core/utils/formatters.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Ligne compacte d'une séance terminée : icône check (primaire, dans un
-/// wrapper teinté) à gauche, titre au centre, date à droite.
-///
-/// `showComment` : si `true` et qu'un commentaire existe, affiche le
-/// commentaire en-dessous dans un wrapper teinté (utilisé dans le bottom
-/// sheet historique). Dans la preview compacte (3 dernières lignes sur une
-/// fiche), on le laisse à `false` pour garder les tuiles courtes.
+/// Ligne compacte d'une séance terminée : icône check + titre + date.
+/// `showComment: true` ajoute le commentaire en-dessous (utilisé dans le
+/// bottom sheet historique). En preview compacte on le laisse à `false`.
 class CompactHistoryRow extends StatelessWidget {
   const CompactHistoryRow({
     super.key,

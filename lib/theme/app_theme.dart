@@ -1,3 +1,5 @@
+// Construction des ThemeData light et dark de l'application.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -7,11 +9,8 @@ import 'app_sizes.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
-/// Construit les [ThemeData] light et dark de Featclub.
-///
-/// Style global : minimaliste façon Stripe/Linear.
-/// Cartes nettes (1px de bordure, pas d'ombre), boutons primaires hauts (56),
-/// rayons arrondis cohérents, typographie League Spartan.
+/// Style global : minimaliste, cartes nettes (bordure 1px, pas d'ombre),
+/// boutons primaires hauts (56), rayons arrondis cohérents.
 class AppTheme {
   AppTheme._();
 
@@ -189,10 +188,8 @@ class AppTheme {
       ),
 
       snackBarTheme: SnackBarThemeData(
-        // Pas de backgroundColor ni contentTextStyle : Material 3 utilise
-        // par défaut `inverseSurface` / `onInverseSurface`, ce qui donne un
-        // snackbar automatiquement contrasté avec le thème courant
-        // (fond sombre en light mode, fond clair en dark mode).
+        // Pas de backgroundColor : Material 3 utilise inverseSurface par
+        // défaut, ce qui donne un snackbar contrasté avec le thème courant.
         actionTextColor: AppColors.brandSecondary,
         behavior: SnackBarBehavior.floating,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.mdAll),

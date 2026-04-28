@@ -23,9 +23,9 @@ import '../widgets/theme_mode_toggle.dart';
 
 /// Écran de profil partagé (élève + coach).
 ///
-/// Mode lecture par défaut + bascule en mode édition. Champs adaptés au rôle :
-///  - élève : prénom, nom, bio, date de naissance, taille, objectif
-///  - coach : prénom, nom, bio
+/// Mode lecture par défaut + bascule en édition. Champs adaptés au rôle :
+/// élève (prénom, nom, bio, naissance, taille, objectif), coach (prénom,
+/// nom, bio).
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -222,11 +222,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  /// Actions de l'AppBar du profil.
-  ///
-  /// Lecture : `[🌙 thème] [✏️ éditer] [🚪 logout]`.
-  /// Édition  : `[✕ annuler] [✓ enregistrer]` uniquement, pour éviter
-  /// toute action destructive pendant qu'une saisie est en cours.
+  // En édition, on n'expose que Annuler/Enregistrer pour éviter toute action
+  // destructive (déconnexion, switch thème) pendant qu'une saisie est ouverte.
   List<Widget> _buildAppBarActions(Profile? profile) {
     if (profile == null) return const [ThemeModeToggle()];
     if (_isEditing) {
@@ -279,8 +276,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             initials: profile.initials,
             displayName: displayName,
             subtitle: email,
-            // Chip rôle uniquement pour coach et admin : pour un élève
-            // consultant son propre profil, l'info n'apporte rien.
+            // Pas de chip rôle pour un élève consultant son propre profil
+            // (info redondante).
             chip: !isStudent ? _RoleChip(role: profile.role) : null,
             chipAsideAvatar: true,
             avatarOverlay: _isEditing
@@ -289,7 +286,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onTap: () => _pickAvatar(profile),
                   )
                 : null,
-            // En mode édition la carte reste minimale (identité seule) :
+            // En mode édition, la carte reste minimale (identité seule) :
             // les champs modifiables sont dans le formulaire en dessous.
             body: _isEditing
                 ? null

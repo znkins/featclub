@@ -7,15 +7,12 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 
-/// Création ou édition d'une séance élève (métadonnées + jour de semaine).
+/// Création vide ou édition d'une séance dans le programme d'un élève
+/// (titre, description, durée, jour de semaine).
 ///
-/// Mode création : nécessite `programId`, `existing` est null.
-/// Mode édition : nécessite `existing`.
-///
-/// Le jour de semaine choisi sert de seule source de vérité pour la
-/// planification : la date concrète affichée à l'élève est dérivée à la
-/// lecture (prochaine occurrence du jour, aujourd'hui si on l'assigne le
-/// jour J).
+/// Le jour est la seule source de vérité pour la planification : la date
+/// concrète affichée à l'élève est dérivée à la lecture (prochaine
+/// occurrence du jour, aujourd'hui inclus).
 class StudentSessionFormScreen extends ConsumerStatefulWidget {
   const StudentSessionFormScreen({
     super.key,

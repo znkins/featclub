@@ -8,8 +8,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import 'admin_pills.dart';
 
-/// Tuile de liste pour la gestion admin des comptes : avatar, nom, email,
-/// pill rôle (toujours), pill « Désactivé » uniquement si statut disabled.
+/// Tuile d'utilisateur dans la liste admin : avatar, nom, email, pills.
 class AdminUserTile extends StatelessWidget {
   const AdminUserTile({
     super.key,

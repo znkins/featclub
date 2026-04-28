@@ -8,19 +8,16 @@ final blockServiceProvider = Provider<BlockService>((ref) {
   return BlockService(ref.watch(supabaseClientProvider));
 });
 
-/// Liste des blocs du coach connecté (avec compteur d'exercices).
+/// Blocs templates du coach connecté (avec compteur d'exercices).
 final coachBlocksProvider = FutureProvider<List<BlockListItem>>((ref) async {
   final userId = ref.watch(currentSessionProvider)?.user.id;
   if (userId == null) return const [];
   return ref.watch(blockServiceProvider).listByCoach(userId);
 });
 
-/// Détail d'un bloc (entête + liaisons d'exercices).
-///
-/// `autoDispose` pour garantir la fraîcheur : quand l'écran détail est
-/// disposé (pop direct ou `popUntil` via breadcrumb), le cache est vidé.
-/// Prochaine entrée = fetch frais, sans dépendre de `didPopNext` qui ne
-/// déclenche que sur le niveau où on atterrit.
+/// Détail d'un bloc (entête + exercices). `autoDispose` pour garantir un
+/// fetch frais à la prochaine entrée — utile quand le breadcrumb fait un
+/// `popUntil` qui saute des niveaux sans déclencher `didPopNext`.
 final blockDetailProvider =
     FutureProvider.autoDispose.family<BlockDetail, String>((ref, id) async {
   return ref.watch(blockServiceProvider).fetchDetail(id);

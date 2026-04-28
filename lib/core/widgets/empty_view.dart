@@ -5,10 +5,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 
-/// État vide standard : icône + message court + action facultative.
-///
-/// `wrapIcon: true` rend l'icône dans une pastille arrondie teintée en
-/// couleur primaire — cohérent avec les tuiles de la bibliothèque.
+/// État vide standard : icône + message + action facultative.
+/// `wrapIcon: true` rend l'icône dans une pastille primaire arrondie.
 class EmptyView extends StatelessWidget {
   const EmptyView({
     super.key,
@@ -18,8 +16,7 @@ class EmptyView extends StatelessWidget {
     this.wrapIcon = false,
   });
 
-  /// Variante standard pour une recherche qui ne ramène aucun résultat.
-  /// Utilisée par toutes les listes recherchables et les pickers.
+  /// Variante « aucune correspondance » pour les recherches sans résultat.
   const EmptyView.noResults({super.key})
       : icon = LucideIcons.search,
         message = 'Aucun résultat',

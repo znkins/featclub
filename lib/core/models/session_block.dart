@@ -1,4 +1,4 @@
-/// Pivot séance <-> bloc (table `public.session_blocks`).
+/// Pivot séance ↔ bloc (table `public.session_blocks`).
 class SessionBlock {
   SessionBlock({
     required this.id,

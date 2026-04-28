@@ -5,12 +5,10 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
 /// Choix d'ajout côté éditeur élève : création vide ou depuis un template.
-///
-/// Utilisé au niveau programme, séance et bloc. Au niveau exercice, on
-/// utilise le même widget avec des libellés ajustés (« Ad hoc » / « Biblio »).
 enum AddChoice { empty, template }
 
-/// Ouvre un bottom sheet avec deux options et retourne le choix (ou null).
+/// Ouvre un bottom sheet de choix d'ajout (« vide » ou « depuis template »).
+/// Renvoie le choix de l'utilisateur, ou `null` s'il annule.
 Future<AddChoice?> showAddChoiceSheet(
   BuildContext context, {
   required String title,

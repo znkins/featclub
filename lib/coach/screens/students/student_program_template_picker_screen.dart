@@ -15,10 +15,9 @@ import '../../widgets/library_list_tile.dart';
 import '../../widgets/library_search_field.dart';
 import '../../widgets/library_type_icon.dart';
 
-/// Choix d'un programme template à dupliquer pour un élève (sélection simple).
-///
-/// Sur tap d'une tuile : confirmation puis appel de la RPC
-/// `duplicate_program_template_for_student`.
+/// Picker d'un programme template à dupliquer pour un élève.
+/// Sur tap : confirmation puis appel de la RPC
+/// `duplicate_program_template_for_student` (copie profonde).
 class StudentProgramTemplatePickerScreen extends ConsumerStatefulWidget {
   const StudentProgramTemplatePickerScreen({
     super.key,

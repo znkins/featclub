@@ -1,6 +1,7 @@
+// Validateurs réutilisés par les formulaires d'authentification.
+
 import 'package:flutter/widgets.dart';
 
-/// Validateurs partagés des formulaires d'authentification.
 class AuthValidators {
   AuthValidators._();
 
@@ -21,6 +22,7 @@ class AuthValidators {
     return null;
   }
 
+  /// Validateur dynamique : compare le champ courant à la valeur de [source].
   static String? Function(String?) confirmPassword(
       TextEditingController source) {
     return (value) {

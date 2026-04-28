@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Mode de thème courant de l'application.
-///
-/// Défaut : [ThemeMode.system] (suit le réglage de l'OS). Une fois que
-/// l'utilisateur bascule manuellement, on conserve son choix le temps de la
-/// session (pas de persistance disque en V1).
+/// Mode de thème courant. Défaut : suit le réglage OS. Pas de persistance
+/// disque en V1 — le choix manuel ne survit pas au redémarrage de l'app.
 final themeModeProvider = StateProvider<ThemeMode>((_) => ThemeMode.system);

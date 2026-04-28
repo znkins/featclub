@@ -1,4 +1,5 @@
-/// Tailles standards utilisées à travers l'application.
+// Tailles standards (boutons, icônes, cibles tactiles, etc.).
+
 class AppSizes {
   AppSizes._();
 

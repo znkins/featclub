@@ -15,10 +15,8 @@ import '../../../widgets/library_selectable_tile.dart';
 import '../../../widgets/library_type_icon.dart';
 import '../../../widgets/session_meta_row.dart';
 
-/// Sélection multiple de séances à ajouter à un programme.
-///
-/// La liste affiche toutes les séances de la bibliothèque : une séance déjà
-/// présente dans le programme peut être ajoutée à nouveau (duplicat).
+/// Picker multi-sélection de séances à ajouter dans un programme template.
+/// Les duplicats sont autorisés.
 class ProgramSessionPickerScreen extends ConsumerStatefulWidget {
   const ProgramSessionPickerScreen({super.key, required this.programId});
 

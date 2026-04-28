@@ -15,10 +15,9 @@ import '../../../widgets/library_selectable_tile.dart';
 import '../../../widgets/library_type_icon.dart';
 import '../../../widgets/session_meta_row.dart';
 
-/// Sélection multiple de séances templates à dupliquer dans un programme élève.
-///
-/// Chaque séance choisie est copiée en profondeur (séance → blocs →
-/// exercices) via la RPC `duplicate_session_template_for_student`.
+/// Picker multi-sélection de séances templates à dupliquer dans le programme
+/// d'un élève (RPC `duplicate_session_template_for_student`, copie profonde
+/// séance → blocs → exercices).
 class StudentSessionTemplatePickerScreen extends ConsumerStatefulWidget {
   const StudentSessionTemplatePickerScreen({
     super.key,

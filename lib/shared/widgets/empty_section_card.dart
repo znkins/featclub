@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Carte d'état vide pour une section : pastille icône primaire, titre,
-/// sous-titre explicatif. Utilisée dans les sections d'une fiche (Mesures,
-/// Historique, Programmes) pour remplacer proprement une liste vide.
+/// Carte d'état vide pour une section de fiche (pastille icône + titre +
+/// sous-titre). Utilisée à la place d'une liste vide dans Mesures,
+/// Historique, Programmes, etc.
 class EmptySectionCard extends StatelessWidget {
   const EmptySectionCard({
     super.key,

@@ -1,13 +1,11 @@
 /// Exercice d'une séance élève (table `public.student_session_exercises`).
 ///
-/// Snapshot indépendant d'un exercice template : tous les paramètres sont
-/// stockés en clair (`reps`, `load`, `intensity`, `rest`, `note`) et restent
+/// Snapshot indépendant d'un exercice template : tous les paramètres
+/// (`reps`, `load`, `intensity`, `rest`, `note`) sont stockés en clair et
 /// modifiables sans impact sur la bibliothèque coach.
 ///
-/// Les champs `description` et `note` ont des rôles distincts :
-///   - `description` : instructions générales de l'exercice (snapshot du
-///     template, ou édité par le coach)
-///   - `note` : remarque personnalisée du coach pour cet élève spécifique
+/// `description` = instructions générales (snapshot du template ou édité).
+/// `note` = remarque personnalisée du coach pour cet élève.
 class StudentSessionExercise {
   StudentSessionExercise({
     required this.id,

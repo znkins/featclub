@@ -16,6 +16,8 @@ import '../../../widgets/library_type_icon.dart';
 import 'program_detail_screen.dart';
 import 'program_form_screen.dart';
 
+/// Onglet « Programmes » de la bibliothèque coach : liste filtrable +
+/// FAB de création + tap pour ouvrir le détail.
 class ProgramListScreen extends ConsumerStatefulWidget {
   const ProgramListScreen({super.key});
 

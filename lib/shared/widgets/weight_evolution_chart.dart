@@ -6,13 +6,9 @@ import '../../core/utils/formatters.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Graphique d'évolution du poids partagé coach (fiche élève) et élève
-/// (onglet Progression).
-///
-/// Affiche au moins 2 mesures. Trié chronologiquement ; tiebreaker sur
-/// `createdAt` quand plusieurs mesures partagent la même date.
-/// Indicateur de touch en couleur secondaire (orange) pour rester cohérent
-/// avec les dots oranges du graphique.
+/// Graphique d'évolution du poids (line chart fl_chart).
+/// Partagé entre la fiche élève coach et l'onglet Progression de l'élève.
+/// Nécessite au moins 2 mesures.
 class WeightEvolutionChart extends StatelessWidget {
   const WeightEvolutionChart({super.key, required this.measures});
 
@@ -21,6 +17,8 @@ class WeightEvolutionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Tri chronologique avec tiebreaker `createdAt` quand plusieurs
+    // mesures partagent la même date.
     final sorted = [...measures]
       ..sort((a, b) {
         final byDate = a.measuredAt.compareTo(b.measuredAt);

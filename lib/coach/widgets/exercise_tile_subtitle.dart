@@ -3,12 +3,9 @@ import 'package:flutter/material.dart';
 import '../../theme/app_spacing.dart';
 import 'category_chip.dart';
 
-/// Sous-titre d'une tuile exercice : description (onSurface) + chip catégorie.
-///
-/// Utilisé dans la liste des exercices de la biblio et dans les exercices
-/// listés sous un bloc. Renvoie `SizedBox.shrink()` si ni description ni
-/// catégorie — à l'appelant de passer `null` comme subtitleWidget dans ce cas
-/// pour que la tuile ne réserve aucun espace sous le titre.
+/// Sous-titre d'une tuile exercice : description + chip catégorie.
+/// Renvoie une boîte vide si ni description ni catégorie — l'appelant
+/// peut alors passer `null` pour ne réserver aucun espace.
 class ExerciseTileSubtitle extends StatelessWidget {
   const ExerciseTileSubtitle({
     super.key,
@@ -24,8 +21,7 @@ class ExerciseTileSubtitle extends StatelessWidget {
 
   bool get _hasCategory => category != null && category!.trim().isNotEmpty;
 
-  /// Indique si le widget aurait du contenu à afficher — pratique pour décider
-  /// de passer `null` à la place.
+  /// `true` si le widget aurait quelque chose à afficher.
   static bool hasContent({String? description, String? category}) {
     return (description != null && description.trim().isNotEmpty) ||
         (category != null && category.trim().isNotEmpty);

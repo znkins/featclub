@@ -1,10 +1,11 @@
+// Service Supabase pour `completed_sessions` (historique des séances faites).
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/completed_session.dart';
 import '../models/profile.dart';
 
-/// Complétion d'un élève + son profil minimal (pour le feed d'activité coach :
-/// on a besoin du nom et de l'avatar à côté de chaque ligne).
+/// Complétion + profil de l'élève (utilisé par le feed d'activité coach).
 class RecentActivityItem {
   const RecentActivityItem({required this.completion, required this.student});
 
@@ -12,10 +13,6 @@ class RecentActivityItem {
   final Profile student;
 }
 
-/// Historique des séances terminées (`public.completed_sessions`).
-///
-/// Lecture côté coach et élève, création côté élève uniquement
-/// (bouton « Terminer » du détail séance ou du mode d'exécution).
 class CompletedSessionService {
   CompletedSessionService(this._client);
 
@@ -26,11 +23,9 @@ class CompletedSessionService {
   static const String _profileColumns =
       'id, role, status, first_name, last_name, bio, birth_date, height_cm, goal, current_weight, avatar_url, created_at';
 
-  /// Crée une entrée de séance terminée pour un élève.
-  ///
-  /// `sessionTitle` est un snapshot : l'historique reste lisible même si la
-  /// séance source est supprimée. La séance n'est pas désactivée — l'élève
-  /// peut la refaire plus tard.
+  /// Marque une séance comme terminée pour un élève.
+  /// `sessionTitle` est un snapshot : l'historique reste lisible même
+  /// si la séance source est supprimée plus tard.
   Future<CompletedSession> create({
     required String studentId,
     required String studentSessionId,
@@ -53,9 +48,7 @@ class CompletedSessionService {
   }
 
   /// Nombre total de séances terminées par un élève.
-  ///
-  /// Requête dédiée `select('id')` pour éviter de tirer title/comment juste
-  /// pour compter.
+  /// Requête `select('id')` pour ne pas tirer titre/commentaire inutilement.
   Future<int> countByStudent(String studentId) async {
     final rows = await _client
         .from('completed_sessions')
@@ -86,15 +79,10 @@ class CompletedSessionService {
         .toList();
   }
 
-  /// Feed d'activité coach : dernières complétions (tous élèves confondus),
-  /// avec le profil de l'élève embarqué pour pouvoir afficher avatar + nom
-  /// sans round-trip supplémentaire.
-  ///
-  /// Pagination cursor-based : passer `before = completed_at du dernier item
-  /// de la page précédente` pour charger la suite. Le tri est strictement
-  /// décroissant sur `completed_at`, donc le curseur ne ramène jamais deux
-  /// fois la même ligne tant que `completed_at` est unique (UUID + timestamp
-  /// précis à la microseconde côté Postgres).
+  /// Feed d'activité coach paginé (curseur sur `completed_at`).
+  /// Embarque le profil de l'élève pour afficher avatar + nom sans
+  /// round-trip supplémentaire. Passer `before = completed_at du dernier
+  /// item de la page précédente` pour charger la suite.
   Future<List<RecentActivityItem>> listRecentWithStudent({
     required int limit,
     DateTime? before,

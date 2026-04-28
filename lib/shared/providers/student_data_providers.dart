@@ -1,26 +1,20 @@
+// Données liées à un élève, partagées entre coach (fiche élève) et
+// élève (onglet progression). Keyés sur `studentId` pour servir les deux rôles.
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/completed_session.dart';
 import '../../core/models/weight_measure.dart';
 import 'data_providers.dart';
 
-/// Providers de données liées à un élève (mesures de poids + historique)
-/// partagés par le coach (fiche élève) et par l'élève (onglet progression).
-///
-/// Tous sont keyés sur `studentId` pour pouvoir servir les deux rôles :
-/// coach passe l'id de l'élève consulté, élève passe son propre id.
-
-/// Toutes les mesures de poids, plus récentes en tête.
-///
-/// Source unique utilisée par la section « Mesures » : le graphique utilise
-/// l'historique complet, les lignes ne montrent que les 3 dernières, et le
-/// bottom sheet « Voir plus » affiche tout.
+/// Toutes les mesures de poids d'un élève (plus récentes en tête).
+/// Source unique pour graphique, lignes récentes et bottom sheet « Voir plus ».
 final studentWeightsProvider =
     FutureProvider.family<List<WeightMeasure>, String>((ref, studentId) async {
   return ref.watch(weightMeasureServiceProvider).listByStudent(studentId);
 });
 
-/// Aperçu compact : 4 entrées (3 affichées + 1 pour savoir s'il faut montrer
+/// 4 dernières complétions (3 affichées + 1 pour décider d'afficher
 /// le bouton « Voir plus »).
 final studentRecentHistoryProvider =
     FutureProvider.family<List<CompletedSession>, String>(

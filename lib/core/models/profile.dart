@@ -2,8 +2,8 @@ import '../utils/user_role.dart';
 
 /// Profil applicatif (table `public.profiles`).
 ///
-/// L'`id` est partagé avec `auth.users.id`. Le profil est créé
-/// automatiquement à l'inscription via le trigger `handle_new_user`.
+/// `id` est partagé avec `auth.users.id`. Le profil est créé automatiquement
+/// à l'inscription par le trigger `handle_new_user`.
 class Profile {
   Profile({
     required this.id,
@@ -38,8 +38,7 @@ class Profile {
     return parts.join(' ');
   }
 
-  /// Initiales (jusqu'à 2 lettres, majuscules) dérivées du prénom + nom.
-  /// Fallback de l'avatar quand pas de photo.
+  /// Initiales (jusqu'à 2 lettres). Fallback de l'avatar.
   String get initials {
     final f = (firstName ?? '').trim();
     final l = (lastName ?? '').trim();
@@ -48,7 +47,7 @@ class Profile {
     return (i1 + i2).toUpperCase();
   }
 
-  /// Âge calculé depuis `birthDate`, `null` si non renseigné.
+  /// Âge calculé à partir de `birthDate`. `null` si non renseigné.
   int? get age {
     final birth = birthDate;
     if (birth == null) return null;
@@ -61,7 +60,7 @@ class Profile {
     return years;
   }
 
-  /// Le profil est considéré complet dès lors que le prénom est renseigné.
+  /// Profil considéré comme complet dès que le prénom est renseigné.
   bool get isComplete => (firstName ?? '').trim().isNotEmpty;
 
   factory Profile.fromJson(Map<String, dynamic> json) {

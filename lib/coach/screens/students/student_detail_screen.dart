@@ -32,7 +32,8 @@ import 'student_program_form_screen.dart';
 import 'student_program_template_picker_screen.dart';
 import 'weight_measure_form_dialog.dart';
 
-/// Fiche élève côté coach : identité + programmes + mesures + historique.
+/// Fiche d'un élève côté coach : identité + stats, programmes assignés
+/// (toggle actif), mesures de poids + graphique, historique de séances.
 class StudentDetailScreen extends ConsumerStatefulWidget {
   const StudentDetailScreen({super.key, required this.studentId});
 
@@ -449,4 +450,3 @@ class _HistorySection extends ConsumerWidget {
     );
   }
 }
-

@@ -8,7 +8,7 @@ final programServiceProvider = Provider<ProgramService>((ref) {
   return ProgramService(ref.watch(supabaseClientProvider));
 });
 
-/// Liste des programmes templates du coach connecté (avec compteur de séances).
+/// Programmes templates du coach connecté (avec compteur de séances).
 final coachProgramsProvider =
     FutureProvider<List<ProgramListItem>>((ref) async {
   final userId = ref.watch(currentSessionProvider)?.user.id;
@@ -16,11 +16,8 @@ final coachProgramsProvider =
   return ref.watch(programServiceProvider).listByCoach(userId);
 });
 
-/// Détail d'un programme template (entête + liaisons de séances).
-///
-/// `autoDispose` : fraîcheur garantie à chaque ré-entrée dans l'écran détail
-/// (couvre le cas du `popUntil` breadcrumb qui saute des niveaux sans
-/// déclencher `didPopNext` sur les écrans traversés).
+/// Détail d'un programme template (entête + séances). `autoDispose` pour
+/// éviter le cache périmé lors d'un `popUntil` via breadcrumb.
 final programDetailProvider =
     FutureProvider.autoDispose.family<ProgramDetail, String>((ref, id) async {
   return ref.watch(programServiceProvider).fetchDetail(id);

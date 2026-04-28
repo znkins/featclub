@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Badge de catégorie d'un exercice.
-///
-/// Style pill en couleur principale, auto-dimensionné à la largeur du texte.
+/// Badge de catégorie d'un exercice (pill couleur primaire).
 class CategoryChip extends StatelessWidget {
   const CategoryChip({super.key, required this.label});
 

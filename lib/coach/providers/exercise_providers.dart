@@ -9,16 +9,15 @@ final exerciseServiceProvider = Provider<ExerciseService>((ref) {
   return ExerciseService(ref.watch(supabaseClientProvider));
 });
 
-/// Liste des exercices du coach connecté.
+/// Exercices template du coach connecté.
 final coachExercisesProvider = FutureProvider<List<Exercise>>((ref) async {
   final userId = ref.watch(currentSessionProvider)?.user.id;
   if (userId == null) return const [];
   return ref.watch(exerciseServiceProvider).listByCoach(userId);
 });
 
-/// Détail d'un exercice (pour l'écran détail).
-///
-/// `autoDispose` : fraîcheur garantie à chaque ré-entrée dans l'écran détail.
+/// Détail d'un exercice. `autoDispose` pour garantir la fraîcheur à
+/// chaque ré-entrée dans l'écran détail.
 final exerciseByIdProvider =
     FutureProvider.autoDispose.family<Exercise, String>((ref, id) async {
   return ref.watch(exerciseServiceProvider).fetchById(id);

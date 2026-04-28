@@ -6,11 +6,7 @@ import '../../core/widgets/user_avatar.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Tuile de liste dédiée à un profil élève (Featers).
-///
-/// Spécifique au module élèves : avatar photo en leading avec un gap `lg`
-/// (plus aéré que la tuile `LibraryListTile` conçue pour les icônes de la
-/// bibliothèque de contenu).
+/// Tuile d'un profil élève dans la liste « Featers » du coach.
 class StudentListTile extends StatelessWidget {
   const StudentListTile({
     super.key,

@@ -24,10 +24,9 @@ import 'student_block_form_screen.dart';
 import 'student_exercise_editor_screen.dart';
 import 'student_exercise_library_picker_screen.dart';
 
-/// Éditeur d'un bloc élève : titre + liste des exercices.
-///
-/// Ajout d'un exercice : depuis la bibliothèque coach (snapshot titre/vidéo)
-/// ou ad hoc (création libre).
+/// Éditeur d'un bloc d'un élève : titre + liste des exercices.
+/// Ajout d'exercice : depuis la bibliothèque coach (snapshot titre/vidéo)
+/// ou en saisie libre (paramètres custom).
 class StudentBlockEditorScreen extends ConsumerWidget {
   const StudentBlockEditorScreen({
     super.key,
@@ -169,8 +168,8 @@ class StudentBlockEditorScreen extends ConsumerWidget {
     try {
       await ref.read(studentProgramServiceProvider).deleteBlock(block.id);
       ref.invalidate(studentSessionEditorDetailProvider(sessionId));
-      // Supprimer un bloc change la `blockCount` de la séance affichée dans
-      // l'éditeur programme → on invalide aussi ce niveau.
+      // Le `blockCount` de la séance affichée dans l'éditeur programme
+      // change : invalider aussi ce niveau.
       ref.invalidate(studentProgramEditorDetailProvider(programId));
       if (!context.mounted) return;
       AppSnackbar.showSuccess(context, 'Bloc supprimé');
@@ -441,9 +440,8 @@ class _ExerciseSubtitle extends StatelessWidget {
         if (hasParams) ExerciseParamsRow(exercise: exercise),
         if (note.isNotEmpty) ...[
           if (hasParams) const SizedBox(height: AppSpacing.sm),
-          // `maxLines: 3` borne le texte dans le contexte dense de
-          // l'éditeur (les tuiles d'exos doivent garder une hauteur
-          // raisonnable même si le coach saisit une note longue).
+          // Borne le texte pour que les tuiles gardent une hauteur
+          // raisonnable même avec une note longue.
           ExerciseNoteRow(note: note, maxLines: 3),
         ],
       ],

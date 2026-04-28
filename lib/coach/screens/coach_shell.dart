@@ -9,7 +9,7 @@ import 'coach_content_screen.dart';
 import 'coach_featers_screen.dart';
 import 'coach_home_screen.dart';
 
-/// Conteneur coach : 4 onglets (Accueil, Featers, Contenu, Profil).
+/// Coquille de l'espace coach : 4 onglets (Accueil, Featers, Contenu, Profil).
 class CoachShell extends ConsumerWidget {
   const CoachShell({super.key});
 
@@ -29,10 +29,9 @@ class CoachShell extends ConsumerWidget {
       const CoachContentScreen(),
       const ProfileScreen(),
     ];
-    // L'onglet Profil fournit son propre Scaffold + AppBar (actions qui
-    // changent selon le mode lecture/édition), on masque donc celui du shell
-    // pour éviter un double AppBar. Accueil affiche le logo de marque
-    // centré en place du titre (cohérent avec l'élève).
+    // Profil fournit son propre Scaffold + AppBar (actions qui changent en
+    // mode édition) : on masque celle du shell.
+    // Accueil affiche le wordmark centré en place du titre.
     final isProfile = index == _profileTabIndex;
     final isHome = index == _homeTabIndex;
     return Scaffold(

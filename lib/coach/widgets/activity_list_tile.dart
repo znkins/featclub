@@ -7,13 +7,10 @@ import '../../core/widgets/user_avatar.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Ligne du feed d'activité coach : avatar + nom élève à gauche, date à
-/// droite, titre de séance en sous-ligne, commentaire éventuel dans un
-/// wrapper teinté en dessous.
-///
-/// Variante "feed" du `CompactHistoryRow` (qui s'utilise sur la fiche élève
-/// où l'identité de l'élève est déjà connue) : ici l'identité est l'info
-/// principale, on pousse donc l'avatar et le nom en tête de la ligne.
+/// Ligne du feed d'activité coach : avatar + nom de l'élève en tête,
+/// titre de séance + date, commentaire éventuel en dessous.
+/// Variante du `CompactHistoryRow` où l'identité de l'élève est l'info
+/// principale (pas connue d'avance comme sur la fiche élève).
 class ActivityListTile extends StatelessWidget {
   const ActivityListTile({super.key, required this.item});
 

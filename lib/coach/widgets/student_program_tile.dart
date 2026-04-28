@@ -6,11 +6,9 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import 'library_type_icon.dart';
 
-/// Tuile d'un programme élève : icône + infos + switch actif.
-///
-/// Les actions "Modifier" et "Supprimer" ne sont pas exposées ici : elles sont
-/// accessibles via l'AppBar de l'écran détail (`StudentProgramEditorScreen`).
-/// On évite ainsi le doublon avec un overflow menu redondant.
+/// Tuile d'un programme assigné à un élève (icône, infos, switch actif).
+/// Modifier/Supprimer ne sont pas exposés ici : ces actions vivent dans
+/// l'AppBar de l'écran détail (`StudentProgramEditorScreen`).
 class StudentProgramTile extends StatelessWidget {
   const StudentProgramTile({
     super.key,

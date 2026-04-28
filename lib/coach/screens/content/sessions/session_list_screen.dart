@@ -17,6 +17,8 @@ import '../../../widgets/session_meta_row.dart';
 import 'session_detail_screen.dart';
 import 'session_form_screen.dart';
 
+/// Onglet « Séances » de la bibliothèque coach : liste filtrable +
+/// FAB de création + tap pour ouvrir le détail.
 class SessionListScreen extends ConsumerStatefulWidget {
   const SessionListScreen({super.key});
 

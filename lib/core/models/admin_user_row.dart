@@ -2,9 +2,8 @@ import '../utils/user_role.dart';
 
 /// Ligne d'utilisateur retournée par la RPC `admin_list_users`.
 ///
-/// Variante allégée de [Profile] : ne contient que les champs utiles à la
-/// gestion admin (identité + email + rôle + statut), enrichie de l'email
-/// depuis `auth.users` que les clients ne peuvent pas lire en direct.
+/// Variante allégée de [Profile] : identité + email + rôle + statut.
+/// L'email vient de `auth.users` (les clients ne peuvent pas le lire en direct).
 class AdminUserRow {
   AdminUserRow({
     required this.id,
@@ -31,8 +30,10 @@ class AdminUserRow {
     return parts.join(' ');
   }
 
+  /// Nom complet, ou email en fallback si pas de prénom/nom renseigné.
   String get displayName => fullName.isEmpty ? email : fullName;
 
+  /// Initiales (jusqu'à 2 lettres). Fallback : 1ère lettre de l'email.
   String get initials {
     final f = (firstName ?? '').trim();
     final l = (lastName ?? '').trim();

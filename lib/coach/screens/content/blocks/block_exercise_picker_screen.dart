@@ -15,10 +15,8 @@ import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_selectable_tile.dart';
 import '../../../widgets/library_type_icon.dart';
 
-/// Sélection multiple d'exercices à ajouter à un bloc.
-///
-/// La liste affiche tous les exercices de la bibliothèque : un exercice déjà
-/// présent dans le bloc peut être ajouté à nouveau (duplicat).
+/// Picker multi-sélection d'exercices à ajouter dans un bloc template.
+/// Les duplicats sont autorisés : on n'exclut pas les exercices déjà présents.
 class BlockExercisePickerScreen extends ConsumerStatefulWidget {
   const BlockExercisePickerScreen({super.key, required this.blockId});
 

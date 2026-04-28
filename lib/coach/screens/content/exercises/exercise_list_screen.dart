@@ -16,6 +16,8 @@ import '../../../widgets/library_type_icon.dart';
 import 'exercise_detail_screen.dart';
 import 'exercise_form_screen.dart';
 
+/// Onglet « Exercices » de la bibliothèque coach : liste filtrable +
+/// FAB de création + tap pour ouvrir le détail.
 class ExerciseListScreen extends ConsumerStatefulWidget {
   const ExerciseListScreen({super.key});
 
@@ -141,4 +143,3 @@ class _ExerciseListScreenState extends ConsumerState<ExerciseListScreen> {
     );
   }
 }
-

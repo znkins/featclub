@@ -3,10 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../shared/widgets/meta_pill.dart';
 
-/// Pastille « durée » : ic. horloge + `X min`.
-///
-/// Utilisée partout où la durée d'une séance est affichée (tuiles de liste,
-/// entête de détail, pickers).
+/// Pastille de durée d'une séance (`X min`).
 class DurationPill extends StatelessWidget {
   const DurationPill({super.key, required this.minutes});
 

@@ -7,7 +7,8 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/exercise_providers.dart';
 
-/// Création / édition d'un exercice.
+/// Formulaire de création / édition d'un exercice template
+/// (titre, description, catégorie, URL vidéo).
 class ExerciseFormScreen extends ConsumerStatefulWidget {
   const ExerciseFormScreen({super.key, this.existing});
 

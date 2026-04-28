@@ -5,9 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/theme_mode_provider.dart';
 
 /// Bouton AppBar pour basculer entre thème clair et sombre.
-///
-/// L'icône reflète le mode courant ("résolu" si on est en `system`) et,
-/// au tap, force l'application dans le mode opposé.
+/// L'icône reflète le mode courant ; le tap force le mode opposé.
 class ThemeModeToggle extends ConsumerWidget {
   const ThemeModeToggle({super.key});
 

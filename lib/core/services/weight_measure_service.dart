@@ -1,14 +1,11 @@
+// Service Supabase pour la table `weight_measures` (mesures de poids).
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/weight_measure.dart';
 
-/// Mesures de poids (`public.weight_measures`).
-///
-/// L'insertion déclenche le trigger `update_current_weight` côté DB qui
+/// L'insertion déclenche le trigger DB `update_current_weight` qui
 /// recopie la dernière valeur dans `profiles.current_weight`.
-///
-/// RLS : SELECT et INSERT ouverts au coach et à l'élève concerné. Pas de
-/// UPDATE ni DELETE dans le schéma actuel.
 class WeightMeasureService {
   WeightMeasureService(this._client);
 

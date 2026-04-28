@@ -16,10 +16,9 @@ import '../providers/student_session_providers.dart';
 import '../widgets/assigned_date_pill.dart';
 import 'student_session_detail_screen.dart';
 
-/// Accueil élève : bienvenue, prochaine séance, raccourcis, CTA profil.
-///
-/// `onNavigate(int)` permet aux raccourcis et au CTA de basculer sur un autre
-/// onglet du shell sans passer par le routeur global.
+/// Onglet Accueil de l'élève : bienvenue, prochaine séance, raccourcis,
+/// CTA profil si incomplet. `onNavigate(int)` permet aux raccourcis de
+/// basculer d'onglet sans passer par le routeur global.
 class StudentHomeScreen extends ConsumerWidget {
   const StudentHomeScreen({super.key, required this.onNavigate});
 
@@ -147,12 +146,11 @@ class _NextSessionCard extends StatelessWidget {
 
   final StudentActiveProgramDetail detail;
 
-  /// Tab-switch vers « Mon programme ». Utilisé pour l'état avec programme
-  /// mais sans prochaine séance (rien à commencer, on redirige vers la liste).
+  /// Bascule vers l'onglet « Programme » (utilisé quand un programme existe
+  /// mais n'a pas encore de séance suivante à démarrer).
   final VoidCallback onOpenProgram;
 
-  /// Ouvre l'écran de détail de la prochaine séance. `null` quand il n'y
-  /// a pas de séance suivante (pas de programme, ou programme vide).
+  /// Ouvre le détail de la prochaine séance. `null` si rien à démarrer.
   final VoidCallback? onStartSession;
 
   @override
@@ -197,8 +195,8 @@ class _NextSessionCard extends StatelessWidget {
                       LucideIcons.chevronRight,
                       size: 18,
                       // Chevron orange quand la carte est un CTA fort
-                      // (commencer la prochaine séance), teal quand c'est
-                      // de la simple navigation (vers le tab Programme).
+                      // (commencer la séance), teal quand c'est juste de la
+                      // navigation (vers l'onglet programme).
                       color: onStartSession != null
                           ? theme.colorScheme.secondary
                           : theme.colorScheme.primary,
@@ -490,4 +488,3 @@ class _ShortcutTile extends StatelessWidget {
     );
   }
 }
-

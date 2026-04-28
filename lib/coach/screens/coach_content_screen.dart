@@ -6,7 +6,8 @@ import 'content/exercises/exercise_list_screen.dart';
 import 'content/programs/program_list_screen.dart';
 import 'content/sessions/session_list_screen.dart';
 
-/// Onglet Contenu coach : bibliothèque templates (exercices, blocs, séances, programmes).
+/// Onglet Contenu coach : bibliothèque templates organisée en 4 onglets
+/// (Exercices, Blocs, Séances, Programmes).
 class CoachContentScreen extends StatelessWidget {
   const CoachContentScreen({super.key});
 

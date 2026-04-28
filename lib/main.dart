@@ -1,3 +1,5 @@
+// Point d'entrée de l'application : initialise Supabase puis lance l'app.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

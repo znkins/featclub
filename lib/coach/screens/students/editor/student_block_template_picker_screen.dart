@@ -14,10 +14,8 @@ import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_selectable_tile.dart';
 import '../../../widgets/library_type_icon.dart';
 
-/// Sélection multiple de blocs templates à dupliquer dans une séance élève.
-///
-/// Chaque bloc choisi est copié en profondeur (bloc → exercices) via la RPC
-/// `duplicate_block_template_for_student`.
+/// Picker multi-sélection de blocs templates à dupliquer dans la séance
+/// d'un élève (RPC `duplicate_block_template_for_student`, copie profonde).
 class StudentBlockTemplatePickerScreen extends ConsumerStatefulWidget {
   const StudentBlockTemplatePickerScreen({
     super.key,
@@ -27,8 +25,8 @@ class StudentBlockTemplatePickerScreen extends ConsumerStatefulWidget {
 
   final String sessionId;
 
-  /// Nécessaire pour invalider l'éditeur programme dont la `blockCount` de la
-  /// séance change quand on duplique un template.
+  /// Permet d'invalider l'éditeur programme dont le `blockCount` de la
+  /// séance parente change après duplication.
   final String programId;
 
   @override

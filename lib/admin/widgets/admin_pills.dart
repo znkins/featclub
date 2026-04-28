@@ -5,8 +5,7 @@ import '../../core/utils/user_role.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Libellé français d'un rôle (utilisé par les pills, le picker et la
-/// recherche).
+/// Libellé français d'un rôle.
 String labelForRole(UserRole role) {
   switch (role) {
     case UserRole.eleve:
@@ -18,7 +17,7 @@ String labelForRole(UserRole role) {
   }
 }
 
-/// Icône Lucide associée à un rôle (utilisée par les pills et le picker).
+/// Icône Lucide associée à un rôle.
 IconData iconForRole(UserRole role) {
   switch (role) {
     case UserRole.eleve:
@@ -30,7 +29,7 @@ IconData iconForRole(UserRole role) {
   }
 }
 
-/// Pill compact pour afficher le rôle d'un utilisateur dans la liste admin.
+/// Pill compact affichant le rôle d'un utilisateur (icône + libellé).
 class AdminRolePill extends StatelessWidget {
   const AdminRolePill({super.key, required this.role});
 
@@ -48,10 +47,8 @@ class AdminRolePill extends StatelessWidget {
   }
 }
 
-/// Pill « Désactivé » signalant un compte avec statut `disabled`.
-///
-/// Le statut actif n'a volontairement pas de pill : le manque de pastille
-/// rouge est suffisant pour signaler l'état "ok".
+/// Pill « Désactivé » signalant un compte au statut `disabled`.
+/// Le statut actif n'a pas de pill : son absence suffit comme signal.
 class AdminDisabledPill extends StatelessWidget {
   const AdminDisabledPill({super.key});
 
@@ -109,4 +106,3 @@ class _Pill extends StatelessWidget {
     );
   }
 }
-

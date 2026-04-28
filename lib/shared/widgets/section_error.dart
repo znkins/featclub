@@ -4,9 +4,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// Carte d'erreur pour une section : message + bouton « Réessayer » aligné
-/// à droite. Utilisée quand le provider de la section échoue localement
-/// sans faire basculer toute la page en mode erreur.
+/// Carte d'erreur pour une section : message + bouton « Réessayer ».
+/// À utiliser quand un provider de section échoue localement, sans faire
+/// basculer toute la page en mode erreur.
 class SectionError extends StatelessWidget {
   const SectionError({
     super.key,

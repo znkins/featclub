@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../theme/app_spacing.dart';
 
-/// Barre de recherche partagée pour les listes de contenu coach.
+/// Barre de recherche standard pour les listes de contenu coach.
 class LibrarySearchField extends StatelessWidget {
   const LibrarySearchField({
     super.key,

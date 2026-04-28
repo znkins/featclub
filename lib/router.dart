@@ -1,3 +1,5 @@
+// Routeur applicatif (go_router) avec redirection par rôle.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,17 +17,14 @@ import 'shared/providers/route_observer_provider.dart';
 import 'shared/providers/supabase_providers.dart';
 import 'student/screens/student_shell.dart';
 
-/// Routes publiques accessibles sans session.
 const _publicRoutes = {'/login', '/signup', '/forgot-password'};
 
-/// Router applicatif avec redirection par rôle.
+/// Provider du `GoRouter` global.
 ///
-/// Règles :
-///  - non connecté : seules `/login`, `/signup`, `/forgot-password` sont
-///    accessibles ; tout le reste renvoie vers `/login`.
-///  - connecté + statut `disabled` : déconnexion + retour `/login`.
-///  - connecté actif : redirigé vers l'espace correspondant à son rôle
-///    (`/student`, `/coach`, `/admin`).
+/// Règles de redirection :
+/// - sans session : seules les routes publiques sont accessibles ;
+/// - statut `disabled` : déconnexion forcée ;
+/// - sinon : on est envoyé sur l'espace correspondant au rôle.
 final routerProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _AuthRefreshNotifier(ref);
   ref.onDispose(refreshNotifier.dispose);
@@ -72,13 +71,10 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
   final session = ref.read(currentSessionProvider);
   final location = state.matchedLocation;
 
-  // Pas de session : seules les routes publiques (login/signup/forgot) sont
-  // accessibles.
   if (session == null) {
     return _publicRoutes.contains(location) ? null : '/login';
   }
 
-  // Session présente : on a besoin du profil pour connaître le rôle.
   final profileAsync = ref.read(currentProfileProvider);
 
   return profileAsync.when(
@@ -87,7 +83,6 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
     data: (profile) {
       if (profile == null) return '/login';
 
-      // Statut désactivé : déconnexion forcée.
       if (profile.status == AccessStatus.disabled) {
         ref.read(supabaseClientProvider).auth.signOut();
         return '/login';
@@ -95,12 +90,11 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
 
       final destination = _routeForRole(profile.role);
 
-      // Sur une route publique ou /loading : on bascule vers la home du rôle.
       if (_publicRoutes.contains(location) || location == '/loading') {
         return destination;
       }
 
-      // Garde-fou : un rôle ne peut pas accéder à un espace d'un autre rôle.
+      // Garde-fou : un rôle ne peut pas entrer dans l'espace d'un autre rôle.
       if (location.startsWith('/student') && profile.role != UserRole.eleve) {
         return destination;
       }
@@ -127,8 +121,8 @@ String _routeForRole(UserRole role) {
   }
 }
 
-/// Petit pont entre Riverpod et go_router : déclenche un refresh du router
-/// dès qu'un évènement Supabase modifie la session ou que le profil change.
+/// Pont entre Riverpod et go_router : déclenche un refresh du routeur
+/// dès que la session ou le profil change.
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier(this._ref) {
     _sessionSub = _ref.listen<dynamic>(

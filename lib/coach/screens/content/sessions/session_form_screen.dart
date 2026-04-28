@@ -7,6 +7,9 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/session_providers.dart';
 
+/// Formulaire de création / édition d'une séance template
+/// (titre, description, durée estimée). Les blocs sont ajoutés ensuite
+/// via le détail (picker).
 class SessionFormScreen extends ConsumerStatefulWidget {
   const SessionFormScreen({super.key, this.existing});
 

@@ -7,6 +7,8 @@ import '../../../../shared/providers/auth_provider.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/program_providers.dart';
 
+/// Formulaire de création / édition d'un programme template (titre + description).
+/// Les séances sont ajoutées ensuite via le détail (picker).
 class ProgramFormScreen extends ConsumerStatefulWidget {
   const ProgramFormScreen({super.key, this.existing});
 

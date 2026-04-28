@@ -1,8 +1,9 @@
+// Service Supabase pour la table `profiles` (lecture, mise à jour).
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/profile.dart';
 
-/// Lecture / mise à jour des profils (`public.profiles`).
 class ProfileService {
   ProfileService(this._client);
 
@@ -21,10 +22,8 @@ class ProfileService {
     return Profile.fromJson(row);
   }
 
-  /// Liste des élèves actifs (rôle `eleve` + statut `active`).
-  ///
-  /// Utilisé par le coach pour parcourir ses Featers. Le tri (profil complété
-  /// en premier, puis par nom) est réalisé côté client.
+  /// Liste les élèves actifs (rôle `eleve` + statut `active`).
+  /// Utilisé par le coach. Le tri est appliqué côté UI.
   Future<List<Profile>> listActiveStudents() async {
     final rows = await _client
         .from('profiles')
@@ -37,9 +36,8 @@ class ProfileService {
   }
 
   /// Met à jour les champs éditables par l'utilisateur lui-même.
-  ///
-  /// On ne touche pas à `role`, `status` (réservés à l'admin) ni à
-  /// `current_weight` (calculé par le trigger `update_current_weight`).
+  /// Ne touche pas à `role`, `status` (admin) ni `current_weight`
+  /// (calculé par le trigger `update_current_weight`).
   Future<Profile> updateOwnProfile({
     required String id,
     String? firstName,
@@ -69,7 +67,7 @@ class ProfileService {
     return Profile.fromJson(row);
   }
 
-  /// Mise à jour réservée à l'admin (role / status).
+  /// Mise à jour réservée à l'admin (rôle / statut).
   Future<Profile> updateRoleAndStatus({
     required String id,
     required String role,

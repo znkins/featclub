@@ -9,6 +9,7 @@ import '../../theme/app_spacing.dart';
 import '../utils/auth_validators.dart';
 import '../widgets/auth_text_field.dart';
 
+/// Écran « Mot de passe oublié » : envoie un email de reset Supabase.
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 

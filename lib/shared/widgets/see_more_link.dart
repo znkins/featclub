@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Lien « Voir plus » centré, placé sous une liste partielle qui ouvre
-/// généralement un bottom sheet avec la liste complète.
+/// Lien « Voir plus » centré sous une liste partielle.
+/// Ouvre généralement un bottom sheet avec la liste complète.
 class SeeMoreLink extends StatelessWidget {
   const SeeMoreLink({super.key, required this.onTap});
 

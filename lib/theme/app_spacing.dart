@@ -1,7 +1,6 @@
-/// Échelle d'espacement Featclub.
-///
-/// Unité de base : 4px. Utiliser exclusivement ces constantes,
-/// jamais de valeur d'espacement en dur dans les widgets.
+// Échelle d'espacement (unité de base : 4px).
+// Utiliser exclusivement ces constantes, jamais de valeur en dur.
+
 class AppSpacing {
   AppSpacing._();
 

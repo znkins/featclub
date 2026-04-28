@@ -9,10 +9,9 @@ import '../../shared/providers/data_providers.dart';
 import '../../shared/providers/student_data_providers.dart';
 import '../../theme/app_spacing.dart';
 
-/// Affiche une modale pour que l'élève ajoute sa propre mesure de poids.
-///
-/// L'insertion déclenche le trigger DB `update_current_weight` qui met à jour
-/// `profiles.current_weight` — on invalide donc aussi `currentProfileProvider`.
+/// Dialogue de saisie d'une mesure de poids par l'élève.
+/// L'insertion déclenche le trigger `update_current_weight` côté DB ;
+/// on invalide donc aussi `currentProfileProvider`.
 Future<void> showStudentWeightMeasureDialog(BuildContext context) {
   return showDialog<void>(
     context: context,

@@ -25,7 +25,8 @@ import 'student_block_form_screen.dart';
 import 'student_block_template_picker_screen.dart';
 import 'student_session_form_screen.dart';
 
-/// Éditeur d'une séance élève : métadonnées + liste des blocs.
+/// Éditeur d'une séance d'un élève : métadonnées + liste des blocs
+/// (réorder, dupliquer, supprimer, ajout vide ou depuis template).
 class StudentSessionEditorScreen extends ConsumerWidget {
   const StudentSessionEditorScreen({
     super.key,

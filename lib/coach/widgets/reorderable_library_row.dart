@@ -5,10 +5,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 
-/// Rangée réordonnable d'un écran détail (grip à gauche, contenu, actions à droite).
-///
-/// Structure : `[grip | titre+sous-titre | menu overflow | chevron]`.
-/// Le menu overflow regroupe les actions `Dupliquer` et `Retirer`.
+/// Rangée drag-and-drop d'un écran détail (grip + contenu + actions).
+/// Structure : `[grip | titre/sous-titre | menu overflow | chevron]`.
 class ReorderableLibraryRow extends StatelessWidget {
   const ReorderableLibraryRow({
     super.key,
@@ -30,11 +28,9 @@ class ReorderableLibraryRow extends StatelessWidget {
   final VoidCallback? onDuplicate;
   final VoidCallback? onRemove;
 
-  /// Libellé de l'action « retirer » (défaut: « Retirer »).
-  ///
-  /// Utilisé pour distinguer retrait d'un lien biblio (ne supprime pas le
-  /// contenu sous-jacent) de la suppression d'une entité propre à l'élève
-  /// (cascade réelle) : dans ce dernier cas passer `'Supprimer'`.
+  /// Libellé de l'action de retrait. Passer `'Supprimer'` pour les entités
+  /// propres à l'élève (cascade réelle), `'Retirer'` pour les liens biblio
+  /// (qui ne suppriment pas le contenu sous-jacent).
   final String removeLabel;
 
   @override
@@ -146,7 +142,7 @@ class ReorderableLibraryRow extends StatelessWidget {
                 )
               else if (onRemove != null)
                 // Action unique (retirer) : icône directe plutôt qu'un menu
-                // overflow à un seul item. Un tap au lieu de deux.
+                // overflow à un seul item.
                 IconButton(
                   tooltip: removeLabel,
                   icon: Icon(
@@ -175,7 +171,8 @@ class ReorderableLibraryRow extends StatelessWidget {
 
 enum _RowAction { duplicate, remove }
 
-/// Enveloppe l'élément en drag pour supprimer l'ombre Material par défaut.
+/// Enveloppe l'élément en cours de drag pour supprimer l'ombre Material
+/// par défaut (rendu plat cohérent avec le style de l'app).
 Widget flatProxyDecorator(Widget child, int index, Animation<double> animation) {
   return Material(
     color: Colors.transparent,

@@ -5,12 +5,8 @@ import '../../theme/app_spacing.dart';
 import 'day_of_week_pill.dart';
 import 'duration_pill.dart';
 
-/// Ligne de méta-infos pour une séance : jour assigné (éditeur élève) +
-/// compteur de blocs + pastille de durée.
-///
-/// `dayOfWeek` n'est renseigné que dans le contexte éditeur élève, où une
-/// séance peut avoir un jour assigné. Côté biblio, les séances templates
-/// n'ont pas de jour, le paramètre reste `null`.
+/// Ligne de meta-infos pour une séance : compteur de blocs + jour assigné +
+/// durée. `dayOfWeek` n'est rempli qu'en contexte éditeur élève.
 class SessionMetaRow extends StatelessWidget {
   const SessionMetaRow({
     super.key,

@@ -1,3 +1,8 @@
+// Service Supabase pour le contenu personnalisé d'un élève :
+// `student_programs`, `student_sessions`, `student_session_blocks`,
+// `student_session_exercises`. C'est ici que vit la duplication
+// template → élève (RPC `duplicate_*_template_for_student`).
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/student_program.dart';
@@ -6,7 +11,7 @@ import '../models/student_session_block.dart';
 import '../models/student_session_exercise.dart';
 import '../utils/day_of_week.dart';
 
-/// Programme élève avec compteur de séances (pour la liste sur la fiche élève).
+/// Programme élève + nombre de séances (utilisé sur la fiche élève).
 class StudentProgramListItem {
   const StudentProgramListItem({
     required this.program,
@@ -17,7 +22,7 @@ class StudentProgramListItem {
   final int sessionCount;
 }
 
-/// Séance élève + compteur de blocs (ligne de l'éditeur programme).
+/// Séance élève + nombre de blocs (ligne de l'éditeur programme).
 class StudentSessionListItem {
   const StudentSessionListItem({
     required this.session,
@@ -28,7 +33,7 @@ class StudentSessionListItem {
   final int blockCount;
 }
 
-/// Bloc élève + compteur d'exercices (ligne de l'éditeur séance).
+/// Bloc élève + nombre d'exercices (ligne de l'éditeur séance).
 class StudentBlockListItem {
   const StudentBlockListItem({
     required this.block,
@@ -39,7 +44,7 @@ class StudentBlockListItem {
   final int exerciseCount;
 }
 
-/// Programme élève + liste ordonnée de ses séances (avec compteurs de blocs).
+/// Programme + ses séances pour l'éditeur coach.
 class StudentProgramEditorDetail {
   const StudentProgramEditorDetail({
     required this.program,
@@ -50,7 +55,7 @@ class StudentProgramEditorDetail {
   final List<StudentSessionListItem> sessions;
 }
 
-/// Séance élève + liste ordonnée de ses blocs (avec compteurs d'exercices).
+/// Séance + ses blocs pour l'éditeur coach.
 class StudentSessionEditorDetail {
   const StudentSessionEditorDetail({
     required this.session,
@@ -61,7 +66,7 @@ class StudentSessionEditorDetail {
   final List<StudentBlockListItem> blocks;
 }
 
-/// Bloc élève + liste ordonnée de ses exercices.
+/// Bloc + ses exercices pour l'éditeur coach.
 class StudentBlockEditorDetail {
   const StudentBlockEditorDetail({
     required this.block,
@@ -72,11 +77,9 @@ class StudentBlockEditorDetail {
   final List<StudentSessionExercise> exercises;
 }
 
-/// Séance élève + champs dérivés à la lecture pour l'affichage côté élève.
-///
-/// La planification est purement calendaire : `nextOccurrence` est
-/// recalculée à chaque lecture à partir de `session.dayOfWeek` et des
-/// complétions de la semaine en cours (cf. `nextOccurrenceForStudent`).
+/// Séance élève + champs dérivés pour l'affichage côté élève.
+/// `nextOccurrence` est recalculée à chaque lecture à partir du
+/// `dayOfWeek` et des complétions de la semaine en cours.
 class StudentSessionView {
   const StudentSessionView({
     required this.session,
@@ -85,13 +88,11 @@ class StudentSessionView {
 
   final StudentSession session;
 
-  /// Prochaine date affichée à l'élève. `null` si la séance n'a pas de
-  /// `dayOfWeek` (séance non planifiée).
+  /// `null` si la séance n'a pas de `dayOfWeek` (non planifiée).
   final DateTime? nextOccurrence;
 }
 
-/// Programme actif d'un élève et ses séances (liste plate, triée pour l'app
-/// élève). Utilisé par l'accueil et l'onglet programme.
+/// Programme actif d'un élève + ses séances triées pour l'app élève.
 class StudentActiveProgramDetail {
   const StudentActiveProgramDetail({
     required this.program,
@@ -101,13 +102,12 @@ class StudentActiveProgramDetail {
   /// `null` si l'élève n'a aucun programme actif.
   final StudentProgram? program;
 
-  /// Séances du programme actif, triées pour la vue élève : séances avec
-  /// une `nextOccurrence` en premier (plus proche d'abord), puis séances
-  /// sans jour assigné triées par date de création.
+  /// Séances avec `nextOccurrence` non nulle en premier (plus proche
+  /// d'abord), puis séances sans jour assigné par date de création.
   final List<StudentSessionView> sessions;
 }
 
-/// Bloc élève + ses exercices ordonnés (version "lecture" pour l'élève).
+/// Bloc + ses exercices ordonnés (vue lecture pour l'élève).
 class StudentSessionBlockContent {
   const StudentSessionBlockContent({
     required this.block,
@@ -118,12 +118,9 @@ class StudentSessionBlockContent {
   final List<StudentSessionExercise> exercises;
 }
 
-/// Contenu complet d'une séance élève : séance + blocs + exercices,
-/// avec champs dérivés pour l'affichage (cf. [StudentSessionView]).
-///
-/// Utilisé par le détail séance et le mode d'exécution, où l'on doit
-/// disposer de tout l'arbre d'un coup pour naviguer bloc par bloc sans
-/// aller-retour réseau supplémentaire.
+/// Arbre complet d'une séance élève (séance + blocs + exercices).
+/// Chargé d'un coup pour le détail séance et le mode d'exécution
+/// (pas d'aller-retour réseau pendant la séance).
 class StudentSessionContent {
   const StudentSessionContent({
     required this.session,
@@ -139,13 +136,6 @@ class StudentSessionContent {
       blocks.fold<int>(0, (acc, b) => acc + b.exercises.length);
 }
 
-/// Contenu personnalisé d'un élève : `student_programs`, `student_sessions`,
-/// `student_session_blocks`, `student_session_exercises`.
-///
-/// C'est ici que vit la logique de duplication template -> élève via les RPC
-/// `duplicate_program_template_for_student`,
-/// `duplicate_session_template_for_student` et
-/// `duplicate_block_template_for_student`.
 class StudentProgramService {
   StudentProgramService(this._client);
 
@@ -203,7 +193,8 @@ class StudentProgramService {
     return StudentProgram.fromJson(row);
   }
 
-  /// Duplique un programme template vers un élève (copie profonde via RPC).
+  /// Duplique un programme template vers un élève (RPC
+  /// `duplicate_program_template_for_student`, copie profonde).
   Future<String> duplicateFromTemplate({
     required String studentId,
     required String sourceProgramId,
@@ -239,11 +230,9 @@ class StudentProgramService {
     await _client.from('student_programs').delete().eq('id', id);
   }
 
-  /// Active ou désactive un programme.
-  ///
-  /// Contrainte DB : un seul programme actif par élève. Pour activer, on
-  /// désactive d'abord les autres programmes actifs du même élève afin de
-  /// respecter l'index unique partiel `idx_student_programs_one_active`.
+  /// Active ou désactive un programme. Pour activer, on désactive d'abord
+  /// les autres programmes actifs du même élève (contrainte d'unicité DB :
+  /// un seul programme actif à la fois par élève).
   Future<void> setActive({
     required String studentId,
     required String programId,
@@ -266,10 +255,7 @@ class StudentProgramService {
     }
   }
 
-  /// Programme actif d'un élève (`is_active = true`).
-  ///
-  /// Renvoie `null` si aucun programme n'est actif. La contrainte unique côté
-  /// DB garantit au plus un résultat.
+  /// Programme actif d'un élève. `null` si aucun n'est actif.
   Future<StudentProgram?> fetchActiveProgram(String studentId) async {
     final rows = await _client
         .from('student_programs')
@@ -282,13 +268,8 @@ class StudentProgramService {
     return StudentProgram.fromJson(list.first as Map<String, dynamic>);
   }
 
-  /// Programme actif + séances triées pour la vue élève.
-  ///
-  /// Pour chaque séance, calcule la `nextOccurrence` à partir du `dayOfWeek`
-  /// et des complétions de la semaine en cours (cf.
-  /// `nextOccurrenceForStudent`). Tri : séances avec une `nextOccurrence`
-  /// en premier (plus proche d'abord), puis séances sans jour assigné triées
-  /// par date de création.
+  /// Programme actif + séances triées pour la vue élève
+  /// (séance la plus proche en tête, puis non planifiées).
   Future<StudentActiveProgramDetail> fetchActiveProgramWithSessions(
     String studentId,
   ) async {
@@ -327,8 +308,7 @@ class StudentProgramService {
     return StudentActiveProgramDetail(program: program, sessions: views);
   }
 
-  /// Ids des séances qui ont au moins une complétion depuis lundi 00h
-  /// de la semaine en cours.
+  /// Ids des séances ayant au moins une complétion depuis lundi 00h.
   Future<Set<String>> _completedSessionIdsThisWeek(
     List<String> sessionIds,
   ) async {
@@ -344,12 +324,8 @@ class StudentProgramService {
     };
   }
 
-  /// Contenu complet d'une séance : entête + blocs + exercices.
-  ///
-  /// Une seule requête via select imbriqué pour la séance et ses blocs ;
-  /// requête séparée pour les complétions de la semaine en cours afin de
-  /// dériver `nextOccurrence` / `completedThisWeek` (cohérent avec
-  /// l'affichage de la liste programme et de l'accueil).
+  /// Charge l'arbre complet d'une séance (entête + blocs + exercices)
+  /// en une seule requête imbriquée.
   Future<StudentSessionContent> fetchStudentSessionContent(
     String sessionId,
   ) async {
@@ -399,7 +375,7 @@ class StudentProgramService {
     );
   }
 
-  /// Charge un programme + ses séances (avec compteurs de blocs) en ordre.
+  /// Programme + ses séances ordonnées (avec compteurs de blocs).
   Future<StudentProgramEditorDetail> fetchProgramEditorDetail(
     String programId,
   ) async {
@@ -469,7 +445,8 @@ class StudentProgramService {
     return StudentSession.fromJson(row);
   }
 
-  /// Duplique une séance template à la fin d'un programme élève (RPC).
+  /// Duplique une séance template vers un programme élève (RPC
+  /// `duplicate_session_template_for_student`).
   Future<String> duplicateSessionFromTemplate({
     required String studentProgramId,
     required String sourceSessionId,
@@ -484,8 +461,8 @@ class StudentProgramService {
     return result as String;
   }
 
-  /// Duplique une séance élève existante (copie profonde dans le même
-  /// programme, ajoutée à la fin) via RPC.
+  /// Duplique une séance élève existante (RPC `duplicate_student_session`).
+  /// La copie est ajoutée à la fin du même programme.
   Future<String> duplicateStudentSession(String sourceSessionId) async {
     final result = await _client.rpc(
       'duplicate_student_session',
@@ -542,7 +519,7 @@ class StudentProgramService {
         : ((last.first as Map)['position'] as int) + 1;
   }
 
-  /// Charge une séance + ses blocs (avec compteurs d'exercices).
+  /// Séance + ses blocs ordonnés (avec compteurs d'exercices).
   Future<StudentSessionEditorDetail> fetchSessionEditorDetail(
     String sessionId,
   ) async {
@@ -607,6 +584,8 @@ class StudentProgramService {
     return StudentSessionBlock.fromJson(row);
   }
 
+  /// Duplique un bloc template vers une séance élève (RPC
+  /// `duplicate_block_template_for_student`).
   Future<String> duplicateBlockFromTemplate({
     required String studentSessionId,
     required String sourceBlockId,
@@ -621,8 +600,8 @@ class StudentProgramService {
     return result as String;
   }
 
-  /// Duplique un bloc élève existant (copie profonde dans la même séance,
-  /// ajouté à la fin) via RPC.
+  /// Duplique un bloc élève existant (RPC `duplicate_student_block`).
+  /// La copie est ajoutée à la fin de la même séance.
   Future<String> duplicateStudentBlock(String sourceBlockId) async {
     final result = await _client.rpc(
       'duplicate_student_block',
@@ -675,7 +654,7 @@ class StudentProgramService {
         : ((last.first as Map)['position'] as int) + 1;
   }
 
-  /// Charge un bloc + ses exercices.
+  /// Bloc + ses exercices ordonnés.
   Future<StudentBlockEditorDetail> fetchBlockEditorDetail(
     String blockId,
   ) async {
@@ -723,7 +702,7 @@ class StudentProgramService {
     return StudentSessionExercise.fromJson(row);
   }
 
-  /// Crée un exercice ad hoc à la fin du bloc.
+  /// Crée un exercice ad hoc à la fin du bloc (saisie libre, pas de template).
   Future<StudentSessionExercise> createEmptyExercise({
     required String blockId,
     required String title,
@@ -756,10 +735,8 @@ class StudentProgramService {
   }
 
   /// Crée un exercice à partir d'un exercice de la bibliothèque coach.
-  ///
-  /// Snapshot du titre, de la description et de l'URL vidéo ; les paramètres
-  /// prescriptifs (reps/load/intensity/rest/note) restent à renseigner par
-  /// le coach via l'éditeur.
+  /// Snapshot du titre, de la description et de l'URL vidéo. Les paramètres
+  /// (reps/load/intensity/rest/note) sont à renseigner ensuite via l'éditeur.
   Future<StudentSessionExercise> createExerciseFromLibrary({
     required String blockId,
     required String libraryExerciseId,
@@ -834,9 +811,6 @@ class StudentProgramService {
   }
 }
 
-/// Tri "vue élève" : séances avec une `nextOccurrence` en premier
-/// (plus proche d'abord), puis séances sans jour assigné triées par date
-/// de création.
 int _compareStudentSessionViewsForStudent(
   StudentSessionView a,
   StudentSessionView b,

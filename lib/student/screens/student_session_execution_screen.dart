@@ -19,10 +19,9 @@ import '../../theme/app_spacing.dart';
 import '../providers/student_session_providers.dart';
 import '../widgets/complete_session_dialog.dart';
 
-/// Mode d'exécution guidé : l'élève parcourt la séance bloc par bloc, avec un
-/// chronomètre libre et la possibilité de terminer la séance depuis le dernier
-/// bloc. Quitter ne crée aucune complétion — seule l'action « Terminer » le
-/// fait (via le sheet de complétion).
+/// Mode d'exécution guidé : l'élève parcourt la séance bloc par bloc, avec
+/// chronomètre libre. Quitter ne crée aucune complétion — seul le bouton
+/// « Terminer » du dernier bloc le fait (via le sheet de complétion).
 class StudentSessionExecutionScreen extends ConsumerWidget {
   const StudentSessionExecutionScreen({super.key, required this.sessionId});
 
@@ -180,8 +179,6 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
               onToggle: _toggleStopwatch,
               onReset: _resetStopwatch,
             ),
-            // Progression visuelle dans la séance : remplace l'ancien badge
-            // « Bloc N / N ». Le step montre le bloc en cours sur le total.
             LinearProgressIndicator(
               value: (_index + 1) / blocks.length,
               minHeight: AppSizes.progressBarHeight,
@@ -209,8 +206,6 @@ class _ExecutionBodyState extends ConsumerState<_ExecutionBody> {
                       style: theme.textTheme.bodyLarge,
                     ),
                   ],
-                  // Si le bloc est vide, on n'affiche aucune section : c'est
-                  // une anomalie côté coach que l'élève ne peut résoudre.
                   if (current.exercises.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xl),
                     ContentSectionHeader(

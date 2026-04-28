@@ -1,11 +1,7 @@
-/// Jour de la semaine assignable à une séance élève (colonne `day_of_week`
-/// de `student_sessions`, stockée en texte).
-///
-/// Le calcul de la date assignée renvoie la prochaine occurrence du jour
-/// choisi — si le jour choisi est *aujourd'hui*, la date retournée est celle
-/// du jour (décision produit tranchée en cadrage).
+// Jours de la semaine et calcul de la prochaine occurrence d'une séance.
 library;
 
+/// Jour assignable à une séance élève (colonne `student_sessions.day_of_week`).
 enum DayOfWeek {
   monday,
   tuesday,
@@ -15,10 +11,10 @@ enum DayOfWeek {
   saturday,
   sunday;
 
-  /// Valeur stockée en base (`monday`..`sunday`).
+  /// Valeur stockée en base ('monday'..'sunday').
   String get storageValue => name;
 
-  /// Libellé français capitalisé (`Lundi`..`Dimanche`).
+  /// Libellé français capitalisé ('Lundi'..'Dimanche').
   String get frenchLabel {
     switch (this) {
       case DayOfWeek.monday:
@@ -38,7 +34,7 @@ enum DayOfWeek {
     }
   }
 
-  /// Numéro ISO (1 = lundi, 7 = dimanche), aligné sur `DateTime.weekday`.
+  /// Numéro ISO (1 = lundi … 7 = dimanche), aligné sur `DateTime.weekday`.
   int get isoWeekday => index + 1;
 
   static DayOfWeek? fromStorage(String? value) {
@@ -57,22 +53,21 @@ DateTime dateForDayInCurrentWeek(DayOfWeek day, {DateTime? now}) {
   return monday.add(Duration(days: day.isoWeekday - 1));
 }
 
-/// Lundi 00:00 de la semaine ISO en cours.
+/// Lundi 00h00 de la semaine ISO en cours.
 DateTime currentWeekStart({DateTime? now}) {
   final today = _dateOnly(now ?? DateTime.now());
   return today.subtract(Duration(days: today.weekday - 1));
 }
 
-/// Lundi 00:00 de la semaine suivante (borne supérieure exclusive).
+/// Lundi 00h00 de la semaine suivante (borne supérieure exclusive).
 DateTime currentWeekEnd({DateTime? now}) =>
     currentWeekStart(now: now).add(const Duration(days: 7));
 
 /// Prochaine occurrence affichée à l'élève pour une séance hebdomadaire.
 ///
 /// Modèle « la complétion valide la semaine » :
-/// - si la séance a déjà été complétée cette semaine → semaine prochaine ;
-/// - sinon, si la date de cette semaine est passée (séance ratée) → semaine
-///   prochaine ;
+/// - séance déjà faite cette semaine → semaine prochaine ;
+/// - sinon, date de cette semaine déjà passée → semaine prochaine ;
 /// - sinon → date de cette semaine.
 DateTime nextOccurrenceForStudent(
   DayOfWeek day, {

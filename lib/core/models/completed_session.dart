@@ -1,7 +1,7 @@
-/// Historique de séance terminée (table `public.completed_sessions`).
+/// Historique d'une séance terminée (table `public.completed_sessions`).
 ///
-/// `sessionTitle` est un snapshot du titre au moment de la complétion :
-/// l'historique reste lisible même si la séance source est supprimée.
+/// `sessionTitle` est un snapshot : l'historique reste lisible même si
+/// la séance source est supprimée plus tard.
 class CompletedSession {
   CompletedSession({
     required this.id,

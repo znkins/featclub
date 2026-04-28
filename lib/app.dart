@@ -1,3 +1,5 @@
+// Widget racine : configure le routeur, le thème et écoute le reset de session.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,9 +13,8 @@ class FeatclubApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Garde l'écouteur de reset de session actif pour toute la durée de vie
-    // de l'app : remet les onglets des shells à 0 dès que l'utilisateur
-    // authentifié change.
+    // Watch le provider de reset pour qu'il reste actif toute la durée de vie
+    // de l'app : il remet les onglets à zéro quand l'utilisateur change.
     ref.watch(authSessionResetProvider);
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);

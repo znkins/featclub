@@ -8,7 +8,8 @@ import '../../../theme/app_spacing.dart';
 import '../../providers/student_providers.dart';
 import '../../providers/weight_measure_providers.dart';
 
-/// Affiche une modale pour ajouter une mesure de poids.
+/// Dialogue d'ajout d'une mesure de poids pour un élève (côté coach).
+/// L'insertion déclenche le trigger DB `update_current_weight`.
 Future<void> showWeightMeasureFormDialog(
   BuildContext context, {
   required String studentId,
@@ -19,9 +20,6 @@ Future<void> showWeightMeasureFormDialog(
   );
 }
 
-/// Formulaire d'ajout d'une mesure : date + valeur en kg.
-///
-/// L'insertion déclenche le trigger DB qui met à jour `profiles.current_weight`.
 class _WeightMeasureFormDialog extends ConsumerStatefulWidget {
   const _WeightMeasureFormDialog({required this.studentId});
 

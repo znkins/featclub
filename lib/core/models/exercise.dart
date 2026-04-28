@@ -1,7 +1,5 @@
 /// Exercice template (table `public.exercises`).
-///
-/// Brique de base de la bibliothèque coach. Réutilisable dans plusieurs
-/// blocs.
+/// Brique de base de la bibliothèque coach, réutilisable dans plusieurs blocs.
 class Exercise {
   Exercise({
     required this.id,

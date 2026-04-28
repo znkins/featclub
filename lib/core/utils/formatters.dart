@@ -1,18 +1,14 @@
-/// Helpers d'affichage partagés.
-///
-/// Centralisés ici pour garantir un format uniforme dans toute l'app : une
-/// seule source de vérité pour les dates et les poids.
+// Helpers d'affichage partagés (dates, poids).
 library;
 
-/// Formate une date au format `JJ/MM/AAAA` (standard de l'app).
+/// `JJ/MM/AAAA` — format standard de l'app.
 String formatDate(DateTime d) {
   final dd = d.day.toString().padLeft(2, '0');
   final mm = d.month.toString().padLeft(2, '0');
   return '$dd/$mm/${d.year}';
 }
 
-/// Formate une date au format court `JJ/MM/AA` (utilisé par le tooltip du
-/// graphique de poids, où la place est contrainte).
+/// `JJ/MM/AA` — format compact (utilisé par le tooltip du graphique poids).
 String formatDateShort(DateTime d) {
   final dd = d.day.toString().padLeft(2, '0');
   final mm = d.month.toString().padLeft(2, '0');
@@ -20,16 +16,14 @@ String formatDateShort(DateTime d) {
   return '$dd/$mm/$yy';
 }
 
-/// Formate un poids en kilogrammes : entier si valeur ronde, 1 décimale sinon.
+/// Poids en kg, entier si valeur ronde, 1 décimale sinon.
 String formatWeightKg(double kg) {
   final rounded = kg.toStringAsFixed(kg % 1 == 0 ? 0 : 1);
   return '$rounded kg';
 }
 
-/// Affichage humain d'une date assignée :
-/// "Aujourd'hui" / "Demain" / nom du jour (si dans 7j) / sinon `JJ/MM/AAAA`.
-///
-/// Utilisé par l'accueil élève et la liste des séances du programme.
+/// Date assignée affichée naturellement :
+/// "Aujourd'hui" / "Demain" / nom du jour si dans 7j / `JJ/MM/AAAA` sinon.
 String? formatAssignedDateLabel(DateTime? date) {
   if (date == null) return null;
   final now = DateTime.now();

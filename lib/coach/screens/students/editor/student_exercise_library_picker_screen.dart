@@ -15,11 +15,10 @@ import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_selectable_tile.dart';
 import '../../../widgets/library_type_icon.dart';
 
-/// Sélection multiple d'exercices de la bibliothèque à snapshot dans un bloc
-/// élève.
-///
-/// Seuls le titre et l'URL vidéo sont copiés ; les paramètres prescriptifs
-/// (reps/load/intensity/rest/note) restent à renseigner.
+/// Picker multi-sélection d'exercices de la bibliothèque coach à snapshot
+/// dans un bloc d'élève. Seuls le titre, la description et l'URL vidéo
+/// sont copiés ; les paramètres (reps/load/intensity/rest/note) restent à
+/// renseigner ensuite via l'éditeur d'exercice.
 class StudentExerciseLibraryPickerScreen extends ConsumerStatefulWidget {
   const StudentExerciseLibraryPickerScreen({
     super.key,
@@ -29,8 +28,8 @@ class StudentExerciseLibraryPickerScreen extends ConsumerStatefulWidget {
 
   final String blockId;
 
-  /// Nécessaire pour invalider l'éditeur séance dont la `exerciseCount` du
-  /// bloc change quand on copie un exercice.
+  /// Permet d'invalider l'éditeur séance dont le `exerciseCount` du bloc
+  /// change après copie.
   final String sessionId;
 
   @override

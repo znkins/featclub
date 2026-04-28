@@ -6,10 +6,9 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 
-/// Création ou édition d'un bloc élève (titre + description).
-///
-/// Mode création : `sessionId` requis.
-/// Mode édition : `existing` requis.
+/// Création vide ou édition d'un bloc dans la séance d'un élève
+/// (titre + description). En création, `sessionId` requis ; en édition,
+/// `existing` requis.
 class StudentBlockFormScreen extends ConsumerStatefulWidget {
   const StudentBlockFormScreen({
     super.key,
@@ -21,9 +20,10 @@ class StudentBlockFormScreen extends ConsumerStatefulWidget {
 
   final String? sessionId;
 
-  /// Utilisé en création pour invalider l'éditeur programme dont la
-  /// `blockCount` de la séance parente change quand on ajoute un bloc.
+  /// `programId` permet d'invalider l'éditeur programme dont la `blockCount`
+  /// de la séance change quand on ajoute un bloc.
   final String? programId;
+
   final StudentSessionBlock? existing;
 
   @override
@@ -82,8 +82,8 @@ class _StudentBlockFormScreenState
           description: _descriptionController.text,
         );
         sessionIdToInvalidate = widget.sessionId!;
-        // Création d'un bloc → la `blockCount` de la séance change, donc
-        // l'éditeur programme doit refetch quand on y remonte.
+        // Le `blockCount` de la séance change : refetch éditeur programme
+        // au retour.
         if (widget.programId != null) {
           ref.invalidate(
             studentProgramEditorDetailProvider(widget.programId!),

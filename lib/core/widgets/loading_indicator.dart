@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Indicateur de chargement centré avec couleur primaire.
+/// Indicateur de chargement centré (couleur primaire).
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({super.key});
 

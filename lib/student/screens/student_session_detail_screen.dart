@@ -18,8 +18,8 @@ import '../widgets/block_count_pill.dart';
 import '../widgets/complete_session_dialog.dart';
 import 'student_session_execution_screen.dart';
 
-/// Détail d'une séance élève : méta + blocs + exercices, avec boutons
-/// Démarrer (mode d'exécution) et Terminer (complétion directe).
+/// Détail d'une séance élève : meta + blocs + exercices, avec
+/// boutons Démarrer (mode d'exécution) et Terminer (complétion directe).
 class StudentSessionDetailScreen extends ConsumerWidget {
   const StudentSessionDetailScreen({super.key, required this.sessionId});
 
@@ -211,8 +211,8 @@ class _BlockCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(description, style: theme.textTheme.bodyMedium),
           ],
-          // Si le bloc est vide, on n'affiche aucun message : c'est une
-          // anomalie côté coach que l'élève ne peut pas résoudre.
+          // Bloc vide : pas de message — c'est une anomalie côté coach
+          // que l'élève ne peut pas résoudre.
           if (blockContent.exercises.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             for (var i = 0; i < blockContent.exercises.length; i++) ...[
@@ -281,7 +281,6 @@ class _ExerciseRow extends StatelessWidget {
   }
 }
 
-/// Barre d'actions en bas : « Terminer » (secondaire) + « Démarrer » (CTA).
 class _SessionActionsBar extends ConsumerWidget {
   const _SessionActionsBar({required this.content});
 
@@ -312,7 +311,6 @@ class _SessionActionsBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     // Démarrer n'a de sens que si la séance contient au moins un exercice.
-    // Une séance avec des blocs tous vides est une anomalie côté coach.
     final hasExercises = content.blocks.any((b) => b.exercises.isNotEmpty);
     return SafeArea(
       top: false,

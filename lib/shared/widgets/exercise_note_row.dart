@@ -3,13 +3,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../theme/app_spacing.dart';
 
-/// Affichage inline d'une note d'exercice : icône sticky note secondaire +
-/// texte. Renvoie `SizedBox.shrink()` si la note est vide — peut être
-/// inclus inconditionnellement.
-///
-/// `maxLines` permet de borner le texte (ellipsis) dans les contextes
-/// denses comme l'éditeur coach. Par défaut le texte n'est pas tronqué
-/// (plein affichage côté élève).
+/// Ligne « note d'exercice » : icône orange + texte. Renvoie une boîte vide
+/// si la note est vide — peut être inclus inconditionnellement.
 class ExerciseNoteRow extends StatelessWidget {
   const ExerciseNoteRow({
     super.key,
@@ -18,6 +13,9 @@ class ExerciseNoteRow extends StatelessWidget {
   });
 
   final String note;
+
+  /// Borne le texte (ellipsis) dans les contextes denses (éditeur coach).
+  /// `null` (défaut) = plein affichage côté élève.
   final int? maxLines;
 
   @override

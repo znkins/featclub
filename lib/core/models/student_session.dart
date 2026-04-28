@@ -1,10 +1,8 @@
 /// Séance propre à un élève (table `public.student_sessions`).
 ///
-/// `dayOfWeek` est une chaîne libre stockée côté DB ('monday'..'sunday')
-/// et reste la seule source de vérité pour la planification. La date
-/// concrète affichée à l'élève (« prochaine occurrence ») est dérivée à la
-/// lecture par le service à partir du `dayOfWeek` et des complétions de la
-/// semaine en cours — cf. `StudentSessionView`.
+/// `dayOfWeek` est une chaîne ('monday'..'sunday') et reste la seule source
+/// de vérité pour la planification. La date concrète (« prochaine occurrence »)
+/// est dérivée à la lecture par le service — cf. `StudentSessionView`.
 class StudentSession {
   StudentSession({
     required this.id,

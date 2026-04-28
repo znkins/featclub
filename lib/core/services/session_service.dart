@@ -1,9 +1,11 @@
+// Service Supabase pour `sessions` + `session_blocks` (bibliothèque coach).
+
 import 'package:supabase_flutter/supabase_flutter.dart' hide Session;
 
 import '../models/block.dart';
 import '../models/session.dart';
 
-/// Élément de la liste des séances coach (entête + nombre de blocs liés).
+/// Séance + nombre de blocs liés (utilisé par la liste).
 class SessionListItem {
   const SessionListItem({required this.session, required this.blockCount});
 
@@ -11,11 +13,9 @@ class SessionListItem {
   final int blockCount;
 }
 
-/// Liaison séance ↔ bloc (ligne de `session_blocks`) avec le bloc résolu
-/// et son nombre d'exercices (affiché dans la tuile de liste).
-///
-/// Le même bloc peut apparaître plusieurs fois dans une séance : chaque
-/// apparition est identifiée par son `linkId` (id de la ligne pivot).
+/// Liaison séance ↔ bloc (ligne pivot) avec le bloc résolu et son
+/// nombre d'exercices. Le même bloc peut apparaître plusieurs fois :
+/// chaque apparition est identifiée par son `linkId`.
 class SessionBlockLink {
   const SessionBlockLink({
     required this.linkId,
@@ -30,7 +30,7 @@ class SessionBlockLink {
   final int exerciseCount;
 }
 
-/// Détail d'une séance template : entête + liaisons de blocs dans l'ordre.
+/// Détail d'une séance template : entête + liaisons de blocs ordonnées.
 class SessionDetail {
   const SessionDetail({required this.session, required this.links});
 
@@ -38,9 +38,6 @@ class SessionDetail {
   final List<SessionBlockLink> links;
 }
 
-/// Bibliothèque de séances templates (`public.sessions` + `public.session_blocks`).
-///
-/// `is_template = true` pour toutes les séances créées ici.
 class SessionService {
   SessionService(this._client);
 
@@ -159,10 +156,7 @@ class SessionService {
     }).toList();
   }
 
-  /// Ajoute un bloc à la fin de la séance.
-  ///
-  /// Les duplicats sont autorisés : appeler plusieurs fois insère plusieurs
-  /// lignes pivot distinctes.
+  /// Ajoute un bloc à la fin de la séance (les duplicats sont autorisés).
   Future<void> addBlock({
     required String sessionId,
     required String blockId,

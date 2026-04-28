@@ -4,11 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/formatters.dart';
 import '../../shared/widgets/meta_pill.dart';
 
-/// Pastille « date d'assignation » : icône calendrier + libellé humain
-/// ("Aujourd'hui" / "Demain" / `JJ/MM/AAAA`).
-///
-/// Variante côté élève du [DayOfWeekPill] coach : ici la séance a une date
-/// concrète, pas un jour de la semaine abstrait.
+/// Pastille de la date d'une séance côté élève (« Aujourd'hui » / « Demain »
+/// / nom du jour / `JJ/MM/AAAA`). Variante de `DayOfWeekPill` côté coach.
 class AssignedDatePill extends StatelessWidget {
   const AssignedDatePill({super.key, required this.date});
 

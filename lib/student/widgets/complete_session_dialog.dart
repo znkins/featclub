@@ -8,13 +8,9 @@ import '../../shared/providers/student_data_providers.dart';
 import '../providers/student_session_providers.dart';
 import '../providers/student_shell_providers.dart';
 
-/// Modale de complétion de séance : commentaire facultatif puis insert dans
-/// `completed_sessions`.
-///
-/// Renvoie `true` si la complétion a été enregistrée, `false`/`null` si
-/// l'utilisateur a annulé. Le titre est snapshot (l'historique reste lisible
-/// même si la séance source est supprimée) et la séance n'est pas désactivée
-/// (elle reste disponible pour être refaite).
+/// Modale de complétion de séance (commentaire facultatif puis insert dans
+/// `completed_sessions`). Renvoie `true` si la complétion est enregistrée.
+/// Le titre est snapshot et la séance reste disponible pour être refaite.
 Future<bool?> showCompleteSessionDialog(
   BuildContext context, {
   required String studentSessionId,
@@ -29,13 +25,9 @@ Future<bool?> showCompleteSessionDialog(
   );
 }
 
-/// À appeler dans la branche succès qui suit [showCompleteSessionDialog].
-///
-/// Centralise la logique post-complétion identique aux deux points
-/// d'entrée (écran détail + écran exécution) : invalide les providers
-/// d'historique/compteur/programme actif, bascule sur l'onglet « Mon
-/// programme », affiche le snackbar de succès et pop tous les écrans
-/// empilés au-dessus du shell.
+/// Logique post-complétion partagée entre le détail et l'écran d'exécution :
+/// invalide les providers, bascule sur l'onglet « Mon programme »,
+/// affiche le snackbar de succès et pop la pile jusqu'à la racine.
 void afterSessionCompletion(BuildContext context, WidgetRef ref) {
   final profile = ref.read(currentProfileProvider).valueOrNull;
   if (profile != null) {
@@ -43,9 +35,8 @@ void afterSessionCompletion(BuildContext context, WidgetRef ref) {
     ref.invalidate(studentHistoryProvider(profile.id));
     ref.invalidate(studentCompletedSessionCountProvider(profile.id));
   }
-  // La séance fraîchement complétée doit être recalculée par le provider
-  // d'« active program » (pour que la prochaine séance soit à jour sur
-  // l'accueil et la liste programme).
+  // Le programme actif doit être recalculé pour que la nouvelle « prochaine
+  // séance » apparaisse correctement sur l'accueil et la liste programme.
   ref.invalidate(studentActiveProgramProvider);
   ref.read(studentActiveTabProvider.notifier).state = 1;
   AppSnackbar.showSuccess(context, 'Séance enregistrée');

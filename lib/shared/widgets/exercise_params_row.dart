@@ -5,19 +5,15 @@ import '../../core/models/student_session_exercise.dart';
 import '../../theme/app_spacing.dart';
 import 'meta_pill.dart';
 
-/// Wrap horizontal de pills pour les paramètres d'un exercice : reps,
-/// charge, intensité, repos. Chaque champ non vide devient un `MetaPill`.
-///
-/// Renvoie `SizedBox.shrink()` si aucun paramètre n'est renseigné — le
-/// widget peut donc être inclus inconditionnellement par l'appelant.
-/// Les appelants qui ont besoin de la même information pour conditionner
-/// du spacing peuvent utiliser le helper [hasContent].
+/// Wrap horizontal de pills pour les paramètres d'un exercice :
+/// reps, charge, intensité, repos. Renvoie une boîte vide si rien à afficher.
 class ExerciseParamsRow extends StatelessWidget {
   const ExerciseParamsRow({super.key, required this.exercise});
 
   final StudentSessionExercise exercise;
 
-  /// Indique si l'exercice contient au moins un paramètre à afficher.
+  /// `true` si l'exercice contient au moins un paramètre à afficher.
+  /// Utile aux appelants qui veulent conditionner du spacing.
   static bool hasContent(StudentSessionExercise exercise) {
     return (exercise.reps ?? '').trim().isNotEmpty ||
         (exercise.load ?? '').trim().isNotEmpty ||

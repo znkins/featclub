@@ -1,9 +1,11 @@
+// Service Supabase pour `blocks` + `block_exercises` (bibliothèque coach).
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/block.dart';
 import '../models/exercise.dart';
 
-/// Élément de la liste des blocs coach (entête + nombre d'exercices liés).
+/// Bloc + nombre d'exercices liés (utilisé par la liste).
 class BlockListItem {
   const BlockListItem({required this.block, required this.exerciseCount});
 
@@ -11,10 +13,9 @@ class BlockListItem {
   final int exerciseCount;
 }
 
-/// Liaison bloc ↔ exercice (ligne de `block_exercises`) avec l'exercice résolu.
-///
-/// Le même exercice peut apparaître plusieurs fois dans un bloc : chaque
-/// apparition est identifiée par son `linkId` (id de la ligne pivot).
+/// Liaison bloc ↔ exercice (ligne pivot) avec l'exercice résolu.
+/// Le même exercice peut apparaître plusieurs fois dans un bloc :
+/// chaque apparition est identifiée par son `linkId`.
 class BlockExerciseLink {
   const BlockExerciseLink({
     required this.linkId,
@@ -27,7 +28,7 @@ class BlockExerciseLink {
   final int position;
 }
 
-/// Détail d'un bloc : entête + liaisons d'exercices dans l'ordre.
+/// Détail d'un bloc : entête + liaisons d'exercices triées par position.
 class BlockDetail {
   const BlockDetail({required this.block, required this.links});
 
@@ -35,7 +36,6 @@ class BlockDetail {
   final List<BlockExerciseLink> links;
 }
 
-/// Bibliothèque de blocs coach (`public.blocks` + `public.block_exercises`).
 class BlockService {
   BlockService(this._client);
 
@@ -140,10 +140,7 @@ class BlockService {
     }).toList();
   }
 
-  /// Ajoute un exercice à la fin du bloc.
-  ///
-  /// Les duplicats sont autorisés : appeler plusieurs fois insère plusieurs
-  /// lignes pivot distinctes.
+  /// Ajoute un exercice à la fin du bloc (les duplicats sont autorisés).
   Future<void> addExercise({
     required String blockId,
     required String exerciseId,

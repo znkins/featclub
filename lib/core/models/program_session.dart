@@ -1,4 +1,4 @@
-/// Pivot programme <-> séance (table `public.program_sessions`).
+/// Pivot programme ↔ séance (table `public.program_sessions`).
 class ProgramSession {
   ProgramSession({
     required this.id,

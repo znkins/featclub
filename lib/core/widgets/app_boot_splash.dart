@@ -5,14 +5,9 @@ import 'package:flutter/material.dart';
 import '../../auth/widgets/featclub_wordmark.dart';
 import '../../theme/app_spacing.dart';
 
-/// Écran affiché pendant le boot de l'app pour un utilisateur déjà connecté :
-/// le temps que `currentProfileProvider` réponde avant la redirection vers la
-/// home du rôle. Reprend le wordmark animé du login pour la continuité visuelle
-/// entre splash natif → boot → home.
-///
-/// Un spinner discret apparaît en dessous uniquement si le chargement dure
-/// plus longtemps que l'animation d'entrée (réseau lent), pour signaler que
-/// l'app n'est pas figée.
+/// Splash de boot affiché à un utilisateur déjà connecté, le temps que
+/// `currentProfileProvider` réponde avant la redirection vers son espace.
+/// Reprend le wordmark animé du login pour la continuité visuelle.
 class AppBootSplash extends StatefulWidget {
   const AppBootSplash({super.key});
 
@@ -32,6 +27,8 @@ class _AppBootSplashState extends State<AppBootSplash>
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
+    // Spinner différé : n'apparaît que si le chargement dépasse l'animation
+    // d'entrée du wordmark, pour signaler que l'app n'est pas figée.
     _spinnerTimer = Timer(const Duration(milliseconds: 1200), () {
       if (mounted) _spinnerFade.forward();
     });

@@ -1,7 +1,5 @@
 /// Bloc template (table `public.blocks`).
-///
-/// Regroupement réutilisable d'exercices, conçu pour composer
-/// des séances templates.
+/// Regroupement réutilisable d'exercices, brique de composition des séances.
 class Block {
   Block({
     required this.id,

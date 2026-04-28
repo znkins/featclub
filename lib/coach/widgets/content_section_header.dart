@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
-/// En-tête d'une section "contenu" : titre H2 + compteur en chip teal.
-///
-/// Utilisé entre la carte d'infos d'un détail (exercice / bloc / séance /
-/// programme) et la liste des enfants. Remplace l'ancien label gris
-/// minuscule qui flottait seul entre deux blocs visuels.
+/// En-tête de section « contenu » : titre H2 + chip compteur.
+/// Utilisé entre la carte d'infos et la liste d'enfants sur les écrans
+/// de détail (exercice, bloc, séance, programme).
 class ContentSectionHeader extends StatelessWidget {
   const ContentSectionHeader({
     super.key,

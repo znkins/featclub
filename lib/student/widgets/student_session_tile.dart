@@ -7,10 +7,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import 'assigned_date_pill.dart';
 
-/// Carte d'une séance élève dans la liste du programme.
-///
-/// Titre + pills (date dérivée + durée) + description courte si renseignée.
-/// Cohérent avec la carte « Prochaine séance » de l'accueil.
+/// Carte d'une séance dans la liste du programme élève :
+/// titre + pills (date dérivée + durée) + description courte.
 class StudentSessionTile extends StatelessWidget {
   const StudentSessionTile({
     super.key,

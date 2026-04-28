@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Entête de section d'une fiche (titre H1 + action optionnelle à droite,
-/// typiquement un `TextButton.icon` « + Ajouter »).
+/// Entête de section : titre H1 + action optionnelle à droite
+/// (typiquement un `TextButton.icon` « + Ajouter »).
 class SectionHeader extends StatelessWidget {
   const SectionHeader({super.key, required this.title, this.action});
 

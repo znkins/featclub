@@ -14,10 +14,8 @@ import '../../../widgets/library_search_field.dart';
 import '../../../widgets/library_selectable_tile.dart';
 import '../../../widgets/library_type_icon.dart';
 
-/// Sélection multiple de blocs à ajouter à une séance.
-///
-/// La liste affiche tous les blocs de la bibliothèque : un bloc déjà présent
-/// dans la séance peut être ajouté à nouveau (duplicat).
+/// Picker multi-sélection de blocs à ajouter dans une séance template.
+/// Les duplicats sont autorisés.
 class SessionBlockPickerScreen extends ConsumerStatefulWidget {
   const SessionBlockPickerScreen({super.key, required this.sessionId});
 

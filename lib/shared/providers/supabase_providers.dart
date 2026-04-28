@@ -1,3 +1,5 @@
+// Client Supabase global + providers de services qui en dépendent.
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,9 +8,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/profile_service.dart';
 import '../../core/services/storage_service.dart';
 
-/// Client Supabase global.
-///
-/// Construit à partir de l'instance singleton initialisée dans `main.dart`.
+/// Client Supabase (instance singleton initialisée dans `main.dart`).
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });

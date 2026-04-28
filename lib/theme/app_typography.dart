@@ -1,14 +1,9 @@
+// Construction du TextTheme à partir de la police League Spartan.
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Construit le [TextTheme] Featclub à partir de League Spartan.
-///
-/// Les valeurs suivent design_rules.md :
-///  - Display : 32 / 700 / 1.2
-///  - H1       : 22 / 600 / 1.3
-///  - H2       : 18 / 600 / 1.4
-///  - Body     : 16 / 400 / 1.5
-///  - Caption  : 14 / 500 / 1.4
+/// Échelle typographique Featclub (cf. docs/design_rules.md).
 class AppTypography {
   AppTypography._();
 

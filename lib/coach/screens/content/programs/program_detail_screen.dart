@@ -22,6 +22,8 @@ import '../sessions/session_detail_screen.dart';
 import 'program_form_screen.dart';
 import 'program_session_picker_screen.dart';
 
+/// Écran détail d'un programme template : entête + liste réordonnable des
+/// séances + FAB d'ajout. AppBar : Modifier + Supprimer.
 class ProgramDetailScreen extends ConsumerStatefulWidget {
   const ProgramDetailScreen({
     super.key,

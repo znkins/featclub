@@ -3,18 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/app_spacing.dart';
 
-/// Wordmark Featclub : logo à gauche, « FEATCLUB » en Contrail One couleur
-/// primaire et baseline « back to basics » en Contrail One couleur secondaire
-/// alignée sous le F de FEATCLUB.
+/// Wordmark Featclub : logo + « FEATCLUB » en Contrail One, baseline
+/// optionnelle « back to basics ».
 ///
-/// Le logo occupe la hauteur complète du bloc texte pour un alignement
-/// vertical propre sans déformer le fichier source. `showBaseline: false`
-/// donne une variante compacte (logo + « FEATCLUB » uniquement) utilisable
-/// dans une AppBar, où la baseline serait illisible.
-///
-/// `animate: true` joue une séquence d'entrée premium : le logo apparaît en
-/// fade+scale, puis chaque lettre de « FEATCLUB » fait un stagger fade+slide,
-/// puis la baseline fade-in. Sobre, joué une seule fois au mount du widget.
+/// `animate: true` joue une séquence d'entrée (logo en fade+scale, lettres
+/// en stagger, baseline en fade) une seule fois au mount du widget.
 class FeatclubWordmark extends StatefulWidget {
   const FeatclubWordmark({
     super.key,
@@ -28,22 +21,15 @@ class FeatclubWordmark extends StatefulWidget {
 
   final double titleFontSize;
   final double baselineFontSize;
-
-  /// Espace vertical entre « FEATCLUB » et « back to basics ».
   final double lineGap;
 
-  /// Affiche la baseline « back to basics ». Désactiver pour les contextes
-  /// compacts (AppBar) où la baseline n'aurait pas une taille lisible.
+  /// `false` pour la version compacte (AppBar) sans baseline.
   final bool showBaseline;
 
-  /// Override la hauteur du logo. Par défaut suit la hauteur du bloc texte
-  /// (titre + éventuelle baseline) — approprié pour le grand wordmark de
-  /// l'auth. En variante compacte sans baseline, le logo paraît trop grand
-  /// par rapport à la cap-height réelle du Contrail One : fournir une
-  /// valeur explicite permet de calibrer visuellement.
+  /// Override de la hauteur du logo. Utile en variante compacte où le
+  /// défaut (suit la hauteur du bloc texte) paraît trop grand.
   final double? logoHeight;
 
-  /// Joue l'animation d'entrée séquencée une seule fois au mount.
   final bool animate;
 
   @override
@@ -89,16 +75,11 @@ class _FeatclubWordmarkState extends State<FeatclubWordmark>
         ? widget.titleFontSize + widget.lineGap + widget.baselineFontSize
         : widget.titleFontSize;
     final imageHeight = widget.logoHeight ?? blockHeight;
-    // Contrail One a une cap-height ~72% de l'em-box : le centre visuel du
-    // texte est plus haut que le centre de la box. En mode compact (sans
-    // baseline) où logo et texte ont ~même hauteur, on relève le logo pour
-    // recoller son centre à celui des glyphes. En mode auth (avec baseline),
-    // le bloc texte inclut déjà la baseline sous la ligne de base, donc
-    // pas d'offset à appliquer.
+    // Contrail One a une cap-height ~72% de l'em-box : en mode compact on
+    // relève le logo pour recoller son centre à celui des glyphes.
     final logoVerticalOffset =
         widget.showBaseline ? 0.0 : -widget.titleFontSize * 0.12;
-    // Le PNG du logo a un léger padding transparent à gauche qui pousse
-    // visuellement le contenu vers la droite. Compensation optique.
+    // Compense le padding transparent à gauche du PNG du logo.
     const horizontalOpticalShift = -5.0;
     final gap = widget.showBaseline ? AppSpacing.sm : AppSpacing.xs;
 

@@ -16,6 +16,9 @@ import '../../../widgets/detail_info_card.dart';
 import '../../../widgets/editor_breadcrumb.dart';
 import 'exercise_form_screen.dart';
 
+/// Écran détail d'un exercice template (titre, catégorie, description, vidéo).
+/// AppBar : Modifier + Supprimer. Breadcrumb si l'écran a été ouvert depuis
+/// un parent (bloc / séance / programme).
 class ExerciseDetailScreen extends ConsumerWidget {
   const ExerciseDetailScreen({
     super.key,
@@ -25,14 +28,12 @@ class ExerciseDetailScreen extends ConsumerWidget {
 
   final String exerciseId;
 
-  /// Fil d'Ariane parent (chemin de navigation ayant mené à cet écran).
-  /// Vide quand on l'ouvre depuis la liste biblio ; rempli quand on arrive
-  /// via un programme / séance / bloc.
+  /// Fil d'Ariane du chemin parcouru pour arriver ici (vide si entrée
+  /// directe depuis la liste biblio).
   final List<EditorCrumb> parents;
 
-  /// Factory à utiliser systématiquement pour pousser l'écran : garantit que
-  /// `RouteSettings.name` est positionné pour que d'éventuels enfants
-  /// puissent remonter ici via le breadcrumb.
+  /// Factory à utiliser pour pousser cet écran : positionne `RouteSettings.name`
+  /// pour que d'éventuels enfants puissent remonter ici via le breadcrumb.
   static Route<void> route({
     required String exerciseId,
     List<EditorCrumb> parents = const [],

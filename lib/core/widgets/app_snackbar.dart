@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 
-/// Helpers pour afficher des snackbars succès / erreur cohérents.
+/// Snackbars succès / erreur cohérents (icône + couleur).
 class AppSnackbar {
   AppSnackbar._();
 

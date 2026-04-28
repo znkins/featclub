@@ -1,6 +1,6 @@
 /// Programme propre à un élève (table `public.student_programs`).
 ///
-/// Copie profonde et indépendante d'un programme template ou créé à la main.
+/// Copie profonde et indépendante d'un programme template (ou créé à la main).
 /// Règle métier : un seul programme actif à la fois par élève.
 class StudentProgram {
   StudentProgram({

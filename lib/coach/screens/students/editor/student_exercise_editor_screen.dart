@@ -12,16 +12,13 @@ import '../../../../theme/app_spacing.dart';
 import '../../../providers/student_program_providers.dart';
 import '../../../widgets/editor_breadcrumb.dart';
 
-/// Éditeur d'un exercice élève (titre + vidéo + paramètres prescriptifs).
+/// Éditeur d'un exercice élève (titre, vidéo, paramètres prescriptifs).
 ///
-/// Deux modes :
-/// - création ad hoc (`exerciseId == null`) : tous les champs vides, on
-///   enregistre avec `createEmptyExercise`.
-/// - édition (`exerciseId != null`) : charge l'exercice, permet de modifier
-///   tous les champs puis enregistrer, avec action supprimer dans l'AppBar.
+/// Deux modes via `createRoute` / `editRoute` :
+/// - création ad hoc : tous les champs vides, save = `createEmptyExercise`.
+/// - édition : charge l'exercice et permet de tout modifier + supprimer.
 ///
-/// Pas de liste d'enfants ici donc pas de détail en lecture seule : on ouvre
-/// directement le formulaire (simple et cohérent).
+/// Pas de vue détail séparée : on ouvre directement le formulaire.
 class StudentExerciseEditorScreen extends ConsumerStatefulWidget {
   const StudentExerciseEditorScreen._({
     required this.studentId,
@@ -196,8 +193,8 @@ class _StudentExerciseEditorScreenState
           rest: _restController.text,
           note: _noteController.text,
         );
-        // Création d'un exercice → la `exerciseCount` du bloc affiché dans
-        // l'éditeur séance change, donc on invalide ce niveau aussi.
+        // L'`exerciseCount` du bloc affiché dans l'éditeur séance change
+        // après création.
         ref.invalidate(studentSessionEditorDetailProvider(widget.sessionId));
       }
       ref.invalidate(studentBlockEditorDetailProvider(widget.blockId));
@@ -230,8 +227,8 @@ class _StudentExerciseEditorScreenState
           .read(studentProgramServiceProvider)
           .deleteExercise(widget.exerciseId!);
       ref.invalidate(studentBlockEditorDetailProvider(widget.blockId));
-      // Suppression d'un exercice → la `exerciseCount` du bloc change dans
-      // l'éditeur séance.
+      // L'`exerciseCount` du bloc affiché dans l'éditeur séance change
+      // après suppression.
       ref.invalidate(studentSessionEditorDetailProvider(widget.sessionId));
       if (!mounted) return;
       AppSnackbar.showSuccess(context, 'Exercice supprimé');
@@ -244,10 +241,9 @@ class _StudentExerciseEditorScreenState
 
   @override
   Widget build(BuildContext context) {
-    // Source de vérité pour le libellé AppBar + breadcrumb : on dérive du
-    // provider Riverpod (les données fraîches du serveur), pas du controller
-    // local — celui-ci reflète les saisies en cours et ne notifie pas
-    // l'AppBar des changements.
+    // Le titre de l'AppBar suit le provider (donnée fraîche du serveur),
+    // pas le controller local — celui-ci reflète les saisies en cours
+    // et ne notifie pas l'AppBar.
     final async = _isEdit
         ? ref.watch(studentExerciseProvider(widget.exerciseId!))
         : null;

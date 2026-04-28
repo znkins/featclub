@@ -7,9 +7,6 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 
 /// Ligne d'une mesure de poids : pastille icône + poids + date.
-///
-/// Réutilisée côté coach (fiche élève + sheet "Toutes les mesures") et côté
-/// élève (onglet progression).
 class WeightMeasureRow extends StatelessWidget {
   const WeightMeasureRow({super.key, required this.measure});
 

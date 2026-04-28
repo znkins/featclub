@@ -1,10 +1,11 @@
+// Upload des avatars dans Supabase Storage.
+
 import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
 
-/// Upload des avatars dans le bucket Supabase Storage.
 class StorageService {
   StorageService(this._client);
 
@@ -12,12 +13,9 @@ class StorageService {
 
   String get avatarsBucket => SupabaseConfig.avatarsBucket;
 
-  /// Upload un avatar pour [userId] et renvoie l'URL publique fraîche
-  /// (avec un cache-buster pour forcer le rechargement).
-  ///
-  /// L'image est écrasée si elle existe déjà (`upsert: true`).
-  /// Le bucket est supposé public côté Supabase, conformément à la config
-  /// validée pour ce projet.
+  /// Upload un avatar pour [userId] et renvoie son URL publique.
+  /// L'image existante est écrasée (`upsert: true`). Un cache-buster est
+  /// ajouté à l'URL pour forcer le rechargement côté client.
   Future<String> uploadAvatar({
     required String userId,
     required Uint8List bytes,

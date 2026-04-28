@@ -8,9 +8,7 @@ import '../providers/student_data_providers.dart';
 import 'weight_measure_row.dart';
 
 /// Bottom sheet listant toutes les mesures de poids d'un élève.
-///
-/// Utilisé par la fiche élève coach et par l'onglet progression élève (même
-/// présentation, même provider, le `studentId` change selon l'appelant).
+/// Partagé entre la fiche coach et l'onglet progression élève.
 Future<void> showWeightMeasuresSheet(
   BuildContext context, {
   required String studentId,

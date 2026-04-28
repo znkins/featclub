@@ -12,12 +12,10 @@ import '../../theme/app_sizes.dart';
 import '../../theme/app_spacing.dart';
 import 'coach_activity_screen.dart';
 
-/// Accueil coach : bienvenue, raccourcis (Featers, Activité) et CTA de
-/// complétion de profil si nécessaire.
-///
-/// `onNavigate(int)` permet au raccourci Featers de basculer sur l'onglet
-/// du shell (cf. [CoachShell]). L'Activité, elle, est un écran poussé
-/// (Navigator.push) puisqu'elle n'a pas d'onglet dédié.
+/// Onglet Accueil du coach : bienvenue, raccourcis (Featers, Activité),
+/// CTA de complétion de profil.
+/// `onNavigate` permet aux raccourcis de basculer d'onglet du shell.
+/// L'écran Activité est ouvert via `Navigator.push` (pas d'onglet dédié).
 class CoachHomeScreen extends ConsumerWidget {
   const CoachHomeScreen({super.key, required this.onNavigate});
 

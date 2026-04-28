@@ -8,7 +8,7 @@ final sessionServiceProvider = Provider<SessionService>((ref) {
   return SessionService(ref.watch(supabaseClientProvider));
 });
 
-/// Liste des séances templates du coach connecté (avec compteur de blocs).
+/// Séances templates du coach connecté (avec compteur de blocs).
 final coachSessionsProvider =
     FutureProvider<List<SessionListItem>>((ref) async {
   final userId = ref.watch(currentSessionProvider)?.user.id;
@@ -16,11 +16,8 @@ final coachSessionsProvider =
   return ref.watch(sessionServiceProvider).listByCoach(userId);
 });
 
-/// Détail d'une séance template (entête + liaisons de blocs).
-///
-/// `autoDispose` : fraîcheur garantie à chaque ré-entrée dans l'écran détail
-/// (couvre le cas du `popUntil` breadcrumb qui saute des niveaux sans
-/// déclencher `didPopNext` sur les écrans traversés).
+/// Détail d'une séance template (entête + blocs). `autoDispose` pour
+/// éviter le cache périmé lors d'un `popUntil` via breadcrumb.
 final sessionDetailProvider =
     FutureProvider.autoDispose.family<SessionDetail, String>((ref, id) async {
   return ref.watch(sessionServiceProvider).fetchDetail(id);

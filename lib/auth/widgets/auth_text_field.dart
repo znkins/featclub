@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_spacing.dart';
 
-/// Champ texte standardisé pour les formulaires d'authentification.
+/// Champ de texte standardisé pour les formulaires d'authentification
+/// (label au-dessus, hint, validation, autofill).
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
     super.key,

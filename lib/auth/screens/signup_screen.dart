@@ -9,6 +9,8 @@ import '../../theme/app_spacing.dart';
 import '../utils/auth_validators.dart';
 import '../widgets/auth_text_field.dart';
 
+/// Écran de création de compte. Le profil applicatif est créé en base par
+/// le trigger Supabase `handle_new_user` à la confirmation de l'email.
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
@@ -45,7 +47,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         context,
         'Compte créé. Confirme ton email pour activer ton accès.',
       );
-      // Retour à la connexion (la session a été nettoyée côté service).
       if (context.canPop()) {
         context.pop();
       } else {
