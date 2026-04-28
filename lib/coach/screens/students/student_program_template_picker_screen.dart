@@ -103,10 +103,7 @@ class _StudentProgramTemplatePickerScreenState
                     }
                     final filtered = _filter(all);
                     if (filtered.isEmpty) {
-                      return const EmptyView(
-                        icon: LucideIcons.search,
-                        message: 'Aucun résultat',
-                      );
+                      return const EmptyView.noResults();
                     }
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(
@@ -139,9 +136,9 @@ class _StudentProgramTemplatePickerScreenState
             ],
           ),
           if (_busy)
-            const ColoredBox(
-              color: Color(0x66000000),
-              child: Center(
+            ColoredBox(
+              color: Theme.of(context).colorScheme.scrim,
+              child: const Center(
                 child: CircularProgressIndicator(),
               ),
             ),

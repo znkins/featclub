@@ -77,7 +77,6 @@ class StudentBlockEditorDetail {
 /// La planification est purement calendaire : `nextOccurrence` est
 /// recalculée à chaque lecture à partir de `session.dayOfWeek` et des
 /// complétions de la semaine en cours (cf. `nextOccurrenceForStudent`).
-/// La colonne DB `assigned_date` est legacy et ignorée.
 class StudentSessionView {
   const StudentSessionView({
     required this.session,

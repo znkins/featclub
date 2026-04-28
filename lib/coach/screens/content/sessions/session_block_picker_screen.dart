@@ -105,10 +105,7 @@ class _SessionBlockPickerScreenState
                 }
                 final filtered = _filter(all);
                 if (filtered.isEmpty) {
-                  return const EmptyView(
-                    icon: LucideIcons.search,
-                    message: 'Aucun résultat',
-                  );
+                  return const EmptyView.noResults();
                 }
                 return ListView.separated(
                   padding: const EdgeInsets.fromLTRB(

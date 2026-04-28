@@ -5,9 +5,6 @@
 /// concrète affichée à l'élève (« prochaine occurrence ») est dérivée à la
 /// lecture par le service à partir du `dayOfWeek` et des complétions de la
 /// semaine en cours — cf. `StudentSessionView`.
-///
-/// La colonne DB `assigned_date` est legacy (figée à l'écriture coach,
-/// jamais recalculée) ; le code ne la lit ni ne l'écrit plus.
 class StudentSession {
   StudentSession({
     required this.id,

@@ -53,11 +53,14 @@ class WeightEvolutionChart extends StatelessWidget {
             borderData: FlBorderData(show: false),
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
+                getTooltipColor: (_) => theme.colorScheme.inverseSurface,
                 getTooltipItems: (touched) => touched.map((t) {
                   final m = sorted[t.spotIndex];
                   return LineTooltipItem(
                     '${formatDateShort(m.measuredAt)}\n${formatWeightKg(m.valueKg)}',
-                    theme.textTheme.bodySmall!.copyWith(color: Colors.white),
+                    theme.textTheme.bodySmall!.copyWith(
+                      color: theme.colorScheme.onInverseSurface,
+                    ),
                   );
                 }).toList(),
               ),

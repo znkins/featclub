@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../theme/app_radius.dart';
 import '../../theme/app_sizes.dart';
@@ -16,6 +17,14 @@ class EmptyView extends StatelessWidget {
     this.action,
     this.wrapIcon = false,
   });
+
+  /// Variante standard pour une recherche qui ne ramène aucun résultat.
+  /// Utilisée par toutes les listes recherchables et les pickers.
+  const EmptyView.noResults({super.key})
+      : icon = LucideIcons.search,
+        message = 'Aucun résultat',
+        action = null,
+        wrapIcon = false;
 
   final IconData icon;
   final String message;

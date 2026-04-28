@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../providers/student_providers.dart';
 
@@ -64,7 +65,7 @@ class EditorBreadcrumb extends StatelessWidget implements PreferredSizeWidget {
                     () => Navigator.of(context).popUntil(
                           (r) => r.settings.name == crumb.routeName,
                         ),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,

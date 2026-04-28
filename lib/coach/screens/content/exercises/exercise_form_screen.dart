@@ -48,6 +48,17 @@ class _ExerciseFormScreenState extends ConsumerState<ExerciseFormScreen> {
     super.dispose();
   }
 
+  /// URL facultative : si renseignée, doit être un http(s) parsable.
+  String? _validateOptionalUrl(String? v) {
+    final s = v?.trim() ?? '';
+    if (s.isEmpty) return null;
+    final uri = Uri.tryParse(s);
+    if (uri == null || !uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      return 'URL invalide (https://… attendu)';
+    }
+    return null;
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     final form = _formKey.currentState;
@@ -143,6 +154,7 @@ class _ExerciseFormScreenState extends ConsumerState<ExerciseFormScreen> {
                 decoration: const InputDecoration(
                   hintText: 'https://...',
                 ),
+                validator: _validateOptionalUrl,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),

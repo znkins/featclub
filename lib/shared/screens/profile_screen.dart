@@ -439,6 +439,7 @@ class _AvatarEditButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onPrimary = theme.colorScheme.onPrimary;
     return Material(
       color: theme.colorScheme.primary,
       shape: const CircleBorder(),
@@ -448,17 +449,17 @@ class _AvatarEditButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: uploading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: onPrimary,
                   ),
                 )
-              : const Icon(
+              : Icon(
                   LucideIcons.pencil,
-                  color: Colors.white,
+                  color: onPrimary,
                   size: 18,
                 ),
         ),

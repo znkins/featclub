@@ -95,10 +95,7 @@ class _ProgramListScreenState extends ConsumerState<ProgramListScreen> {
                 }
                 final filtered = _filter(all);
                 if (filtered.isEmpty) {
-                  return const EmptyView(
-                    icon: LucideIcons.search,
-                    message: 'Aucun résultat',
-                  );
+                  return const EmptyView.noResults();
                 }
                 return RefreshIndicator(
                   onRefresh: () async =>

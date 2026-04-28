@@ -140,6 +140,17 @@ class _StudentExerciseEditorScreenState
     _noteController.text = e.note ?? '';
   }
 
+  /// URL facultative : si renseignée, doit être un http(s) parsable.
+  String? _validateOptionalUrl(String? v) {
+    final s = v?.trim() ?? '';
+    if (s.isEmpty) return null;
+    final uri = Uri.tryParse(s);
+    if (uri == null || !uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      return 'URL invalide (https://… attendu)';
+    }
+    return null;
+  }
+
   Future<void> _openVideo() async {
     final url = _videoUrlController.text.trim();
     if (url.isEmpty) return;
@@ -352,6 +363,7 @@ class _StudentExerciseEditorScreenState
                   decoration: const InputDecoration(
                     hintText: 'https://…',
                   ),
+                  validator: _validateOptionalUrl,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

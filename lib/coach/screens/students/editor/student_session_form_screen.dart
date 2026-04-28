@@ -12,9 +12,10 @@ import '../../../providers/student_program_providers.dart';
 /// Mode création : nécessite `programId`, `existing` est null.
 /// Mode édition : nécessite `existing`.
 ///
-/// Le jour de semaine choisi déclenche le calcul automatique de
-/// `assigned_date` côté service (prochaine occurrence, aujourd'hui si
-/// même jour).
+/// Le jour de semaine choisi sert de seule source de vérité pour la
+/// planification : la date concrète affichée à l'élève est dérivée à la
+/// lecture (prochaine occurrence du jour, aujourd'hui si on l'assigne le
+/// jour J).
 class StudentSessionFormScreen extends ConsumerStatefulWidget {
   const StudentSessionFormScreen({
     super.key,
