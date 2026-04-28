@@ -1,6 +1,16 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/completed_session.dart';
+import '../models/profile.dart';
+
+/// Complétion d'un élève + son profil minimal (pour le feed d'activité coach :
+/// on a besoin du nom et de l'avatar à côté de chaque ligne).
+class RecentActivityItem {
+  const RecentActivityItem({required this.completion, required this.student});
+
+  final CompletedSession completion;
+  final Profile student;
+}
 
 /// Historique des séances terminées (`public.completed_sessions`).
 ///
@@ -13,6 +23,8 @@ class CompletedSessionService {
 
   static const String _columns =
       'id, student_id, student_session_id, session_title, comment, completed_at';
+  static const String _profileColumns =
+      'id, role, status, first_name, last_name, bio, birth_date, height_cm, goal, current_weight, avatar_url, created_at';
 
   /// Crée une entrée de séance terminée pour un élève.
   ///
@@ -71,6 +83,33 @@ class CompletedSessionService {
     final rows = await query;
     return (rows as List)
         .map((r) => CompletedSession.fromJson(r as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Feed d'activité coach : dernières complétions (tous élèves confondus),
+  /// avec le profil de l'élève embarqué pour pouvoir afficher avatar + nom
+  /// sans round-trip supplémentaire.
+  ///
+  /// La V1 ne pagine pas : on coupe à `limit` (Phase 6 pourra paginer).
+  Future<List<RecentActivityItem>> listRecentWithStudent({
+    required int limit,
+  }) async {
+    final rows = await _client
+        .from('completed_sessions')
+        .select('$_columns, student:profiles!completed_sessions_student_id_fkey($_profileColumns)')
+        .order('completed_at', ascending: false)
+        .limit(limit);
+    return (rows as List)
+        .map((r) {
+          final map = r as Map<String, dynamic>;
+          final studentJson = map['student'] as Map<String, dynamic>?;
+          if (studentJson == null) return null;
+          return RecentActivityItem(
+            completion: CompletedSession.fromJson(map),
+            student: Profile.fromJson(studentJson),
+          );
+        })
+        .whereType<RecentActivityItem>()
         .toList();
   }
 }
