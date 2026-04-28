@@ -8,7 +8,7 @@ import 'auth/screens/login_screen.dart';
 import 'auth/screens/signup_screen.dart';
 import 'coach/screens/coach_shell.dart';
 import 'core/utils/user_role.dart';
-import 'core/widgets/loading_indicator.dart';
+import 'core/widgets/app_boot_splash.dart';
 import 'shared/providers/auth_provider.dart';
 import 'shared/providers/current_profile_provider.dart';
 import 'shared/providers/route_observer_provider.dart';
@@ -62,7 +62,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/loading',
-        builder: (_, _) => const Scaffold(body: LoadingIndicator()),
+        builder: (_, _) => const AppBootSplash(),
       ),
     ],
   );

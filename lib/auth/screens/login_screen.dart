@@ -75,7 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const FeatclubWordmark(),
+                  const FeatclubWordmark(animate: true),
                   const SizedBox(height: AppSpacing.xxl),
                   AuthTextField(
                     controller: _emailController,
