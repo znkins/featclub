@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/services/admin_user_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/profile_service.dart';
 import '../../core/services/storage_service.dart';
@@ -22,4 +23,8 @@ final profileServiceProvider = Provider<ProfileService>((ref) {
 
 final storageServiceProvider = Provider<StorageService>((ref) {
   return StorageService(ref.watch(supabaseClientProvider));
+});
+
+final adminUserServiceProvider = Provider<AdminUserService>((ref) {
+  return AdminUserService(ref.watch(supabaseClientProvider));
 });
