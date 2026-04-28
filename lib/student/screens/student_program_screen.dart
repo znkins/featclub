@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../core/models/student_session.dart';
+import '../../core/services/student_program_service.dart';
+import '../../core/utils/day_of_week.dart';
 import '../../core/widgets/empty_view.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
@@ -72,11 +73,11 @@ class StudentProgramScreen extends ConsumerWidget {
               for (var i = 0; i < detail.sessions.length; i++) ...[
                 if (i > 0) const SizedBox(height: AppSpacing.md),
                 StudentSessionTile(
-                  session: detail.sessions[i],
+                  view: detail.sessions[i],
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => StudentSessionDetailScreen(
-                        sessionId: detail.sessions[i].id,
+                        sessionId: detail.sessions[i].session.id,
                       ),
                     ),
                   ),
@@ -90,26 +91,22 @@ class StudentProgramScreen extends ConsumerWidget {
   }
 }
 
-/// Compteur des séances assignées sur la semaine calendaire en cours
-/// (lundi → dimanche).
+/// Compteur des séances restantes sur la semaine calendaire en cours
+/// (jusqu'à dimanche). Une séance complétée cette semaine voit sa
+/// `nextOccurrence` rouler à la semaine suivante et sort donc du décompte.
 class _WeekCounter extends StatelessWidget {
   const _WeekCounter({required this.sessions});
 
-  final List<StudentSession> sessions;
+  final List<StudentSessionView> sessions;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    // Lundi = weekday 1, dimanche = 7. On calcule le lundi de la semaine.
-    final weekStart = today.subtract(Duration(days: today.weekday - 1));
-    final weekEnd = weekStart.add(const Duration(days: 7));
-    final count = sessions.where((s) {
-      final d = s.assignedDate;
+    final weekEnd = currentWeekEnd();
+    final count = sessions.where((v) {
+      final d = v.nextOccurrence;
       if (d == null) return false;
-      final day = DateTime(d.year, d.month, d.day);
-      return !day.isBefore(weekStart) && day.isBefore(weekEnd);
+      return d.isBefore(weekEnd);
     }).length;
 
     final label = count == 0

@@ -26,7 +26,9 @@ String formatWeightKg(double kg) {
   return '$rounded kg';
 }
 
-/// Affichage humain d'une date assignée : "Aujourd'hui" / "Demain" / date.
+/// Affichage humain d'une date assignée :
+/// "Aujourd'hui" / "Demain" / nom du jour (si dans 7j) / sinon `JJ/MM/AAAA`.
+///
 /// Utilisé par l'accueil élève et la liste des séances du programme.
 String? formatAssignedDateLabel(DateTime? date) {
   if (date == null) return null;
@@ -36,5 +38,25 @@ String? formatAssignedDateLabel(DateTime? date) {
   final diff = d.difference(today).inDays;
   if (diff == 0) return 'Aujourd\'hui';
   if (diff == 1) return 'Demain';
+  if (diff > 1 && diff < 7) return _frenchWeekdayName(d.weekday);
   return formatDate(date);
+}
+
+String _frenchWeekdayName(int isoWeekday) {
+  switch (isoWeekday) {
+    case DateTime.monday:
+      return 'Lundi';
+    case DateTime.tuesday:
+      return 'Mardi';
+    case DateTime.wednesday:
+      return 'Mercredi';
+    case DateTime.thursday:
+      return 'Jeudi';
+    case DateTime.friday:
+      return 'Vendredi';
+    case DateTime.saturday:
+      return 'Samedi';
+    default:
+      return 'Dimanche';
+  }
 }

@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../coach/widgets/duration_pill.dart';
 import '../../core/models/profile.dart';
-import '../../core/models/student_session.dart';
 import '../../core/services/student_program_service.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
@@ -78,7 +77,7 @@ class StudentHomeScreen extends ConsumerWidget {
                     : () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => StudentSessionDetailScreen(
-                              sessionId: next.id,
+                              sessionId: next.session.id,
                             ),
                           ),
                         ),
@@ -208,7 +207,7 @@ class _NextSessionCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               if (next != null)
-                _NextSessionContent(session: next)
+                _NextSessionContent(view: next)
               else
                 _NextSessionEmpty(hasProgram: hasProgram),
             ],
@@ -220,14 +219,15 @@ class _NextSessionCard extends StatelessWidget {
 }
 
 class _NextSessionContent extends StatelessWidget {
-  const _NextSessionContent({required this.session});
+  const _NextSessionContent({required this.view});
 
-  final StudentSession session;
+  final StudentSessionView view;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasDate = session.assignedDate != null;
+    final session = view.session;
+    final hasDate = view.nextOccurrence != null;
     final hasDuration = session.durationMinutes != null;
 
     return Column(
@@ -245,7 +245,7 @@ class _NextSessionContent extends StatelessWidget {
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.xs,
             children: [
-              if (hasDate) AssignedDatePill(date: session.assignedDate!),
+              if (hasDate) AssignedDatePill(date: view.nextOccurrence!),
               if (hasDuration) DurationPill(minutes: session.durationMinutes!),
             ],
           ),

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../coach/widgets/duration_pill.dart';
-import '../../core/models/student_session.dart';
 import '../../core/models/student_session_exercise.dart';
 import '../../core/services/student_program_service.dart';
 import '../../core/utils/video_launcher.dart';
@@ -68,7 +67,7 @@ class _Body extends StatelessWidget {
         AppSpacing.xl,
       ),
       children: [
-        _SessionHeader(session: content.session, blockCount: content.blocks.length),
+        _SessionHeader(content: content),
         const SizedBox(height: AppSpacing.xl),
         if (content.blocks.isEmpty)
           _EmptyBlocks()
@@ -87,16 +86,16 @@ class _Body extends StatelessWidget {
 }
 
 class _SessionHeader extends StatelessWidget {
-  const _SessionHeader({required this.session, required this.blockCount});
+  const _SessionHeader({required this.content});
 
-  final StudentSession session;
-  final int blockCount;
+  final StudentSessionContent content;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final session = content.session;
     final description = (session.description ?? '').trim();
-    final hasDate = session.assignedDate != null;
+    final hasDate = content.nextOccurrence != null;
     final hasDuration = session.durationMinutes != null;
 
     return Column(
@@ -110,9 +109,9 @@ class _SessionHeader extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.xs,
           children: [
-            if (hasDate) AssignedDatePill(date: session.assignedDate!),
+            if (hasDate) AssignedDatePill(date: content.nextOccurrence!),
             if (hasDuration) DurationPill(minutes: session.durationMinutes!),
-            BlockCountPill(count: blockCount),
+            BlockCountPill(count: content.blocks.length),
           ],
         ),
       ],

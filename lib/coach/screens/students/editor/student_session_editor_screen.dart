@@ -6,7 +6,6 @@ import '../../../../core/models/student_session.dart';
 import '../../../../core/models/student_session_block.dart';
 import '../../../../core/services/student_program_service.dart';
 import '../../../../core/utils/day_of_week.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_view.dart';
@@ -399,12 +398,7 @@ class _Header extends StatelessWidget {
         DetailField(
           label: 'Jour',
           child: day != null
-              ? Text(
-                  session.assignedDate != null
-                      ? '${day.frenchLabel} · ${formatDate(session.assignedDate!)}'
-                      : day.frenchLabel,
-                  style: theme.textTheme.bodyLarge,
-                )
+              ? Text(day.frenchLabel, style: theme.textTheme.bodyLarge)
               : null,
         ),
         DetailField(

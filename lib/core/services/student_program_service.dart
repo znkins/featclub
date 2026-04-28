@@ -72,6 +72,30 @@ class StudentBlockEditorDetail {
   final List<StudentSessionExercise> exercises;
 }
 
+/// Séance élève + champs dérivés à la lecture pour l'affichage côté élève.
+///
+/// La planification est purement calendaire : `nextOccurrence` est
+/// recalculée à chaque lecture à partir de `session.dayOfWeek` et des
+/// complétions de la semaine en cours (cf. `nextOccurrenceForStudent`).
+/// La colonne DB `assigned_date` est legacy et ignorée.
+class StudentSessionView {
+  const StudentSessionView({
+    required this.session,
+    required this.nextOccurrence,
+    required this.completedThisWeek,
+  });
+
+  final StudentSession session;
+
+  /// Prochaine date affichée à l'élève. `null` si la séance n'a pas de
+  /// `dayOfWeek` (séance non planifiée).
+  final DateTime? nextOccurrence;
+
+  /// Vrai si au moins une complétion existe pour cette séance depuis
+  /// lundi 00h de la semaine en cours.
+  final bool completedThisWeek;
+}
+
 /// Programme actif d'un élève et ses séances (liste plate, triée pour l'app
 /// élève). Utilisé par l'accueil et l'onglet programme.
 class StudentActiveProgramDetail {
@@ -84,9 +108,9 @@ class StudentActiveProgramDetail {
   final StudentProgram? program;
 
   /// Séances du programme actif, triées pour la vue élève : séances avec
-  /// `assigned_date` en premier (plus proche en tête), puis séances sans date
-  /// triées par date de création.
-  final List<StudentSession> sessions;
+  /// une `nextOccurrence` en premier (plus proche d'abord), puis séances
+  /// sans jour assigné triées par date de création.
+  final List<StudentSessionView> sessions;
 }
 
 /// Bloc élève + ses exercices ordonnés (version "lecture" pour l'élève).
@@ -100,7 +124,8 @@ class StudentSessionBlockContent {
   final List<StudentSessionExercise> exercises;
 }
 
-/// Contenu complet d'une séance élève : séance + blocs + exercices.
+/// Contenu complet d'une séance élève : séance + blocs + exercices,
+/// avec champs dérivés pour l'affichage (cf. [StudentSessionView]).
 ///
 /// Utilisé par le détail séance et le mode d'exécution, où l'on doit
 /// disposer de tout l'arbre d'un coup pour naviguer bloc par bloc sans
@@ -108,10 +133,14 @@ class StudentSessionBlockContent {
 class StudentSessionContent {
   const StudentSessionContent({
     required this.session,
+    required this.nextOccurrence,
+    required this.completedThisWeek,
     required this.blocks,
   });
 
   final StudentSession session;
+  final DateTime? nextOccurrence;
+  final bool completedThisWeek;
   final List<StudentSessionBlockContent> blocks;
 
   int get exerciseCount =>
@@ -133,7 +162,7 @@ class StudentProgramService {
   static const String _programColumns =
       'id, student_id, title, description, is_active, created_at';
   static const String _sessionColumns =
-      'id, student_program_id, title, description, duration_minutes, day_of_week, assigned_date, position, created_at';
+      'id, student_program_id, title, description, duration_minutes, day_of_week, position, created_at';
   static const String _blockColumns =
       'id, student_session_id, title, description, position';
   static const String _exerciseColumns =
@@ -263,9 +292,11 @@ class StudentProgramService {
 
   /// Programme actif + séances triées pour la vue élève.
   ///
-  /// Tri : séances avec `assigned_date` en premier (plus proche d'abord),
-  /// puis séances sans date, triées par date de création (la plus ancienne
-  /// en tête — ordre d'apparition stable).
+  /// Pour chaque séance, calcule la `nextOccurrence` à partir du `dayOfWeek`
+  /// et des complétions de la semaine en cours (cf.
+  /// `nextOccurrenceForStudent`). Tri : séances avec une `nextOccurrence`
+  /// en premier (plus proche d'abord), puis séances sans jour assigné triées
+  /// par date de création.
   Future<StudentActiveProgramDetail> fetchActiveProgramWithSessions(
     String studentId,
   ) async {
@@ -279,15 +310,56 @@ class StudentProgramService {
         .eq('student_program_id', program.id);
     final sessions = (rows as List)
         .map((r) => StudentSession.fromJson(r as Map<String, dynamic>))
-        .toList()
-      ..sort(_compareStudentSessionsForStudent);
-    return StudentActiveProgramDetail(program: program, sessions: sessions);
+        .toList();
+
+    final completedIds = sessions.isEmpty
+        ? <String>{}
+        : await _completedSessionIdsThisWeek(
+            sessions.map((s) => s.id).toList(),
+          );
+
+    final views = sessions.map((s) {
+      final day = DayOfWeek.fromStorage(s.dayOfWeek);
+      final completedThisWeek = completedIds.contains(s.id);
+      return StudentSessionView(
+        session: s,
+        nextOccurrence: day == null
+            ? null
+            : nextOccurrenceForStudent(
+                day,
+                completedThisWeek: completedThisWeek,
+              ),
+        completedThisWeek: completedThisWeek,
+      );
+    }).toList()
+      ..sort(_compareStudentSessionViewsForStudent);
+
+    return StudentActiveProgramDetail(program: program, sessions: views);
+  }
+
+  /// Ids des séances qui ont au moins une complétion depuis lundi 00h
+  /// de la semaine en cours.
+  Future<Set<String>> _completedSessionIdsThisWeek(
+    List<String> sessionIds,
+  ) async {
+    final weekStart = currentWeekStart();
+    final rows = await _client
+        .from('completed_sessions')
+        .select('student_session_id')
+        .inFilter('student_session_id', sessionIds)
+        .gte('completed_at', weekStart.toIso8601String());
+    return {
+      for (final r in rows as List)
+        (r as Map<String, dynamic>)['student_session_id'] as String,
+    };
   }
 
   /// Contenu complet d'une séance : entête + blocs + exercices.
   ///
-  /// Une seule requête via select imbriqué ; tri client-side sur `position`
-  /// (PostgREST ne garantit pas l'ordre des relations imbriquées).
+  /// Une seule requête via select imbriqué pour la séance et ses blocs ;
+  /// requête séparée pour les complétions de la semaine en cours afin de
+  /// dériver `nextOccurrence` / `completedThisWeek` (cohérent avec
+  /// l'affichage de la liste programme et de l'accueil).
   Future<StudentSessionContent> fetchStudentSessionContent(
     String sessionId,
   ) async {
@@ -319,7 +391,23 @@ class StudentProgramService {
         exercises: exercises,
       );
     }).toList();
-    return StudentSessionContent(session: session, blocks: blocks);
+
+    final completedIds = await _completedSessionIdsThisWeek([sessionId]);
+    final completedThisWeek = completedIds.contains(sessionId);
+    final day = DayOfWeek.fromStorage(session.dayOfWeek);
+    final nextOccurrence = day == null
+        ? null
+        : nextOccurrenceForStudent(
+            day,
+            completedThisWeek: completedThisWeek,
+          );
+
+    return StudentSessionContent(
+      session: session,
+      nextOccurrence: nextOccurrence,
+      completedThisWeek: completedThisWeek,
+      blocks: blocks,
+    );
   }
 
   /// Charge un programme + ses séances (avec compteurs de blocs) en ordre.
@@ -385,9 +473,6 @@ class StudentProgramService {
           'description': _nullIfBlank(description),
           'duration_minutes': durationMinutes,
           'day_of_week': dayOfWeek?.storageValue,
-          'assigned_date': dayOfWeek != null
-              ? _formatDate(nextDateForDayOfWeek(dayOfWeek))
-              : null,
           'position': position,
         })
         .select(_sessionColumns)
@@ -434,9 +519,6 @@ class StudentProgramService {
           'description': _nullIfBlank(description),
           'duration_minutes': durationMinutes,
           'day_of_week': dayOfWeek?.storageValue,
-          'assigned_date': dayOfWeek != null
-              ? _formatDate(nextDateForDayOfWeek(dayOfWeek))
-              : null,
         })
         .eq('id', id)
         .select(_sessionColumns)
@@ -763,30 +845,27 @@ class StudentProgramService {
   }
 }
 
-/// Tri "vue élève" : séances avec `assignedDate` en premier (plus proche
-/// d'abord), puis séances sans date triées par date de création.
-int _compareStudentSessionsForStudent(StudentSession a, StudentSession b) {
-  final ad = a.assignedDate;
-  final bd = b.assignedDate;
+/// Tri "vue élève" : séances avec une `nextOccurrence` en premier
+/// (plus proche d'abord), puis séances sans jour assigné triées par date
+/// de création.
+int _compareStudentSessionViewsForStudent(
+  StudentSessionView a,
+  StudentSessionView b,
+) {
+  final ad = a.nextOccurrence;
+  final bd = b.nextOccurrence;
   if (ad != null && bd != null) {
     final byDate = ad.compareTo(bd);
     if (byDate != 0) return byDate;
-    return a.createdAt.compareTo(b.createdAt);
+    return a.session.createdAt.compareTo(b.session.createdAt);
   }
   if (ad != null) return -1;
   if (bd != null) return 1;
-  return a.createdAt.compareTo(b.createdAt);
+  return a.session.createdAt.compareTo(b.session.createdAt);
 }
 
 String? _nullIfBlank(String? value) {
   if (value == null) return null;
   final trimmed = value.trim();
   return trimmed.isEmpty ? null : trimmed;
-}
-
-String _formatDate(DateTime d) {
-  final y = d.year.toString().padLeft(4, '0');
-  final m = d.month.toString().padLeft(2, '0');
-  final day = d.day.toString().padLeft(2, '0');
-  return '$y-$m-$day';
 }

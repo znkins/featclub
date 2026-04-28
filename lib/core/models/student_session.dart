@@ -1,7 +1,13 @@
 /// Séance propre à un élève (table `public.student_sessions`).
 ///
-/// `dayOfWeek` est une chaîne libre stockée côté DB ('monday'..'sunday').
-/// `assignedDate` est la prochaine occurrence concrète calculée par le coach.
+/// `dayOfWeek` est une chaîne libre stockée côté DB ('monday'..'sunday')
+/// et reste la seule source de vérité pour la planification. La date
+/// concrète affichée à l'élève (« prochaine occurrence ») est dérivée à la
+/// lecture par le service à partir du `dayOfWeek` et des complétions de la
+/// semaine en cours — cf. `StudentSessionView`.
+///
+/// La colonne DB `assigned_date` est legacy (figée à l'écriture coach,
+/// jamais recalculée) ; le code ne la lit ni ne l'écrit plus.
 class StudentSession {
   StudentSession({
     required this.id,
@@ -10,7 +16,6 @@ class StudentSession {
     this.description,
     this.durationMinutes,
     this.dayOfWeek,
-    this.assignedDate,
     required this.position,
     required this.createdAt,
   });
@@ -21,7 +26,6 @@ class StudentSession {
   final String? description;
   final int? durationMinutes;
   final String? dayOfWeek;
-  final DateTime? assignedDate;
   final int position;
   final DateTime createdAt;
 
@@ -33,9 +37,6 @@ class StudentSession {
       description: json['description'] as String?,
       durationMinutes: json['duration_minutes'] as int?,
       dayOfWeek: json['day_of_week'] as String?,
-      assignedDate: json['assigned_date'] != null
-          ? DateTime.parse(json['assigned_date'] as String)
-          : null,
       position: json['position'] as int,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -48,7 +49,6 @@ class StudentSession {
         'description': description,
         'duration_minutes': durationMinutes,
         'day_of_week': dayOfWeek,
-        'assigned_date': assignedDate?.toIso8601String().split('T').first,
         'position': position,
         'created_at': createdAt.toIso8601String(),
       };
