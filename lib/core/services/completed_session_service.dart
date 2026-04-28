@@ -90,13 +90,22 @@ class CompletedSessionService {
   /// avec le profil de l'élève embarqué pour pouvoir afficher avatar + nom
   /// sans round-trip supplémentaire.
   ///
-  /// La V1 ne pagine pas : on coupe à `limit` (Phase 6 pourra paginer).
+  /// Pagination cursor-based : passer `before = completed_at du dernier item
+  /// de la page précédente` pour charger la suite. Le tri est strictement
+  /// décroissant sur `completed_at`, donc le curseur ne ramène jamais deux
+  /// fois la même ligne tant que `completed_at` est unique (UUID + timestamp
+  /// précis à la microseconde côté Postgres).
   Future<List<RecentActivityItem>> listRecentWithStudent({
     required int limit,
+    DateTime? before,
   }) async {
-    final rows = await _client
+    var query = _client
         .from('completed_sessions')
-        .select('$_columns, student:profiles!completed_sessions_student_id_fkey($_profileColumns)')
+        .select('$_columns, student:profiles!completed_sessions_student_id_fkey($_profileColumns)');
+    if (before != null) {
+      query = query.lt('completed_at', before.toIso8601String());
+    }
+    final rows = await query
         .order('completed_at', ascending: false)
         .limit(limit);
     return (rows as List)
