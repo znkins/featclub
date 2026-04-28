@@ -82,7 +82,6 @@ class StudentSessionView {
   const StudentSessionView({
     required this.session,
     required this.nextOccurrence,
-    required this.completedThisWeek,
   });
 
   final StudentSession session;
@@ -90,10 +89,6 @@ class StudentSessionView {
   /// Prochaine date affichée à l'élève. `null` si la séance n'a pas de
   /// `dayOfWeek` (séance non planifiée).
   final DateTime? nextOccurrence;
-
-  /// Vrai si au moins une complétion existe pour cette séance depuis
-  /// lundi 00h de la semaine en cours.
-  final bool completedThisWeek;
 }
 
 /// Programme actif d'un élève et ses séances (liste plate, triée pour l'app
@@ -134,13 +129,11 @@ class StudentSessionContent {
   const StudentSessionContent({
     required this.session,
     required this.nextOccurrence,
-    required this.completedThisWeek,
     required this.blocks,
   });
 
   final StudentSession session;
   final DateTime? nextOccurrence;
-  final bool completedThisWeek;
   final List<StudentSessionBlockContent> blocks;
 
   int get exerciseCount =>
@@ -320,16 +313,14 @@ class StudentProgramService {
 
     final views = sessions.map((s) {
       final day = DayOfWeek.fromStorage(s.dayOfWeek);
-      final completedThisWeek = completedIds.contains(s.id);
       return StudentSessionView(
         session: s,
         nextOccurrence: day == null
             ? null
             : nextOccurrenceForStudent(
                 day,
-                completedThisWeek: completedThisWeek,
+                completedThisWeek: completedIds.contains(s.id),
               ),
-        completedThisWeek: completedThisWeek,
       );
     }).toList()
       ..sort(_compareStudentSessionViewsForStudent);
@@ -392,20 +383,19 @@ class StudentProgramService {
       );
     }).toList();
 
-    final completedIds = await _completedSessionIdsThisWeek([sessionId]);
-    final completedThisWeek = completedIds.contains(sessionId);
     final day = DayOfWeek.fromStorage(session.dayOfWeek);
-    final nextOccurrence = day == null
-        ? null
-        : nextOccurrenceForStudent(
-            day,
-            completedThisWeek: completedThisWeek,
-          );
+    DateTime? nextOccurrence;
+    if (day != null) {
+      final completed = await _completedSessionIdsThisWeek([sessionId]);
+      nextOccurrence = nextOccurrenceForStudent(
+        day,
+        completedThisWeek: completed.contains(sessionId),
+      );
+    }
 
     return StudentSessionContent(
       session: session,
       nextOccurrence: nextOccurrence,
-      completedThisWeek: completedThisWeek,
       blocks: blocks,
     );
   }

@@ -50,19 +50,6 @@ enum DayOfWeek {
   }
 }
 
-/// Prochaine date correspondant à `day`.
-///
-/// Retourne *aujourd'hui* si `day` tombe le même jour de semaine que `now`
-/// (décision produit), sinon la prochaine occurrence future du jour.
-///
-/// `now` n'est exposé que pour faciliter les tests ; en production, on passe
-/// `DateTime.now()`.
-DateTime nextDateForDayOfWeek(DayOfWeek day, {DateTime? now}) {
-  final today = _dateOnly(now ?? DateTime.now());
-  final diff = (day.isoWeekday - today.weekday) % 7;
-  return today.add(Duration(days: diff));
-}
-
 /// Date du `day` dans la semaine ISO en cours (lundi = début de semaine).
 DateTime dateForDayInCurrentWeek(DayOfWeek day, {DateTime? now}) {
   final today = _dateOnly(now ?? DateTime.now());
